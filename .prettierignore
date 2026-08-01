@@ -1,0 +1,7 @@
+.next/
+node_modules/
+public/wasm/
+coverage/
+playwright-report/
+test-results/
+public/search-index.json

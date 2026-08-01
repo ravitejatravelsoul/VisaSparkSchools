@@ -1,0 +1,59 @@
+# Security & Threat Model
+
+## Threat model summary
+
+| Asset                                           | Threat                                                                                                                                                                     | Mitigation                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Learner's browser/session                       | Malicious/buggy learner code (HTML/JS exercises, playground) escaping to read cookies, localStorage, or the parent page                                                    | Sandboxed `<iframe sandbox="allow-scripts allow-forms">` with **no** `allow-same-origin` — the frame always has an opaque origin. Network calls (`fetch`/`XMLHttpRequest`/`WebSocket`/`EventSource`) are shimmed to reject inside the frame.                                                                                                                                                                     |
+| Learner's browser                               | A runaway/infinite loop in learner code                                                                                                                                    | "Stop" discards and recreates the iframe/Worker; a client-side timeout (~6s HTML/JS, ~15–25s Python/SQL) surfaces a "may be stuck" message. Pure synchronous JS in a single-threaded realm cannot be forcibly preempted mid-instruction — documented as a known limitation, not hidden.                                                                                                                          |
+| User accounts/data (Supabase, when configured)  | One user reading/writing another user's progress, notes, or bookmarks                                                                                                      | Every user-data table has Row Level Security enabled with a policy of `auth.uid() = user_id` for all operations (`supabase/migrations/0001_init.sql`). Course content itself is never stored per-user, so there's nothing private to leak from it.                                                                                                                                                               |
+| Contact/feedback submissions                    | Abuse, spam, or reading others' submissions                                                                                                                                | `user_feedback` allows anonymous+authenticated **inserts only**; no `select` policy is granted, so nothing (including the submitter) can read others' feedback via the client — read access is admin/service-role only.                                                                                                                                                                                          |
+| AI tutor (optional)                             | Prompt injection via a learner's question or via retrieved lesson content instructing the model to break character, reveal secrets, or reveal hidden test/solution content | (1) Learner questions are screened by `containsInjectionAttempt` before use, returning a canned refusal instead of forwarding the text. (2) Retrieved lesson content is treated as **data**, explicitly labeled as such in the system prompt, with a second-layer `sanitizeRetrievedText` pass. (3) The system prompt explicitly forbids revealing hidden tests/full solutions or claiming an exercise "passed." |
+| AI tutor cost/abuse                             | Unbounded usage running up API bills                                                                                                                                       | Daily per-user quota, enforced atomically via a single Postgres RPC (`increment_tutor_usage`) when Supabase + an authenticated user are present; an in-memory fallback when not (explicitly documented as a soft, single-instance-only limit, never relied on alone in a real multi-instance deployment).                                                                                                        |
+| AI tutor output                                 | XSS via a model response containing HTML/script                                                                                                                            | Tutor answers render through the same `<Markdown>` component (react-markdown, no `rehype-raw`) used for lesson content — it never renders raw HTML, so a model cannot inject a `<script>` tag into the page.                                                                                                                                                                                                     |
+| Secrets                                         | API keys / service-role keys leaking to the browser bundle or logs                                                                                                         | All AI/Supabase secrets are read only in `lib/ai/config.ts`, `lib/ai/provider.ts`, and `lib/supabase/server.ts`, none of which are imported by client components (`lib/supabase/server.ts` is marked `import "server-only"`). Only `NEXT_PUBLIC_*` variables — the Supabase URL and anon key, which are meant to be public — reach the browser. `.env.example` contains no real values.                          |
+| Clickjacking / MIME sniffing / referrer leakage | A malicious site framing this app, or leaking referrer data                                                                                                                | `X-Frame-Options: SAMEORIGIN`, `frame-ancestors 'self'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` set globally in `next.config.ts`.                                                                                                                                                                                                                                 |
+| XSS in the main app                             | Injected script via rendered content                                                                                                                                       | No `dangerouslySetInnerHTML` in the app except the JSON-LD structured-data script (fed only `JSON.stringify()` of our own static data, with `<` escaped as defense-in-depth) — see `components/seo/json-ld.tsx`. Lesson/tutor markdown never renders raw HTML.                                                                                                                                                   |
+
+## Content-Security-Policy tradeoffs (documented, not hidden)
+
+`script-src` includes `'unsafe-inline'` because the HTML/CSS/JS runner's `srcdoc` documents
+contain inline `<script>` tags, and a `srcdoc` document inherits its parent's CSP — there is no way
+to give the runner iframe a separately-scoped CSP. **The actual isolation boundary for untrusted
+code is the iframe's `sandbox` attribute, not CSP.** `script-src`/`style-src`/`font-src` also allow
+`https://cdn.jsdelivr.net`, the CDN Monaco, Pyodide, and (icon font) all load from; `'wasm-unsafe-eval'`
+is required for the Pyodide and sql.js WebAssembly runtimes to instantiate. `object-src 'none'` and
+`base-uri 'self'` are otherwise unrelaxed.
+
+## What this beta does NOT do
+
+- No server-side execution of learner-submitted code, ever.
+- No arbitrary file uploads.
+- No collection of information beyond what's needed (email for auth; progress/notes/bookmarks tied
+  only to the authenticated user; optional feedback-form email).
+- No claim that AI tutor conversations are used/not used for model training beyond what the
+  configured provider's own terms actually guarantee (see `docs/PRD.md` and the Privacy page).
+- No secrets committed to the repository (verified: `.env.example` contains only variable names and
+  explanations; grep the repo for `sk-`, `service_role`, etc. before any release).
+
+## RLS verification procedure
+
+Once a real Supabase project is linked (see `docs/DEPLOYMENT.md`), verify Row Level Security with
+two authenticated test users:
+
+1. As user A, insert a row into each of `lesson_progress`, `bookmarks`, `notes`, `skill_mastery`,
+   `review_queue`, `exercise_attempts`, `quiz_attempts`, `daily_goals`.
+2. As user B, attempt to `select`/`update`/`delete` user A's rows by id — every attempt must return
+   zero rows / be denied, never an error leaking existence vs. non-existence differently.
+3. As an unauthenticated (anon) client, attempt the same — must also be denied.
+4. Confirm `user_feedback` allows an anonymous insert but no client (including the submitter) can
+   `select` any row back.
+5. Confirm `tutor_usage` is client-readable only (owner `select`) and that a direct client `insert`/
+   `update`/`delete` against it — as the owning user, with their own session — is denied. All writes
+   to this table must only be possible through the `increment_tutor_usage()` RPC (`security definer`),
+   never through a client-facing table policy; otherwise a user could reset their own daily AI tutor
+   quota by writing to the table directly instead of going through the app.
+
+This is also exercisable via `supabase test db` or a short script using two service-role-free
+anon-key clients signed in as different test users, run against a local `supabase start` instance
+(never against production data).
