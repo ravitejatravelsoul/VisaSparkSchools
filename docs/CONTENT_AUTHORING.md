@@ -7,12 +7,13 @@ planned features as though they're implemented.
 
 ## The two content systems, and how they relate
 
-- **`content/` + `lib/content/`** — the original CodeWise curriculum: 6 tracks, 6 courses, 50
-  lessons, quizzes, exercises, projects. Unchanged by Phase 3.
+- **`content/` + `lib/content/`** — the course curriculum: 7 tracks, 7 courses, 62 lessons,
+  quizzes, exercises, projects (see `docs/CURRICULUM.md` for exact, live-computed counts).
+  Unchanged by Phase 3; extended by Phase 5A (see "How to add a full course" below).
 - **`lib/directory/`** — the Phase 3 technology directory: categories, technologies, and learning
   roadmaps. This system **references** the course/project system (a technology can point at a real
   `courseId`/`projectIds`) but never duplicates or modifies it. If you're adding a full new course
-  with lessons, that's the `content/` system — see `docs/CURRICULUM.md`'s content-authoring notes.
+  with lessons, that's the `content/` system — see "How to add a full course" below.
   If you're adding a technology guide, category, or roadmap, that's `lib/directory/` — this doc.
 
 ## How to add a technology safely
@@ -71,13 +72,46 @@ exist.
 
 ## How to expose runner support
 
-Set `runnerSupport` to one of `"html" | "javascript" | "python" | "sql"` — the four modes the
-existing Playground (`components/playground/playground-client.tsx`) actually implements. Do not
-set this for any other technology (e.g. React, Node.js) even though they're JavaScript-adjacent —
-the Playground has no React/Node runtime, and claiming otherwise would be exactly the "Open
-playground" false claim the product brief explicitly prohibits. Once set, the technology guide
-links to `/playground?lang=<value>`, which deep-links directly to that tab
-(`useInitialLanguage()` in `playground-client.tsx`).
+Set `runnerSupport` to one of `"html" | "javascript" | "typescript" | "python" | "sql"` — the five
+modes the existing Playground (`components/playground/playground-client.tsx`) actually implements.
+Do not set this for any other technology (e.g. React, Node.js) even though they're
+JavaScript-adjacent — the Playground has no React/Node runtime, and claiming otherwise would be
+exactly the "Open playground" false claim the product brief explicitly prohibits. Once set, the
+technology guide links to `/playground?lang=<value>`, which deep-links directly to that tab
+(`useInitialLanguage()` in `playground-client.tsx`). `typescript` genuinely type-checks (a real
+`ts.Program`, not a stripped-down simulation) — see `docs/ARCHITECTURE.md`'s runner architecture
+section — but is still limited to a curated ambient lib rather than the full TypeScript standard
+library; don't set it for a technology whose guide would need DOM lib types, Node types, or a
+third-party `@types` package, none of which the lab runner loads.
+
+## How to add a full course (not a guide)
+
+A course lives in `content/` — `content/courses.ts` (the course record and its `modules`) and
+`content/lessons/<track>.ts` (the lesson bodies) — validated by `courseSchema`/`lessonSchema` in
+`lib/content/types.ts`. See `docs/CURRICULUM.md`'s "Complete-course definition" section for the
+full bar a course must clear (module/lesson/outcome minimums, prerequisite/next-course/
+related-technology referential integrity, per-lesson practice and knowledge-check requirements)
+before it may set `status: "public"` — `scripts/validate-content.ts` enforces the structural half
+of that bar automatically; the content-quality half (original writing, no padding, terminology
+introduced before use, realistic examples) is still a human editorial judgment call the same way
+guide quality is. Two extra tools exist specifically for course content:
+
+- `npm run content:validate-snippets` executes every exercise's reference `solutionCode` against
+  its real runtime (Chromium for `html`/`javascript`/`typescript`, via Playwright; `python`/`sql`
+  are covered by the existing Playwright e2e runner specs instead) — run this after authoring any
+  new exercise, since `content:validate` only checks the exercise is schema-shaped, not that the
+  reference solution actually solves it.
+- If a course predates the Phase 5A module/lesson-count minimums and is already good, complete
+  content, add its id to `EXEMPT_SHORT_COURSES` in `scripts/validate-content.ts` rather than
+  padding it with low-value lessons to hit a number — but never add a _new_ course to that list;
+  the exemption exists only for content that predates the bar.
+
+Once a course exists, decide whether any technology guide should point at it (`courseId` — see
+above) and whether it belongs in `docs/CURRICULUM.md`'s track tables and 80-guide coverage matrix.
+Never add a course to `content/courses.ts` in a state that wouldn't pass `content:validate` "just
+to reserve the slug" — an unfinished course must not exist in the content system at all until it's
+genuinely complete; track it as a documented plan in `docs/CURRICULUM.md` instead (see that file's
+"Master curriculum architecture" section for the Phase 5B/5C course list format to follow).
 
 ## How to create and publish a learning path (roadmap)
 

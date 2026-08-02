@@ -34,6 +34,30 @@ test("completing every lesson in a course marks it Completed, derived live from 
   await expect(page.getByText("Completed", { exact: true })).toBeVisible();
 });
 
+test("enrolling in the new TypeScript Foundations course (Phase 5A) tracks progress through its module structure", async ({
+  page,
+}) => {
+  await page.goto("/courses/typescript-foundations");
+  await expect(page.getByText("Not started")).toBeVisible();
+  // The course-overview page groups lessons under modules (Phase 5A), not a
+  // flat list -- this is real content, not a stub, so its first module and
+  // first lesson should both be discoverable.
+  await expect(page.getByRole("heading", { name: "From JavaScript to TypeScript" })).toBeVisible();
+
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(/\/courses\/typescript-foundations\/ts-why-types$/);
+
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/typescript-foundations");
+  await expect(page.getByText("8% complete")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue this course" })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("8% complete")).toBeVisible();
+});
+
 test("starting a roadmap and marking a self-reported guide step complete persists across a refresh", async ({
   page,
 }) => {

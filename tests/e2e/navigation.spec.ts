@@ -15,7 +15,15 @@ test("homepage to course to lesson navigation", async ({ page }) => {
   await expect(page).toHaveURL(/\/courses$/);
   await expect(page.getByRole("heading", { name: "Course catalog" })).toBeVisible();
 
-  await page.getByRole("link", { name: /HTML & CSS Fundamentals/ }).click();
+  // Scope to the card whose *heading* (course title) is this course, not just
+  // any link whose flattened accessible name happens to contain the string --
+  // catalog cards also show a "Recommended first: <course>" line (Phase 5A),
+  // so a plain substring/regex match on link name can hit a different card
+  // that merely recommends this course as a prerequisite.
+  await page
+    .getByRole("link")
+    .filter({ has: page.getByRole("heading", { name: "HTML & CSS Fundamentals" }) })
+    .click();
   await expect(page).toHaveURL(/\/courses\/html-css-fundamentals$/);
 
   await page.getByRole("link", { name: "Start this course" }).click();

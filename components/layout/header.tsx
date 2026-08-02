@@ -14,8 +14,17 @@ export function Header() {
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link
           href="/"
+          aria-label={siteConfig.name}
           className="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-(--color-ink)"
         >
+          {/*
+            LogoMark is aria-hidden and the site-name span is hidden below the
+            `sm` breakpoint (icon-only on mobile) -- without an explicit
+            aria-label the link would have zero accessible name on mobile,
+            since its only visible content there is a decorative icon. This
+            aria-label makes the accessible name correct at every viewport,
+            not just where the text happens to be visible.
+          */}
           <LogoMark size={30} />
           <span className="hidden sm:inline">{siteConfig.name}</span>
         </Link>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { lessonSchema } from "@/lib/content/types";
+import { lessonSchema, courseSchema } from "@/lib/content/types";
 import {
   allLessons,
   allTracks,
@@ -7,6 +7,29 @@ import {
   getLessonBySlug,
   getAdjacentLessons,
 } from "@/lib/content/registry";
+
+function validCourseInput() {
+  return {
+    id: "test-course",
+    slug: "test-course",
+    trackSlug: "javascript",
+    title: "Test Course",
+    description: "A course used only in tests.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 4,
+    audience: "People who want to test this schema.",
+    learningOutcomes: ["Do thing one", "Do thing two", "Do thing three"],
+    modules: [
+      {
+        id: "test-module",
+        title: "Test Module",
+        summary: "A module used only in tests.",
+        lessonSlugs: ["js-loops"],
+      },
+    ],
+  };
+}
 
 function validLessonInput() {
   return {
@@ -101,6 +124,48 @@ describe("lessonSchema", () => {
   });
 });
 
+describe("courseSchema", () => {
+  it("accepts a minimal, well-formed course", () => {
+    const result = courseSchema.safeParse(validCourseInput());
+    expect(result.success).toBe(true);
+  });
+
+  it("defaults prerequisiteCourseSlugs/nextCourseSlugs/relatedTechnologySlugs to empty arrays", () => {
+    const result = courseSchema.parse(validCourseInput());
+    expect(result.prerequisiteCourseSlugs).toEqual([]);
+    expect(result.nextCourseSlugs).toEqual([]);
+    expect(result.relatedTechnologySlugs).toEqual([]);
+  });
+
+  it("rejects a course with fewer than 3 learning outcomes", () => {
+    const input = validCourseInput();
+    input.learningOutcomes = ["Only one"];
+    const result = courseSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a course with no modules", () => {
+    const input = validCourseInput();
+    input.modules = [];
+    const result = courseSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a module with no lessonSlugs", () => {
+    const input = validCourseInput();
+    input.modules[0].lessonSlugs = [];
+    const result = courseSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a missing audience", () => {
+    const input = validCourseInput() as Record<string, unknown>;
+    delete input.audience;
+    const result = courseSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+});
+
 describe("the real content registry", () => {
   it("has no duplicate lesson ids or slugs", () => {
     const ids = allLessons.map((l) => l.id);
@@ -127,10 +192,65 @@ describe("the real content registry", () => {
     }
   });
 
-  it("covers all 6 tracks with at least one lesson each", () => {
+  it("covers every track with at least one lesson each", () => {
     for (const track of allTracks) {
       const count = allLessons.filter((l) => l.trackSlug === track.slug).length;
       expect(count).toBeGreaterThan(0);
+    }
+  });
+
+  it("has no duplicate course ids or slugs", () => {
+    const ids = allCourses.map((c) => c.id);
+    const slugs = allCourses.map((c) => c.slug);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(new Set(slugs).size).toBe(slugs.length);
+  });
+
+  it("resolves every course's prerequisiteCourseSlugs/nextCourseSlugs to a real course", () => {
+    const slugs = new Set(allCourses.map((c) => c.slug));
+    for (const course of allCourses) {
+      for (const prereq of course.prerequisiteCourseSlugs) {
+        expect(slugs.has(prereq)).toBe(true);
+      }
+      for (const next of course.nextCourseSlugs) {
+        expect(slugs.has(next)).toBe(true);
+      }
+    }
+  });
+
+  it("has an acyclic course prerequisite graph", () => {
+    const bySlug = new Map(allCourses.map((c) => [c.slug, c]));
+    const visiting = new Set<string>();
+    const done = new Set<string>();
+    function visit(slug: string) {
+      if (done.has(slug)) return;
+      expect(visiting.has(slug)).toBe(false);
+      visiting.add(slug);
+      const course = bySlug.get(slug);
+      for (const prereq of course?.prerequisiteCourseSlugs ?? []) {
+        visit(prereq);
+      }
+      visiting.delete(slug);
+      done.add(slug);
+    }
+    for (const course of allCourses) visit(course.slug);
+  });
+
+  it("every module's lessonSlugs resolve to a real lesson of that course, and every lesson belongs to exactly one module", () => {
+    for (const course of allCourses) {
+      const courseLessons = allLessons.filter((l) => l.courseSlug === course.slug);
+      const courseLessonSlugs = new Set(courseLessons.map((l) => l.slug));
+      const claimed = new Map<string, string>();
+      for (const courseModule of course.modules) {
+        for (const slug of courseModule.lessonSlugs) {
+          expect(courseLessonSlugs.has(slug)).toBe(true);
+          expect(claimed.has(slug)).toBe(false);
+          claimed.set(slug, courseModule.id);
+        }
+      }
+      for (const lesson of courseLessons) {
+        expect(claimed.has(lesson.slug)).toBe(true);
+      }
     }
   });
 

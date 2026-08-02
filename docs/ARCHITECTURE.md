@@ -91,8 +91,23 @@ docs/                      This documentation set
    shape" becomes "validated shape."
 3. `scripts/validate-content.ts` (run by `npm run build` and CI) additionally checks cross-cutting
    invariants a single-object schema can't: duplicate ids/slugs, unresolvable prerequisites,
-   unresolvable `nextLessonSlug`, duplicate `order` within a course, and placeholder text.
-4. `scripts/build-search-index.ts` flattens the registry into `public/search-index.json`, consumed
+   unresolvable `nextLessonSlug`, duplicate `order` within a course, and placeholder text. As of
+   Phase 5A it also checks course-level structure: `prerequisiteCourseSlugs`/`nextCourseSlugs`/
+   `relatedTechnologySlugs` resolve to real records, the prerequisite graph is acyclic, every
+   `modules[].lessonSlugs` entry resolves to a real lesson of that course with no lesson claimed by
+   two modules and none left out, minimum lesson/module/learning-outcome counts for any course
+   published from Phase 5A onward (see `EXEMPT_SHORT_COURSES` for the narrow, documented exemption
+   covering five pre-Phase-5A courses), harness-report presence for `html`/`javascript`/
+   `typescript` exercises, and duplicate quiz questions (including "same question, renamed
+   variables" duplicates, via a normalizer that folds single-letter identifiers and digit runs).
+4. `scripts/validate-snippets.ts` (Phase 5A, run on demand via
+   `npm run content:validate-snippets`, not part of the default build) executes every exercise's
+   reference `solutionCode` against its real runtime in headless Chromium (via Playwright) or,
+   for TypeScript, through the real compiler first — proving every exercise is actually solvable,
+   not just schema-valid. `python`/`sql` solutions are intentionally left to the existing
+   Playwright e2e runner specs instead, since exercising Pyodide/sql.js from a standalone script
+   would duplicate that coverage without the real browser context those specs already provide.
+5. `scripts/build-search-index.ts` flattens the registry into `public/search-index.json`, consumed
    client-side by Fuse.js — search needs no server and no AI.
 
 ## Runner architecture
@@ -115,6 +130,20 @@ allow-forms">` — deliberately without `allow-same-origin`, so the frame always
   seed SQL, executes the learner's query, and separately executes the lesson's reference solution
   query against an identically fresh database — then diffs the resulting rows. This is what lets
   multiple correct SQL phrasings all pass instead of only one exact string.
+- **TypeScript** (`lib/runners/typescript-compile.ts` + `components/runners/typescript-runner.tsx`,
+  Phase 5A): the only runner that does real static analysis before execution. `run()` dynamically
+  imports the `typescript` package (`compilerPromise ??= import("typescript")`, cached after the
+  first call) — this keeps the ~8.7 MB compiler out of every bundle except the one that actually
+  opens a TypeScript exercise; nothing on the homepage, dashboard, catalog, or a non-TS lesson ever
+  references it. `compileTypeScript(source)` builds a real `ts.Program` (not
+  `ts.transpileModule`, which performs _no_ type checking at all) against an in-memory
+  `CompilerHost` and a curated ambient lib (`typescript-lab-lib.ts` — a hand-picked subset of
+  lib.es2020.d.ts covering the built-ins these lessons actually use, not the full ~1 MB file),
+  collecting syntactic + semantic + emit diagnostics. The emitted JavaScript is then handed to the
+  _existing_ HTML/JS sandbox (`buildRunnerDoc`) to actually execute — a TypeScript exercise reuses
+  the same iframe/sandbox security boundary as HTML/CSS/JS, it does not open a new execution
+  surface. Type errors render in a `role="status"` (not `role="alert"`) banner, since a type error
+  is frequently the exercise's own expected, correct outcome rather than a failure.
 
 ## Learning engine and account sync (Phase 4)
 

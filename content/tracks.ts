@@ -24,18 +24,26 @@ export const tracks: Track[] = [
     order: 2,
   },
   {
+    id: "typescript",
+    slug: "typescript",
+    title: "TypeScript",
+    description:
+      "Add a type system to JavaScript so mistakes surface while you write, not in production.",
+    order: 3,
+  },
+  {
     id: "python",
     slug: "python",
     title: "Python",
     description: "A general-purpose language for scripting, data, and the backend of AI apps.",
-    order: 3,
+    order: 4,
   },
   {
     id: "git-api-sql",
     slug: "git-api-sql",
     title: "Git, APIs & SQL",
     description: "Version your work, talk to servers over HTTP, and query real databases.",
-    order: 4,
+    order: 5,
   },
   {
     id: "ai-llm-rag",
@@ -43,6 +51,6 @@ export const tracks: Track[] = [
     title: "AI, LLMs, RAG & Agents",
     description:
       "From how language models work to building grounded, cited retrieval-augmented AI applications.",
-    order: 5,
+    order: 6,
   },
 ];

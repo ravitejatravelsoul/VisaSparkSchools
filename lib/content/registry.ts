@@ -4,11 +4,12 @@ import { projects } from "@/content/projects";
 import { foundationsLessons } from "@/content/lessons/foundations";
 import { htmlCssLessons } from "@/content/lessons/html-css";
 import { javascriptLessons } from "@/content/lessons/javascript";
+import { typescriptLessons } from "@/content/lessons/typescript";
 import { pythonLessons } from "@/content/lessons/python";
 import { gitApiSqlLessons } from "@/content/lessons/git-api-sql";
 import { aiLessons } from "@/content/lessons/ai-llm-rag";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
-import { lessonSchema, projectSchema } from "@/lib/content/types";
+import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
 /**
  * Content files author the "input" shape (defaulted fields like
@@ -20,6 +21,7 @@ export const allLessons: Lesson[] = [
   ...foundationsLessons,
   ...htmlCssLessons,
   ...javascriptLessons,
+  ...typescriptLessons,
   ...pythonLessons,
   ...gitApiSqlLessons,
   ...aiLessons,
@@ -28,7 +30,9 @@ export const allLessons: Lesson[] = [
   .sort((a, b) => a.order - b.order);
 
 export const allTracks: Track[] = [...tracks].sort((a, b) => a.order - b.order);
-export const allCourses: Course[] = [...courses].sort((a, b) => a.order - b.order);
+export const allCourses: Course[] = [...courses]
+  .map((course) => courseSchema.parse(course))
+  .sort((a, b) => a.order - b.order);
 export const allProjects: Project[] = [...projects].map((project) => projectSchema.parse(project));
 
 export function getTrackBySlug(slug: string): Track | undefined {

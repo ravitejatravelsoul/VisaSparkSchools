@@ -1,11 +1,13 @@
 # VisaSparkSchools
 
 A self-paced learning and practice platform for programming, AI, data, cloud, and career-ready
-skills. Its original six-track curriculum takes learners from zero coding knowledge through web
-development, Python, APIs, SQL, and modern AI systems (LLMs, embeddings, RAG, and agents); a
-technology directory of ~80 guides across 13 categories plus 15 learning roadmaps (Phase 3) helps
-learners orient across a much broader set of technologies, honestly distinguishing a guide from a
-full course.
+skills. Its curriculum takes learners from zero coding knowledge through web development
+(HTML/CSS, JavaScript, TypeScript), Python, APIs, SQL, and modern AI systems (LLMs, embeddings,
+RAG, and agents) across 7 tracks and 7 complete courses; a technology directory of ~80 guides
+across 13 categories plus 15 learning roadmaps (Phase 3) helps learners orient across a much
+broader set of technologies, honestly distinguishing a guide from a full course — see
+[`docs/CURRICULUM.md`](docs/CURRICULUM.md) for the complete-course definition, the full 8-track
+long-term architecture, and exactly which of the 80 guides map to a real course today.
 
 > **Product promise:** Learn. Build. Prove.
 
@@ -32,7 +34,8 @@ learning experience (lessons, runners, exercises, quizzes, search, guest progres
 - **Zustand** for the client-side learning-progress store (guest mode via `localStorage`)
 - **Monaco Editor** (dynamically loaded) for code editing
 - Sandboxed **iframe** for HTML/CSS/JS; **Pyodide** (Web Worker) for Python; **sql.js** (Web
-  Worker, WebAssembly SQLite) for SQL
+  Worker, WebAssembly SQLite) for SQL; a real, lazy-loaded **TypeScript** compiler
+  (`ts.createProgram`, dynamically imported) for genuine type-checked TypeScript exercises
 - **Fuse.js** for local, AI-free fuzzy search
 - **Supabase** (Postgres + Auth) — optional; when configured, accounts sync guest progress on
   sign-in and keep syncing afterward (see "Guest mode vs. accounts" below)
@@ -41,19 +44,20 @@ learning experience (lessons, runners, exercises, quizzes, search, guest progres
 
 ## Scripts
 
-| Command                           | What it does                                                                     |
-| --------------------------------- | -------------------------------------------------------------------------------- |
-| `npm run dev`                     | Start the dev server                                                             |
-| `npm run build`                   | Validate content, build the search index, and build for production               |
-| `npm run start`                   | Start the production server (after `build`)                                      |
-| `npm run lint`                    | ESLint                                                                           |
-| `npm run typecheck`               | `tsc --noEmit`                                                                   |
-| `npm run format` / `format:check` | Prettier                                                                         |
-| `npm run test`                    | Vitest unit + integration tests                                                  |
-| `npm run e2e`                     | Playwright end-to-end tests (`npx playwright install` first)                     |
-| `npm run content:validate`        | Schema/uniqueness/prerequisite/placeholder checks over all course content        |
-| `npm run content:search-index`    | Regenerate `public/search-index.json`                                            |
-| `npm run content:ai-index`        | Preview the AI tutor's retrieval chunking over course content (no network calls) |
+| Command                             | What it does                                                                                        |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `npm run dev`                       | Start the dev server                                                                                |
+| `npm run build`                     | Validate content, build the search index, and build for production                                  |
+| `npm run start`                     | Start the production server (after `build`)                                                         |
+| `npm run lint`                      | ESLint                                                                                              |
+| `npm run typecheck`                 | `tsc --noEmit`                                                                                      |
+| `npm run format` / `format:check`   | Prettier                                                                                            |
+| `npm run test`                      | Vitest unit + integration tests                                                                     |
+| `npm run e2e`                       | Playwright end-to-end tests (`npx playwright install` first)                                        |
+| `npm run content:validate`          | Schema/uniqueness/prerequisite/placeholder checks over all course content                           |
+| `npm run content:validate-snippets` | Runs every exercise's reference solution in a real browser/compiler, proving it's actually solvable |
+| `npm run content:search-index`      | Regenerate `public/search-index.json`                                                               |
+| `npm run content:ai-index`          | Preview the AI tutor's retrieval chunking over course content (no network calls)                    |
 
 ## Documentation
 

@@ -139,9 +139,25 @@ Added on top of Phases 1-3, without duplicating any existing state:
 
 ## 6. Curriculum shape
 
-Six tracks, one connected path: Digital & Coding Foundations → HTML & CSS → JavaScript → Python →
-Git, APIs & SQL → AI, LLMs, RAG & Agents. See [`CURRICULUM.md`](./CURRICULUM.md) for the full
-lesson-by-lesson matrix and exact counts.
+Seven tracks: Digital & Coding Foundations → HTML & CSS → JavaScript → TypeScript → Python →
+Git, APIs & SQL → AI, LLMs, RAG & Agents (TypeScript and Python are independent branches, not
+sequential prerequisites of each other). See [`CURRICULUM.md`](./CURRICULUM.md) for the full
+lesson-by-lesson matrix, the complete-course definition, the 8-track long-term curriculum
+architecture, and the full guide-to-course coverage matrix across all 80 technology guides.
+
+## 11. Phase 5A — interactive curriculum foundation
+
+Added on top of Phases 1-4.5: a course-authoring schema extension (`audience`, `learningOutcomes`,
+`prerequisiteCourseSlugs`, `nextCourseSlugs`, `relatedTechnologySlugs`, ordered `modules`), a real
+lazy-loaded TypeScript compiler runner reusing the existing HTML/JS sandbox (see
+`docs/ARCHITECTURE.md`), one new complete course (TypeScript Foundations), and an automated
+snippet-validation tool (`scripts/validate-snippets.ts`) that runs every exercise's reference
+solution against its real runtime before content ships. A course now requires 4+ modules, 12+
+lessons, 3+ learning outcomes, and a guided project to be considered complete and eligible for the
+public catalog — enforced by `scripts/validate-content.ts`, with a narrow, documented exemption
+for 5 pre-existing courses that predate this bar. See `PROJECT_STATUS.md`'s "Phase 5A" section for
+the full report, including which of the originally-scoped courses could not be built this batch
+(and why) and remain a documented Phase 5B/5C plan rather than a public claim.
 
 ## 7. Learning engine (transparent, not a black box)
 

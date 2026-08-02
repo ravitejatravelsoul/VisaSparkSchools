@@ -16,6 +16,7 @@ const MonacoEditor = dynamic(() => import("@monaco-editor/react"), {
 const languageMap: Record<string, string> = {
   html: "html",
   javascript: "javascript",
+  typescript: "typescript",
   python: "python",
   sql: "sql",
 };

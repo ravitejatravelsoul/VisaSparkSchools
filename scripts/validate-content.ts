@@ -7,7 +7,12 @@
  */
 import { lessonSchema, courseSchema, trackSchema, projectSchema } from "../lib/content/types";
 import { allLessons, allTracks, allCourses, allProjects } from "../lib/content/registry";
-import { allCategories, allTechnologies, allLearningPaths } from "../lib/directory/registry";
+import {
+  allCategories,
+  allTechnologies,
+  allLearningPaths,
+  getTechnologyBySlug,
+} from "../lib/directory/registry";
 import { validateDirectory } from "../lib/directory/validate";
 
 let errorCount = 0;
@@ -74,6 +79,122 @@ const lessonSlugs = new Set(allLessons.map((l) => l.slug));
 for (const course of allCourses) {
   if (!trackSlugs.has(course.trackSlug)) {
     fail(`Course "${course.slug}" references unknown track "${course.trackSlug}".`);
+  }
+  for (const prereq of course.prerequisiteCourseSlugs) {
+    if (!courseSlugs.has(prereq)) {
+      fail(`Course "${course.slug}" references unresolvable prerequisite course "${prereq}".`);
+    }
+  }
+  for (const next of course.nextCourseSlugs) {
+    if (!courseSlugs.has(next)) {
+      fail(`Course "${course.slug}" references unresolvable next course "${next}".`);
+    }
+  }
+  for (const techSlug of course.relatedTechnologySlugs) {
+    if (!getTechnologyBySlug(techSlug)) {
+      fail(`Course "${course.slug}" references unresolvable technology slug "${techSlug}".`);
+    }
+  }
+}
+
+// --- Prerequisite courses must be acyclic (a real sequence, not a loop) ---
+{
+  const prereqGraph = new Map(allCourses.map((c) => [c.slug, c.prerequisiteCourseSlugs]));
+  const state = new Map<string, "visiting" | "done">();
+  function visit(slug: string, path: string[]): void {
+    const status = state.get(slug);
+    if (status === "done") return;
+    if (status === "visiting") {
+      fail(`Course prerequisite cycle detected: ${[...path, slug].join(" -> ")}.`);
+      return;
+    }
+    state.set(slug, "visiting");
+    for (const prereq of prereqGraph.get(slug) ?? []) {
+      visit(prereq, [...path, slug]);
+    }
+    state.set(slug, "done");
+  }
+  for (const course of allCourses) visit(course.slug, []);
+}
+
+// --- Module <-> lesson integrity: every lesson belongs to exactly one module,
+// every module lesson resolves to a real lesson in that course, and module
+// order matches lesson order. ---
+for (const course of allCourses) {
+  const courseLessons = allLessons.filter((l) => l.courseSlug === course.slug);
+  const courseLessonSlugs = new Set(courseLessons.map((l) => l.slug));
+  const claimedByModule = new Map<string, string>();
+
+  for (const mod of course.modules) {
+    if (mod.lessonSlugs.length === 0) {
+      fail(`Course "${course.slug}" module "${mod.id}" has no lessons.`);
+    }
+    for (const slug of mod.lessonSlugs) {
+      if (!courseLessonSlugs.has(slug)) {
+        fail(
+          `Course "${course.slug}" module "${mod.id}" references lesson "${slug}", which is not a lesson of this course.`,
+        );
+        continue;
+      }
+      const existingModule = claimedByModule.get(slug);
+      if (existingModule) {
+        fail(
+          `Course "${course.slug}" lesson "${slug}" is claimed by two modules: "${existingModule}" and "${mod.id}".`,
+        );
+      }
+      claimedByModule.set(slug, mod.id);
+    }
+  }
+
+  for (const lesson of courseLessons) {
+    if (!claimedByModule.has(lesson.slug)) {
+      fail(`Course "${course.slug}" lesson "${lesson.slug}" does not belong to any module.`);
+    }
+  }
+}
+
+// --- Complete-course definition (Phase 5A): every PUBLIC course must meet the
+// minimum bar so the catalog never shows a shallow guide as a full course. A
+// course under active authoring should be kept out of the registries entirely
+// (not marked "draft" -- there is no such flag, by design: see
+// docs/CONTENT_AUTHORING.md's "complete course" section).
+//
+// EXEMPT_SHORT_COURSES: the five pre-Phase-5A courses predate this bar.
+// Each is real, complete, verified content (schema-checked, exercises
+// snippet-validated, previously audited in Phase 3/4) -- not a shallow
+// guide -- but ranges from 3 to 9 lessons, short of the 12-lesson minimum
+// this phase sets for *new* courses. Retroactively enforcing that minimum
+// against already-good material would mean either padding it with filler
+// (explicitly forbidden by this phase's brief) or removing working courses
+// from the public catalog (also forbidden). "How Computing & the Web Work"
+// is additionally an intentional short primer by design, not a full course
+// at all. Every course added from Phase 5A onward must meet the real
+// minimum with no exemption; adding a slug here for a new course is not a
+// valid way to skip the bar -- see docs/CONTENT_AUTHORING.md. ---
+const EXEMPT_SHORT_COURSES = new Set<string>([
+  "how-computing-works",
+  "html-css-fundamentals",
+  "javascript-fundamentals",
+  "python-fundamentals",
+  "git-apis-sql",
+]);
+const MIN_LESSONS_PER_COMPLETE_COURSE = 12;
+const MIN_MODULES_PER_COMPLETE_COURSE = 4;
+for (const course of allCourses) {
+  if (EXEMPT_SHORT_COURSES.has(course.slug)) continue;
+  const courseLessons = allLessons.filter((l) => l.courseSlug === course.slug);
+  if (courseLessons.length < MIN_LESSONS_PER_COMPLETE_COURSE) {
+    fail(
+      `Course "${course.slug}" has ${courseLessons.length} lesson(s), below the ${MIN_LESSONS_PER_COMPLETE_COURSE}-lesson minimum for a published complete course.`,
+    );
+  }
+  if (course.modules.length < MIN_MODULES_PER_COMPLETE_COURSE) {
+    fail(
+      `Course "${course.slug}" has ${course.modules.length} module(s), below the ${MIN_MODULES_PER_COMPLETE_COURSE}-module minimum for a published complete course.`,
+    );
+  }
+  if (course.learningOutcomes.length < 3) {
+    fail(`Course "${course.slug}" has fewer than 3 learning outcomes.`);
   }
 }
 
@@ -148,6 +269,66 @@ for (const lesson of allLessons) {
     if (exercise.language === "sql" && !exercise.seedSql) {
       fail(`Lesson "${lesson.slug}" exercise "${exercise.id}" is SQL but missing seedSql.`);
     }
+    // Every declared test id must actually be reported by the harness --
+    // otherwise the test can never pass or fail, it simply never runs. Only
+    // applies to html/javascript/typescript exercises: those run in the
+    // sandboxed iframe and report via window.__report(id, ...) calls written
+    // directly into `harness`. SQL exercises use a different model entirely
+    // (components/runners/sql-runner.tsx compares the learner's query result
+    // against the solution query's result and derives pass/fail by test
+    // position, not by a harness string), so this check does not apply to
+    // them -- checking for a literal id substring in SQL's harness field
+    // would be meaningless and produced false positives here in review.
+    if (
+      exercise.language === "html" ||
+      exercise.language === "javascript" ||
+      exercise.language === "typescript"
+    ) {
+      for (const test of exercise.tests) {
+        if (
+          !exercise.harness.includes(`'${test.id}'`) &&
+          !exercise.harness.includes(`"${test.id}"`)
+        ) {
+          fail(
+            `Lesson "${lesson.slug}" exercise "${exercise.id}" declares test "${test.id}" but the harness never calls __report('${test.id}', ...).`,
+          );
+        }
+      }
+    }
+  }
+}
+
+// --- Quiz integrity: valid answer indexes, no duplicate questions within a
+// lesson, and no two quiz questions across the same course that are
+// identical apart from a renamed variable/value (a shallow-rewrite check). ---
+function normalizeForDuplicateCheck(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[a-z_][a-z0-9_]*/gi, (word) => (/^[a-z]$/i.test(word) ? "X" : word))
+    .replace(/\d+/g, "N")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+for (const lesson of allLessons) {
+  const promptsSeen = new Map<string, string>();
+  for (const q of lesson.quiz) {
+    if (q.correctIndex < 0 || q.correctIndex >= q.choices.length) {
+      fail(
+        `Lesson "${lesson.slug}" quiz question "${q.id}" has correctIndex ${q.correctIndex} out of range for ${q.choices.length} choices.`,
+      );
+    }
+    const choiceSet = new Set(q.choices.map((c) => c.trim().toLowerCase()));
+    if (choiceSet.size !== q.choices.length) {
+      fail(`Lesson "${lesson.slug}" quiz question "${q.id}" has duplicate choice text.`);
+    }
+    const normalized = normalizeForDuplicateCheck(q.prompt);
+    const existing = promptsSeen.get(normalized);
+    if (existing) {
+      fail(
+        `Lesson "${lesson.slug}" quiz questions "${existing}" and "${q.id}" appear to be the same question with only names/numbers changed.`,
+      );
+    }
+    promptsSeen.set(normalized, q.id);
   }
 }
 

@@ -464,4 +464,84 @@ export const projects: Project[] = [
       },
     ],
   },
+  {
+    id: "typed-study-tracker",
+    slug: "typed-study-tracker",
+    title: "Typed Study Tracker",
+    description:
+      "Model a small study-tracking domain with TypeScript's type system: discriminated unions for lesson state, derived types for updates, and a type guard for data loaded from storage.",
+    difficulty: "intermediate",
+    estimatedHours: 4,
+    isCapstone: false,
+    trackSlugs: ["typescript"],
+    prerequisiteLessonIds: [
+      "ts-interfaces-aliases",
+      "ts-unions-narrowing",
+      "ts-utility-types",
+      "ts-unknown-guards",
+      "ts-modeling-domain",
+    ],
+    objectives: [
+      "Design a discriminated union that makes an impossible lesson state unrepresentable",
+      "Derive an update type with Partial rather than duplicating a shape",
+      "Write a type guard that safely validates data of type unknown",
+      "Use a generic function to operate on the tracker without losing type information",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Model the domain",
+        description:
+          "Define a Lesson type where status is a discriminated union, so a lesson cannot be both 'not started' and carry a completion date, and cannot be 'completed' without one.",
+        checklist: [
+          "A LessonStatus union has at least not-started, in-progress, and completed variants",
+          "Only the completed variant's shape includes a completedAt field",
+          "A function that switches on status has an exhaustiveness check using never",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Update without duplicating the shape",
+        description:
+          "Write an update function using a derived type instead of a second hand-written interface.",
+        checklist: [
+          "A LessonUpdate type is derived from Lesson with Partial or Pick, not retyped by hand",
+          "updateLesson(lesson, patch) returns a new object and does not mutate the original",
+          "Passing an unrelated field in the patch is rejected by the compiler",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Validate untrusted data",
+        description:
+          "Data loaded from storage arrives as unknown. Write a type guard that proves it is really a Lesson array before the tracker trusts it.",
+        checklist: [
+          "The loader's return type is unknown, not any",
+          "A type predicate function (value is Lesson[]) validates the shape at runtime",
+          "Malformed input (missing fields, wrong types) is rejected rather than crashing later",
+        ],
+      },
+      {
+        id: "m4",
+        title: "A generic summary function",
+        description:
+          "Write at least one generic function operating on the tracker's data without narrowing it to a specific shape unnecessarily.",
+        checklist: [
+          "A generic function (for example, groupBy or countBy) works on the lesson list",
+          "Its return type reflects the input type rather than widening to any",
+          "The project's own automated checks (quiz-style assertions in the lesson pattern, or your own test harness) pass",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "TypeScript Handbook: Discriminated Unions",
+        url: "https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
+      },
+      {
+        label: "TypeScript Handbook: Utility Types",
+        url: "https://www.typescriptlang.org/docs/handbook/utility-types.html",
+      },
+    ],
+  },
 ];

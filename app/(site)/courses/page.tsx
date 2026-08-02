@@ -29,6 +29,9 @@ export default function CoursesPage() {
           const track = allTracks.find((t) => t.slug === course.trackSlug);
           const lessons = getLessonsForCourse(course.slug);
           const accent = accentClasses(trackAccent(course.trackSlug));
+          const prerequisiteTitles = course.prerequisiteCourseSlugs
+            .map((slug) => allCourses.find((c) => c.slug === slug)?.title)
+            .filter((t): t is string => Boolean(t));
           return (
             <Link key={course.slug} href={`/courses/${course.slug}`} className="group">
               <Card interactive className="flex h-full flex-col overflow-hidden">
@@ -50,6 +53,11 @@ export default function CoursesPage() {
                     <Badge tone="neutral">{lessons.length} lessons</Badge>
                     <Badge tone="neutral">{course.estimatedHours}h</Badge>
                   </div>
+                  {prerequisiteTitles.length > 0 && (
+                    <p className="mt-3 text-xs text-(--color-ink-faint)">
+                      Recommended first: {prerequisiteTitles.join(", ")}
+                    </p>
+                  )}
                 </CardBody>
               </Card>
             </Link>

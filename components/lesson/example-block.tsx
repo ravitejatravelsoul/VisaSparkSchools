@@ -6,6 +6,7 @@ import { usePersistedCode } from "@/lib/learning/use-persisted-code";
 import { HtmlJsRunner } from "@/components/runners/html-js-runner";
 import { PythonRunner } from "@/components/runners/python-runner";
 import { SqlRunner } from "@/components/runners/sql-runner";
+import { TypeScriptRunner } from "@/components/runners/typescript-runner";
 import { Button } from "@/components/ui/button";
 import { BOOKSTORE_SEED_SQL } from "@/content/fixtures/sql-seed";
 
@@ -32,6 +33,7 @@ function StaticExample({ example }: { example: CodeExample }) {
       </pre>
       {(example.language === "html" ||
         example.language === "javascript" ||
+        example.language === "typescript" ||
         example.language === "python" ||
         example.language === "sql") && (
         <div className="mt-3">
@@ -94,6 +96,11 @@ function RunnerFor({
         starterCode={starterCode ?? code}
         seedSql={BOOKSTORE_SEED_SQL}
       />
+    );
+  }
+  if (language === "typescript") {
+    return (
+      <TypeScriptRunner code={code} onCodeChange={onCodeChange} starterCode={starterCode ?? code} />
     );
   }
   if (language === "html" || language === "javascript") {

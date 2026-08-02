@@ -7,6 +7,7 @@ import { useProgressStore } from "@/lib/learning/store";
 import { HtmlJsRunner } from "@/components/runners/html-js-runner";
 import { PythonRunner } from "@/components/runners/python-runner";
 import { SqlRunner } from "@/components/runners/sql-runner";
+import { TypeScriptRunner } from "@/components/runners/typescript-runner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { TestOutcome } from "@/lib/runners/types";
@@ -84,6 +85,16 @@ export function ExercisePanel({ exercise }: { exercise: Exercise }) {
           tests={exercise.tests}
           orderSensitive={exercise.sqlOrderSensitive}
           onResult={handleResult}
+        />
+      )}
+      {exercise.language === "typescript" && (
+        <TypeScriptRunner
+          code={code}
+          onCodeChange={setCode}
+          starterCode={exercise.starterCode}
+          harness={exercise.harness}
+          onResult={handleResult}
+          editorLabel={`${exercise.kind} exercise TypeScript editor`}
         />
       )}
       {(exercise.language === "html" || exercise.language === "javascript") && (

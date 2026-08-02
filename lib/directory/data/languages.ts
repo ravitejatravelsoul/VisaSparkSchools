@@ -97,8 +97,10 @@ export const languageTechnologies: TechnologyInput[] = [
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "5.x",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-02",
+    courseId: "typescript-foundations",
+    runnerSupport: "typescript",
+    projectIds: ["typed-study-tracker"],
     publicVisibility: true,
   },
   {

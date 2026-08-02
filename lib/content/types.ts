@@ -1,6 +1,13 @@
 import { z } from "zod";
 
-export const runnerLanguageSchema = z.enum(["html", "javascript", "python", "sql", "none"]);
+export const runnerLanguageSchema = z.enum([
+  "html",
+  "javascript",
+  "typescript",
+  "python",
+  "sql",
+  "none",
+]);
 export type RunnerLanguage = z.infer<typeof runnerLanguageSchema>;
 
 export const difficultySchema = z.enum(["beginner", "intermediate", "advanced"]);
@@ -103,6 +110,24 @@ export type Lesson = z.infer<typeof lessonSchema>;
 /** Authoring shape used by content/lessons/*.ts -- defaulted fields optional. */
 export type LessonInput = z.input<typeof lessonSchema>;
 
+/**
+ * An ordered group of lessons within a course. Modules exist so a learner can
+ * see a course's shape before committing to it, and so long courses have
+ * meaningful checkpoints instead of a flat 12+ item list.
+ *
+ * `lessonSlugs` is the single source of truth for module membership and
+ * ordering; `scripts/validate-content.ts` fails the build if a module
+ * references a lesson that doesn't exist, if a lesson belongs to no module, or
+ * if a lesson is claimed by two modules.
+ */
+export const courseModuleSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  lessonSlugs: z.array(z.string().min(1)).min(1),
+});
+export type CourseModule = z.infer<typeof courseModuleSchema>;
+
 export const courseSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
   slug: z.string().regex(/^[a-z0-9-]+$/),
@@ -112,8 +137,29 @@ export const courseSchema = z.object({
   order: z.number().int().min(0),
   difficulty: difficultySchema,
   estimatedHours: z.number().min(0.5),
+  /** Who this course is written for, in plain language. */
+  audience: z.string().min(1),
+  /**
+   * What a learner can actually do after finishing. Phrased as observable
+   * capabilities, not "understand X" -- the validator has no way to check
+   * phrasing, but docs/CONTENT_AUTHORING.md states the rule for authors.
+   */
+  learningOutcomes: z.array(z.string().min(1)).min(3),
+  /**
+   * Course slugs a learner should finish first. Validated to resolve to real
+   * courses and to be acyclic, so the catalog can render a genuine sequence
+   * rather than an aspirational one.
+   */
+  prerequisiteCourseSlugs: z.array(z.string().min(1)).default([]),
+  /** Suggested continuations, validated to resolve to real courses. */
+  nextCourseSlugs: z.array(z.string().min(1)).default([]),
+  /** Technology directory slugs this course genuinely teaches (drives guide -> course links). */
+  relatedTechnologySlugs: z.array(z.string().min(1)).default([]),
+  modules: z.array(courseModuleSchema).min(1),
 });
 export type Course = z.infer<typeof courseSchema>;
+/** Authoring shape -- defaulted array fields may be omitted. */
+export type CourseInput = z.input<typeof courseSchema>;
 
 export const trackSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),

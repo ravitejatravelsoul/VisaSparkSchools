@@ -104,7 +104,7 @@ tests, the full Playwright suite including new focus-trap regression tests, prod
 axe accessibility sweep, and before/after Lighthouse). **Not pushed** (no remote configured).
 `c670ef1` was not amended or rewritten.
 
-## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phases 5–9 not started.
+## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phases 5–9 not started. Separately, a **Phase 5A — Interactive Curriculum Foundation** track (unrelated to the numbered "Phase 5" below, which is Aptitude/Reasoning/Career content) added a new TypeScript course and lab runner plus the schema/tooling/documentation foundation for future course batches — see "Phase 5A — Interactive Curriculum Foundation" below.
 
 This file replaces the previous CodeWise-era status document. That document's own numbering
 ("Phase 1–10") described the _original build_, not this expansion's 9-phase plan below — see
@@ -1069,6 +1069,105 @@ DEPLOYMENT.md` still only has its name updated, since nothing about the deployme
   (flexbox, grid, custom properties, `backdrop-filter` with a `@supports` fallback already in place
   from Phase 2) with no Chromium-specific features knowingly introduced, but this claim is
   unverified outside Chromium.
+
+## Phase 5A — Interactive Curriculum Foundation (2026-08-02)
+
+A separate, orthogonal expansion track from the numbered Phase 1-9 plan above (that "Phase 5"
+means Aptitude/Reasoning/Career content, still not started — see the checklist above). This
+track responds to a different brief: the platform had ~6 complete courses against 80 short
+technology guides, too few complete courses for a genuine self-learning platform. The brief named
+12 candidate courses (HTML & CSS Foundations, JavaScript Foundations, TypeScript Foundations,
+React, Node.js/Express, Java, Database Design and PostgreSQL, Software Testing Foundations, API
+Testing and Automation, Playwright, Selenium, Test Automation Framework Engineering).
+
+**What was found in a fresh audit of the runner architecture:** 8 of the 12 named courses need an
+execution environment this platform's three browser-only runners (HTML/CSS/JS sandbox, Pyodide,
+sql.js) cannot provide — React, Node.js/Express, Java, PostgreSQL, Playwright, Selenium, and Test
+Automation Framework Engineering all require either real server/local execution (out of scope: no
+server-side arbitrary code execution is permitted) or an explicit "guided local lab" content
+format (setup steps, expected output, verification commands, never a fake Run button). HTML & CSS
+Foundations already exists as `html-css-fundamentals`, a genuinely complete pre-existing course —
+rebuilding it would have meant either duplicating good content or discarding it, so it was audited
+against the new complete-course bar and strengthened (modules/outcomes/prerequisites backfilled)
+instead of duplicated, per the brief's own "if an identical course already exists, audit and
+strengthen" instruction.
+
+**Scope, as explicitly re-scoped by the requester mid-task:** rather than publish 8 shallow,
+non-interactive "courses" to hit a headline count, or silently under-deliver against the full
+12-course ask, the requester was asked directly (via a scoping question) how to spend the
+remaining session, and chose to formally re-scope Phase 5A down to a smaller batch that could be
+delivered complete, end-to-end, and genuinely verified rather than partially started. A second
+question about which new interactive capability to add (a new TypeScript compiler-based runner, a
+new "guided local lab" content type, or neither) was answered with **TypeScript lab runner only**
+— which, combined with the runner-architecture finding above, is what fixed this batch's final
+scope: **one new course, TypeScript Foundations**, plus the schema/tooling/validation/
+documentation foundation that Phase 5B's remaining 8 courses (React, Node.js/Express, Java,
+PostgreSQL, Software Testing Foundations, API Testing and Automation, Playwright, Selenium) and
+Phase 5C's much larger list (see `docs/CURRICULUM.md`'s "Master curriculum architecture" section)
+will build on.
+
+**What this batch actually shipped** (all verified — see the verification section below):
+
+1. A new, real TypeScript execution runner (`lib/runners/typescript-compile.ts` +
+   `components/runners/typescript-runner.tsx`) — a full `ts.Program` type-checker (not
+   `ts.transpileModule`, which performs no type checking), dynamically imported only when a
+   TypeScript exercise/example/Playground tab actually opens, reusing the existing audited
+   HTML/JS sandbox to execute the emitted code rather than opening a new execution surface. See
+   `docs/ARCHITECTURE.md`'s runner architecture section for the full design and
+   `docs/SECURITY.md` for the isolation review.
+2. An extended course-authoring schema (`lib/content/types.ts`): every course now carries
+   `audience`, `learningOutcomes`, `prerequisiteCourseSlugs`, `nextCourseSlugs`,
+   `relatedTechnologySlugs`, and `modules` (ordered groups of lessons). All 6 pre-existing courses
+   were backfilled with real values (not placeholders) computed from their actual lesson content,
+   and are now genuinely schema-validated on every registry load (previously the course array was
+   cast, not parsed).
+3. **TypeScript Foundations** (`typescript-foundations`), a new complete course: 5 modules, 12
+   lessons (why-types through modeling-a-domain with discriminated unions), 36 quiz questions, a
+   guided + independent exercise per lesson (every reference solution proven to compile and pass
+   its own harness — see `scripts/validate-snippets.ts` below), and one guided project
+   (`typed-study-tracker`, 4 milestones).
+4. Extended `scripts/validate-content.ts`: course-level referential integrity (prerequisite/next-
+   course/related-technology resolution, acyclic prerequisite graph), module↔lesson bijection
+   checks, minimum-content-bar checks for any course published from this phase onward (with a
+   narrow, documented exemption for 5 real pre-existing courses that predate the bar — see
+   `EXEMPT_SHORT_COURSES` in that script), harness-presence checks for interactive exercises, and
+   duplicate-quiz-question detection (including renamed-variable duplicates).
+5. A new `scripts/validate-snippets.ts` (run via `npm run content:validate-snippets`): executes
+   every HTML/JS/TypeScript exercise's reference solution against a real headless Chromium page,
+   proving every exercise is actually solvable as authored, not merely schema-shaped.
+6. `docs/CURRICULUM.md` rewritten with a complete-course definition, an 8-track long-term
+   curriculum architecture, and a full 80-guide coverage matrix (every public technology mapped to
+   its real course/runner/project availability, or an explicit reference-only reason, or its
+   planned Phase 5B/5C batch) — see that file for the complete detail this summary omits.
+7. Course overview and catalog pages updated to render the new structure: modules (not a flat
+   lesson list), audience/learning-outcomes, prerequisite and next-course links, and a
+   "Recommended first" line on catalog cards.
+
+**Two real pre-existing bugs, unrelated to this batch's own new code, were found and fixed while
+running this batch's required full accessibility/e2e verification sweep** (both predate Phase 5A
+and are not caused by it — they surfaced because this sweep exercised routes/viewports more
+thoroughly than prior verification runs happened to):
+
+1. **Header logo link had no accessible name on mobile** (`components/layout/header.tsx`): the
+   site-name text next to the logo is `hidden` below the `sm` breakpoint, and the logo SVG itself
+   is `aria-hidden`, so on any mobile viewport the header's home link had zero accessible text —
+   a serious `axe` `link-name` violation on every single page. Fixed with an explicit
+   `aria-label={siteConfig.name}` on the link, which is correct at every viewport width.
+2. **`tests/e2e/navigation.spec.ts`'s catalog-to-course-page test used an ambiguous link-name
+   match** (`getByRole("link", { name: /HTML & CSS Fundamentals/ })`), which became a genuine
+   strict-mode ambiguity once this batch added "Recommended first: &lt;course&gt;" text to catalog
+   cards (Course B's card can now contain Course A's title as its prerequisite line, so a
+   substring match on link name can hit the wrong card). Fixed by scoping the locator to the card
+   whose own `<h2>` heading matches the course title, not the flattened link text.
+
+**Explicitly not done in this batch, and not claimed as available anywhere in the public
+catalog, search, or navigation:** the other 11 originally-named courses. React, Node.js/Express,
+Java, Database Design and PostgreSQL, Software Testing Foundations, API Testing and Automation,
+Playwright, and Selenium remain Phase 5B (documented, not built — see `docs/CURRICULUM.md`).
+HTML & CSS Foundations was not rebuilt because `html-css-fundamentals` already met the bar after
+being strengthened. Test Automation Framework Engineering is Phase 5C, since it presumes the
+Phase 5B testing courses exist first. No "coming soon" card, empty filter state, or placeholder
+course exists for any of these anywhere in the shipped UI.
 
 ## If you pick this up next
 

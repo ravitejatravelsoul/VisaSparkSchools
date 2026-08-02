@@ -62,7 +62,7 @@ export type VersionPolicy = z.infer<typeof versionPolicySchema>;
  * place that decides whether "Open playground" may be shown, and it only
  * ever reads this field.
  */
-export const runnerRefSchema = z.enum(["html", "javascript", "python", "sql"]);
+export const runnerRefSchema = z.enum(["html", "javascript", "typescript", "python", "sql"]);
 export type RunnerRef = z.infer<typeof runnerRefSchema>;
 
 export const technologyExampleSchema = z.object({
