@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
-import { LinkButton } from "@/components/ui/button";
 import {
   getCourseBySlug,
   getLessonsForCourse,
@@ -12,6 +11,7 @@ import {
 } from "@/lib/content/registry";
 import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
+import { CourseProgressActions } from "@/components/course/course-progress-actions";
 
 type Params = Promise<{ courseSlug: string }>;
 
@@ -79,13 +79,7 @@ export default async function CourseOverviewPage({ params }: { params: Params })
         <Badge tone="neutral">{course.estimatedHours}h total</Badge>
       </div>
 
-      {lessons[0] && (
-        <div className="mt-6">
-          <LinkButton href={`/courses/${course.slug}/${lessons[0].slug}`}>
-            Start this course
-          </LinkButton>
-        </div>
-      )}
+      <CourseProgressActions courseSlug={course.slug} lessons={lessons} />
 
       <ol className="mt-8 flex flex-col gap-2">
         {lessons.map((lesson, i) => (

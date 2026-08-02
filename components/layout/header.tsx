@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { LinkButton } from "@/components/ui/button";
 import { LogoMark } from "@/components/brand/logo-mark";
+import { AccountNav } from "@/components/auth/account-nav";
 
 export function Header() {
   return (
@@ -38,9 +39,7 @@ export function Header() {
             </LinkButton>
           </span>
           <span className="hidden sm:inline-flex">
-            <LinkButton href="/sign-in" variant="primary" size="sm">
-              Sign in
-            </LinkButton>
+            <AccountNav />
           </span>
           <MobileNav />
         </div>

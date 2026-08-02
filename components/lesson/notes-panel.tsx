@@ -4,8 +4,10 @@ import { useEffect, useId, useState } from "react";
 import { useProgressStore } from "@/lib/learning/store";
 
 export function NotesPanel({ lessonId }: { lessonId: string }) {
-  const savedNote = useProgressStore((s) => s.state.notes[lessonId] ?? "");
+  const savedNote = useProgressStore((s) => s.state.notes[lessonId]?.text ?? "");
+  const conflict = useProgressStore((s) => s.state.notes[lessonId]?.conflict);
   const setNote = useProgressStore((s) => s.setNote);
+  const resolveNoteConflict = useProgressStore((s) => s.resolveNoteConflict);
   const [draft, setDraft] = useState(savedNote);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const inputId = useId();
@@ -44,6 +46,33 @@ export function NotesPanel({ lessonId }: { lessonId: string }) {
       <p aria-live="polite" className="mt-1 text-xs text-(--color-ink-faint)">
         {savedAt ? "Saved." : "Notes save automatically."}
       </p>
+      {conflict && (
+        <div className="mt-3 rounded-lg border border-(--color-border-strong) bg-(--color-accent-contrast) p-3 text-sm">
+          <p className="font-medium">
+            An older version of this note from another device wasn&apos;t kept automatically.
+          </p>
+          <p className="mt-1 text-(--color-ink-muted)">{conflict.text}</p>
+          <div className="mt-2 flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                resolveNoteConflict(lessonId, "conflict");
+                setDraft(conflict.text);
+              }}
+              className="rounded-lg border border-(--color-border-strong) px-2 py-1 text-xs"
+            >
+              Restore this version instead
+            </button>
+            <button
+              type="button"
+              onClick={() => resolveNoteConflict(lessonId, "current")}
+              className="rounded-lg border border-(--color-border-strong) px-2 py-1 text-xs"
+            >
+              Discard it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

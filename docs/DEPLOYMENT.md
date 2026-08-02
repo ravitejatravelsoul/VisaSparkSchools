@@ -17,31 +17,38 @@ working public beta.
    Vercel's Environment Variables.
 4. Deploy. Every lesson, exercise, quiz, runner, and search works immediately.
 
-## 2. Adding Supabase (accounts today; progress sync requires more work)
+## 2. Adding Supabase (accounts + progress sync)
 
-**Current state, precisely:** enabling Supabase makes sign-up/sign-in/reset-password functional
-and switches the AI tutor's quota to the atomic Postgres RPC. It does **not** yet sync learning
-progress — `lesson_progress`, `exercise_attempts`, `quiz_attempts`, `skill_mastery`,
-`review_queue`, `bookmarks`, and `notes` are defined with RLS in the migration below, but no
-application code reads or writes them. Every learner's progress, signed in or not, lives in that
-browser's `localStorage` until that integration is built (tracked in `PROJECT_STATUS.md`).
+**Current state, precisely:** enabling Supabase makes sign-up/sign-in/reset-password functional,
+switches the AI tutor's quota to the atomic Postgres RPC, and turns on the guest-to-account sync
+lifecycle (`lib/sync/orchestrator.ts`, driven by `components/auth/auth-provider.tsx`) — signing in
+merges local guest progress into the account and pushes the merged result to Supabase once for
+that sign-in (and again on a manual "Retry sync" after a failure) -- not continuously; local
+changes made afterward are cached locally and included in the next sync (see
+`docs/ARCHITECTURE.md`'s "Learning engine and account sync" section). This sync logic is
+unit/integration-tested against a mocked
+Supabase client (`tests/unit/sync-lifecycle.test.ts`, `tests/integration/auth-provider.test.tsx`)
+but has **not** been execution-tested against a real, live Supabase project by this build — no
+cloud resources were provisioned for this beta. Test it against a real project before trusting it
+with real user data.
 
 1. Create a project at [supabase.com](https://supabase.com).
-2. In the Supabase SQL editor (or via the CLI: `supabase link` then `supabase db push`), run the
-   migration in `supabase/migrations/0001_init.sql`. It is idempotent-safe to review before running
-   (`create table if not exists`, policies named explicitly) but has not been run against any real
-   project by this build — read it before applying it to production data.
+2. In the Supabase SQL editor (or via the CLI: `supabase link` then `supabase db push`), run
+   `supabase/migrations/0001_init.sql` followed by `supabase/migrations/0002_phase4_learning_accounts.sql`,
+   in that order. Both are idempotent-safe to review before running (`create table if not exists`,
+   `add column if not exists`, policies named explicitly) but have not been run against any real
+   project by this build — read them before applying either to production data.
 3. Copy the project's URL and anon key (Project Settings → API) into:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 4. Redeploy. `featureFlags.supabaseEnabled` (see `lib/site-config.ts`) turns on automatically once
-   both variables are present — sign-in/sign-up pages become functional, and the tutor's quota
-   switches from in-memory to the atomic Postgres RPC for authenticated users. Progress still does
-   not sync (see above) until the merge integration described in `docs/ARCHITECTURE.md` is built.
+   both variables are present — sign-in/sign-up pages become functional, the tutor's quota switches
+   from in-memory to the atomic Postgres RPC for authenticated users, and sign-in starts running the
+   sync lifecycle described above.
 5. **Never put the Supabase service-role key in any `NEXT_PUBLIC_*` variable or client code.** This
    app never needs it — all client/server access goes through the anon key plus RLS.
-6. Run the RLS verification procedure in `docs/SECURITY.md` before trusting the deployment with
-   real user data.
+6. Run the RLS verification procedure in `docs/SECURITY.md` (now covering the Phase 4 tables too)
+   before trusting the deployment with real user data.
 
 ### Auth configuration notes
 
@@ -72,14 +79,14 @@ browser's `localStorage` until that integration is built (tracked in `PROJECT_ST
 
 See `.env.example` for the full, commented list. Summary:
 
-| Variable                                                     | Required for                                 | Notes                                            |
-| ------------------------------------------------------------ | -------------------------------------------- | ------------------------------------------------ |
-| `NEXT_PUBLIC_SITE_URL`                                       | SEO metadata/sitemap                         | Defaults to `http://localhost:3000`              |
-| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Accounts (not yet progress sync — see above) | Both must be set together                        |
-| `AI_TUTOR_ENABLED` / `NEXT_PUBLIC_AI_TUTOR_ENABLED`          | AI tutor                                     | Keep both in sync                                |
-| `AI_API_KEY` / `AI_API_BASE_URL` / `AI_CHAT_MODEL`           | AI tutor                                     | Any OpenAI-compatible endpoint                   |
-| `AI_EMBEDDING_MODEL` / `AI_EMBEDDING_DIMENSIONS`             | Future vector retrieval                      | Not required for the current keyword-based tutor |
-| `AI_DAILY_TUTOR_ALLOWANCE`                                   | AI tutor                                     | Per-user daily question cap                      |
+| Variable                                                     | Required for                         | Notes                                            |
+| ------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL`                                       | SEO metadata/sitemap                 | Defaults to `http://localhost:3000`              |
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Accounts + progress sync (see above) | Both must be set together                        |
+| `AI_TUTOR_ENABLED` / `NEXT_PUBLIC_AI_TUTOR_ENABLED`          | AI tutor                             | Keep both in sync                                |
+| `AI_API_KEY` / `AI_API_BASE_URL` / `AI_CHAT_MODEL`           | AI tutor                             | Any OpenAI-compatible endpoint                   |
+| `AI_EMBEDDING_MODEL` / `AI_EMBEDDING_DIMENSIONS`             | Future vector retrieval              | Not required for the current keyword-based tutor |
+| `AI_DAILY_TUTOR_ALLOWANCE`                                   | AI tutor                             | Per-user daily question cap                      |
 
 ## 5. CI
 

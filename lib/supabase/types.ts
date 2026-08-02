@@ -7,9 +7,29 @@ export interface Database {
   public: {
     Tables: {
       profiles: {
-        Row: { id: string; display_name: string | null; created_at: string; updated_at: string };
-        Insert: { id: string; display_name?: string | null };
-        Update: { display_name?: string | null };
+        Row: {
+          id: string;
+          display_name: string | null;
+          learning_goal: string | null;
+          current_roadmap_id: string | null;
+          timezone: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          display_name?: string | null;
+          learning_goal?: string | null;
+          current_roadmap_id?: string | null;
+          timezone?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          display_name?: string | null;
+          learning_goal?: string | null;
+          current_roadmap_id?: string | null;
+          timezone?: string | null;
+        };
         Relationships: [];
       };
       lesson_progress: {
@@ -58,7 +78,13 @@ export interface Database {
           total: number;
           created_at: string;
         };
-        Insert: { user_id: string; lesson_id: string; correct: number; total: number };
+        Insert: {
+          user_id: string;
+          lesson_id: string;
+          correct: number;
+          total: number;
+          created_at?: string;
+        };
         Update: { correct?: number; total?: number };
         Relationships: [];
       };
@@ -87,9 +113,119 @@ export interface Database {
         Relationships: [];
       };
       notes: {
-        Row: { id: string; user_id: string; lesson_id: string; body: string; updated_at: string };
-        Insert: { user_id: string; lesson_id: string; body: string };
-        Update: { body?: string };
+        Row: {
+          id: string;
+          user_id: string;
+          lesson_id: string;
+          body: string;
+          updated_at: string;
+          conflict_text: string | null;
+          conflict_updated_at: string | null;
+        };
+        Insert: {
+          user_id: string;
+          lesson_id: string;
+          body: string;
+          conflict_text?: string | null;
+          conflict_updated_at?: string | null;
+        };
+        Update: {
+          body?: string;
+          conflict_text?: string | null;
+          conflict_updated_at?: string | null;
+        };
+        Relationships: [];
+      };
+      enrollments: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          enrolled_at: string;
+          last_accessed_lesson_id: string | null;
+          last_accessed_at: string | null;
+        };
+        Insert: {
+          user_id: string;
+          course_id: string;
+          enrolled_at?: string;
+          last_accessed_lesson_id?: string | null;
+          last_accessed_at?: string | null;
+        };
+        Update: { last_accessed_lesson_id?: string | null; last_accessed_at?: string | null };
+        Relationships: [];
+      };
+      roadmap_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          path_id: string;
+          started_at: string;
+          last_accessed_at: string;
+        };
+        Insert: {
+          user_id: string;
+          path_id: string;
+          started_at?: string;
+          last_accessed_at?: string;
+        };
+        Update: { last_accessed_at?: string };
+        Relationships: [];
+      };
+      roadmap_step_completions: {
+        Row: {
+          id: string;
+          user_id: string;
+          path_id: string;
+          step_id: string;
+          completed_at: string;
+        };
+        Insert: { user_id: string; path_id: string; step_id: string; completed_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      project_progress: {
+        Row: { id: string; user_id: string; project_id: string; started_at: string };
+        Insert: { user_id: string; project_id: string; started_at?: string };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      project_milestone_completions: {
+        Row: {
+          id: string;
+          user_id: string;
+          project_id: string;
+          milestone_id: string;
+          completed_at: string;
+        };
+        Insert: {
+          user_id: string;
+          project_id: string;
+          milestone_id: string;
+          completed_at?: string;
+        };
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      activity_log: {
+        Row: {
+          id: string;
+          user_id: string;
+          event_id: string;
+          type: string;
+          ref_id: string;
+          title: string;
+          occurred_at: string;
+        };
+        Insert: {
+          user_id: string;
+          event_id: string;
+          type: string;
+          ref_id: string;
+          title: string;
+          occurred_at?: string;
+        };
+        Update: Record<string, never>;
         Relationships: [];
       };
       daily_goals: {

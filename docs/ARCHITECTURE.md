@@ -3,12 +3,15 @@
 ## Overview
 
 VisaSparkSchools is a Next.js 16 App Router application. Course content is version-controlled TypeScript
-(not a database), validated by a Zod schema at build time. Learning progress lives client-side
-(localStorage) for every learner, guest or signed-in — **Supabase progress sync is schema-ready
-but not yet wired into the app** (see "Learning engine" below and `PROJECT_STATUS.md`). Code
-execution (HTML/CSS/JS, Python, SQL) happens entirely in the learner's browser — a sandboxed
-iframe and two Web Workers — never on the server, so there is no server-side arbitrary code
-execution surface.
+(not a database), validated by a Zod schema at build time. Learning progress (lessons, exercises,
+quizzes, bookmarks, notes, enrollments, roadmap/project progress, activity, preferences) lives
+client-side (localStorage) as the source of truth for guests; signed-in learners get the same
+local-first behavior plus a Supabase-backed sync layer that folds guest progress into their
+account and pushes the merged result to Postgres once per sign-in (and again on a manual retry
+after a failure) -- not continuously in real time on every mutation; see "Learning engine and
+account sync" below for exactly when a push happens. Code execution (HTML/CSS/JS, Python, SQL)
+happens entirely in the learner's browser — a sandboxed iframe and two Web Workers — never on the
+server, so there is no server-side arbitrary code execution surface.
 
 ```
 Browser
@@ -16,7 +19,8 @@ Browser
 ├─ Sandboxed <iframe srcdoc> — HTML/CSS/JS runner (no allow-same-origin)
 ├─ Web Worker — Pyodide (Python), lazy-loaded from CDN
 ├─ Web Worker — sql.js (SQLite/WASM), self-hosted in /public/wasm
-└─ Zustand store <-> localStorage (progress, for guests AND signed-in users today)
+├─ Zustand progress store <-> localStorage (guest key, or a per-account cache key once signed in)
+└─ AuthProvider — listens for Supabase auth events, runs the guest-to-account sync lifecycle
 
 Server (Next.js route handlers)
 ├─ /api/tutor — optional AI tutor: keyword retrieval over lesson content -> chat completion
@@ -24,8 +28,9 @@ Server (Next.js route handlers)
 
 Supabase (optional, not provisioned in this beta)
 ├─ Auth (email/password) — wired up and functional when configured
-└─ Postgres: per-user progress tables, all with Row Level Security — schema exists;
-   no application code reads/writes these tables yet (see Learning engine)
+└─ Postgres: per-user progress/enrollment/roadmap/activity/preference tables, all with Row Level
+   Security — read/written by the browser client directly (lib/sync/pull.ts, lib/sync/push.ts),
+   never a service-role key
 ```
 
 ## Folder layout
@@ -39,7 +44,12 @@ components/
                            bookmarks, notes, completion actions)
   runners/                 Code editor + the three runner UIs (HTML/JS, Python, SQL)
   ai/                      Tutor launcher (client)
-  auth/, contact/, dashboard/, playground/, search/, seo/
+  auth/                    AuthForm, AuthProvider (sync lifecycle), AccountNav (sign in/out)
+  course/                  CourseProgressActions (enroll/resume/derived completion)
+  roadmap/                 RoadmapStartControls, RoadmapStepList (derived + self-reported steps)
+  project/                 ProjectMilestoneChecklist (derived project completion)
+  profile/                 ProfileForm (display name, learning goal, current roadmap, timezone)
+  contact/, dashboard/, playground/, search/, seo/
 content/
   tracks.ts, courses.ts, projects.ts, lessons/*.ts   Authored course content (typed, validated)
   fixtures/sql-seed.ts     Shared SQL dataset used by every SQL lesson/exercise
@@ -48,7 +58,14 @@ lib/
   directory/               Phase 3 technology directory: types, categories.ts, data/*.ts (~80
                            technologies by category), learning-paths.ts, registry.ts, validate.ts,
                            availability.ts (see "Technology directory" below)
-  learning/                Mastery formula, review schedule, guest progress store + storage/merge
+  learning/                ProgressState (types.ts), store.ts (Zustand actions), storage.ts
+                           (localStorage persistence + mergeProgress), completion.ts (derived
+                           course/project/roadmap-step completion), recommendation.ts (next-lesson
+                           priority function), daily-goal.ts, mastery.ts, review-schedule.ts
+  sync/                    pull.ts/push.ts (Supabase <-> ProgressState), lifecycle.ts
+                           (syncGuestToAccount), sync-status-store.ts (see "Learning engine and
+                           account sync" below)
+  auth/                    session-store.ts (signed-in user id/email for UI, not persisted)
   runners/                 Runner doc-builder (HTML/JS) and the two Web Worker scripts
   ai/                      Provider abstraction, chunking, retrieval, prompt building, safety, quota
   supabase/                Browser/server client factories + hand-maintained typed schema
@@ -94,21 +111,80 @@ allow-forms">` — deliberately without `allow-same-origin`, so the frame always
   query against an identically fresh database — then diffs the resulting rows. This is what lets
   multiple correct SQL phrasings all pass instead of only one exact string.
 
-## Learning engine
+## Learning engine and account sync (Phase 4)
 
 `lib/learning/store.ts` is a Zustand store wrapping a single `ProgressState` object
-(`lib/learning/types.ts`), persisted to `localStorage` (`lib/learning/storage.ts`) on every
-mutation, regardless of whether the learner is a guest or signed in. `mergeProgress`
-(`lib/learning/storage.ts`) implements the _algorithm_ for a future guest→account merge: per
-field, whichever side represents more progress wins (higher lesson status, more attempts, better
-quiz score, earlier review due date, union of bookmarks) — nothing is ever silently dropped. It is
-unit-tested (`tests/unit/progress-merge.test.ts`) but **not currently called from anywhere in the
-app** — there is no code path that fetches a signed-in user's remote progress from Supabase, calls
-`mergeProgress`, or writes progress back to Supabase. Wiring this up (an auth-state-change hook
-that reads the Supabase tables, merges, writes back, and keeps the two in sync going forward) is
-the largest remaining gap between the current Supabase integration and a "real" synced-accounts
-feature. `lib/learning/mastery.ts` and `review-schedule.ts` are pure, unit-tested functions with no
-framework dependency.
+(`lib/learning/types.ts`, currently version 3): lesson status, exercise attempts, quiz results,
+skill mastery, review queue, bookmarks, versioned notes, streak, daily goal, recently viewed,
+**enrollments**, **roadmap progress**, **project progress**, a capped **activity** feed, and
+**profile** preferences. Every mutator persists to `localStorage` on every call
+(`lib/learning/storage.ts`), under one of two keys:
+
+- `visasparkschools:progress` — the shared **guest** key, used whenever nobody is signed in.
+- `visasparkschools:progress:<userId>` — a **per-account** cache key, used only while that
+  specific user is signed in.
+
+`lib/learning/store.ts#setActiveStorageKey()` switches which key `persist()` writes to; nothing
+else in the store needs to know whether a session exists. This separation — not a single shared
+key — is what makes sign-out and account-switching safe: signing out (or a different account
+signing in) always re-points persistence at a key the previous session never wrote learner-visible
+data into after the switch.
+
+**Derived, never stored, completion**: `lib/learning/completion.ts` computes course completion
+(every lesson in the course is `"completed"`), project completion (every milestone id is in
+`completedMilestoneIds`), and roadmap-step completion — `course`/`project` steps are always
+derived from real lesson/milestone data; `technology-guide`/`practice`/`assessment` steps (which
+have no other signal to derive from) are self-reported via `toggleRoadmapStep`, and _only_ those
+step types are ever written to `roadmapProgress[...].completedStepIds`. Nothing in this system
+independently declares a course/project/roadmap "complete" as a boolean that could go stale.
+
+**Guest-to-account sync lifecycle** (`lib/sync/orchestrator.ts`, driven by
+`components/auth/auth-provider.tsx`, a no-render component mounted once in
+`app/(site)/layout.tsx` that subscribes to `supabase.auth.onAuthStateChange` and forwards each
+event to the orchestrator). **A sync runs exactly twice in the ordinary case: once on sign-in, and
+never again automatically** -- it is not a continuous or periodic background sync, and a local
+mutation made after a successful sign-in (completing a lesson, editing the profile, ...) is saved
+to that account's local cache key immediately but is only pushed to Supabase the _next_ time a
+sync runs (the next sign-in in a fresh session, or a manual retry). A retry is only ever
+learner-triggered, from the dashboard's "Sync status" card, and only appears after a failure --
+there is no automatic retry loop. On sign-in, the orchestrator snapshots the current in-memory
+`ProgressState` (guest data, or nothing new if this account is already active), calls
+`lib/sync/lifecycle.ts#syncGuestToAccount` -- which pulls the account's remote state
+(`lib/sync/pull.ts`), merges it with the snapshot via `mergeProgress` (`lib/learning/storage.ts`),
+and pushes the merged result back (`lib/sync/push.ts`, all upserts, so retries are safe) -- then,
+only if the sign-in (or retry) that started the sync is still the current one, writes the merged
+state to that account's local cache key, clears the shared guest key (so it can never be folded
+into a _different_ account later), and switches the store's active key. On sign-out it switches
+back to the guest key and reloads whatever's there (which does not include anything from the
+just-signed-out account, since that account's activity was never written to the guest key). A
+module-scoped `generation` counter (not component state, so it's shared between the auth-event
+listener and the dashboard's manual retry button) discards any sync response that resolves after a
+_later_ sign-in/sign-out/retry already happened, so a slow network response can never land after
+the learner has moved on to a different account, back to guest, or a newer retry attempt -- this is
+unit-tested end-to-end with a fake Supabase client (`tests/integration/auth-provider.test.tsx`)
+simulating those races, including a stale retry response.
+
+`mergeProgress` (`lib/learning/storage.ts`) is per-field: whichever side represents more progress
+wins (higher lesson status, more exercise attempts, better quiz score, earliest review due date,
+union of bookmarks/enrollments/roadmap steps, max skill mastery). Two fields get special handling
+beyond simple union/max: **notes** are versioned (`NoteState { text, updatedAt, conflict? }`) — a
+genuine conflict (both sides edited the same lesson's note differently) keeps the more recent text
+as `text` but preserves the other under `conflict` rather than silently discarding it, surfaced in
+`components/lesson/notes-panel.tsx` with a restore/discard choice. **Profile preferences** are
+last-write-wins as a whole object by `updatedAt`, with one exception: an all-null profile (e.g. the
+empty row `handle_new_user` creates at sign-up) never outranks a side with real preferences set,
+regardless of timestamp — otherwise signing up right after setting a guest preference would erase
+it (`tests/unit/progress-merge.test.ts`).
+
+`lib/learning/mastery.ts`, `review-schedule.ts`, `recommendation.ts`, and `daily-goal.ts` are pure,
+unit-tested functions with no framework dependency. `recommendation.ts#getNextLessonRecommendation`
+is a small, explicit, ordered priority function (resume an in-progress lesson → continue the
+current roadmap's next required course step → continue the most recently accessed enrolled course
+→ start the platform's first lesson) — not AI, and documented as such in its own docstring.
+`daily-goal.ts#getDailyGoalStatus` computes "minutes learned today" from the activity log's real
+`lesson-completed` events (summed `estimatedMinutes`) in the learner's timezone, not a running
+timer; missing a day never deletes anything, since it only ever reads today's slice of a permanent
+log.
 
 ## AI tutor (optional)
 

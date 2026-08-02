@@ -38,18 +38,28 @@ A fresh visitor can, with zero configuration:
 12. Browse technologies by category, filter/search the technology directory, and read a genuine
     guide for any of ~80 technologies — honestly labeled as guide-only, course-available, or
     runner-available, never overclaiming.
-13. Follow a public learning roadmap's ordered steps toward a stated outcome.
+13. Follow a public learning roadmap's ordered steps toward a stated outcome, tracking real
+    progress on it (see section 10).
+14. Enroll in a course, resume where they left off, and see real, derived completion percentages
+    for courses, projects, and roadmaps — never a stored flag that could disagree with the
+    underlying lessons/milestones.
+15. See a dashboard built only from sections backed by real, working systems: continue-learning
+    recommendation, enrolled courses, current roadmap, due reviews, recent activity, bookmarks,
+    notes, and a non-punitive daily goal — no placeholder cards for features that don't exist yet.
 
-With Supabase configured, a visitor can additionally create an account and sign in — **progress
-sync into that account is not yet implemented** (see `docs/ARCHITECTURE.md` and
-`PROJECT_STATUS.md`); progress still lives in that browser's `localStorage` either way. With AI
-credentials configured, a visitor can additionally use a grounded, cited tutor. All of this remains
-fully optional; the absence of any of it never breaks the core product.
+With Supabase configured, a visitor can additionally create an account, sign in, and have their
+guest progress merged into that account automatically, then kept in sync going forward (see
+section 10 and `docs/ARCHITECTURE.md`). Signing out never leaves that account's data visible to a
+guest or a different account signing in afterward. Without Supabase configured, every one of the
+above still works exactly the same way, entirely on localStorage. With AI credentials configured, a
+visitor can additionally use a grounded, cited tutor. All of this remains fully optional; the
+absence of any of it never breaks the core product.
 
 ## 4. In scope (this beta)
 
 Public learning platform; the full six-track curriculum; a technology directory (categories,
-technology guides, learning roadmaps — see section 9); guest progress; optional accounts;
+technology guides, learning roadmaps — see section 9); course enrollment, roadmap/project progress
+tracking, and guest-to-account sync (see section 10); guest progress; optional accounts;
 interactive runners (HTML/CSS/JS, Python, SQL); local search (extended to cover technologies,
 categories, and roadmaps); quizzes/exercises; mastery and spaced review; optional grounded tutor;
 accessibility (WCAG 2.2 AA target); security hardening; SEO; automated tests; documentation;
@@ -62,10 +72,11 @@ native mobile apps, unrestricted file uploads, server-side arbitrary code execut
 multi-tenant school dashboards, certificates (a certificate _system_ — see section 9 for the
 honest-completion-certificate architecture planned for Phase 8), quantitative aptitude/reasoning/
 group-discussion practice content (registered in the category taxonomy but intentionally kept
-internal/non-public until Phase 5 builds real content for them), Study Studio, a multi-file
-Project Studio, a broader Tools Lab, deep-learning-based personalization, automatic publication of
-AI-generated content, and production deployment (nothing in this beta was deployed, and no cloud
-resources were provisioned).
+internal/non-public until Phase 5 builds real content for them), course reviews (deferred until a
+full moderation/abuse/ownership model ships), Study Studio, a multi-file Project Studio, a broader
+Tools Lab, deep-learning-based personalization, automatic publication of AI-generated content, and
+production deployment (nothing in this beta was deployed, and no cloud resources were
+provisioned).
 
 ## 9. Technology directory, categories, and learning roadmaps (Phase 3)
 
@@ -94,6 +105,38 @@ Added in Phase 3, on top of the original six-track curriculum (which is unchange
 See `docs/CONTENT_AUTHORING.md` for exactly how to extend any of this safely, and
 `docs/ARCHITECTURE.md` for how it's implemented.
 
+## 10. Learning and account foundation (Phase 4)
+
+Added on top of Phases 1-3, without duplicating any existing state:
+
+- **Enrollment**: visiting any lesson in a course idempotently enrolls the learner in it (no
+  separate "enroll" click required, though the course overview page's primary action does it
+  explicitly too); the dashboard's "Your courses" section and a course's overview page both show a
+  real, derived completion percentage.
+- **Roadmap tracking**: a learner can start a public roadmap and mark it their "current" one (used
+  by the dashboard's next-lesson recommendation). Each step's completion is either derived from
+  real data (`course`/`project` steps) or self-reported (`technology-guide`/`practice` steps, which
+  have no other signal) — never a stored flag for a step type that could be computed.
+- **Project progress**: a project's milestone checklist is interactive; project completion is
+  derived from which milestones are checked, the same way course completion is derived from
+  lessons.
+- **Guest-to-account sync**: signing in merges a guest's local progress into their account
+  (union/max/latest-wins per field, versioned notes so neither side's writing is silently
+  discarded) and pushes the merged result to Supabase once for that sign-in, and again on a manual
+  retry if it failed -- not a continuous background sync; local changes made afterward are cached
+  locally and pushed the next time a sync runs. Signing out — or a different account signing in on
+  the same device — never surfaces another account's data; see `docs/ARCHITECTURE.md`'s "Learning
+  engine and account sync" section and `docs/SECURITY.md` for exactly how.
+- **Dashboard and profile**: the dashboard only ever renders sections backed by real, working
+  systems (continue-learning recommendation, enrolled courses, current roadmap, due reviews,
+  recent activity, bookmarks, notes, non-punitive daily goal, and — when signed in — a sync status
+  indicator with a retry action). A `/profile` page holds display name, learning goal, current
+  roadmap, and timezone preferences; the light/dark theme toggle already existed and isn't
+  duplicated here.
+- **Deferred**: course reviews (needs a moderation/abuse/ownership model this phase doesn't build);
+  per-exercise saved-code sync to Supabase (stays a local-only convenience feature — no requirement
+  identified for it beyond that, and promoting it would need its own migration and merge rule).
+
 ## 6. Curriculum shape
 
 Six tracks, one connected path: Digital & Coding Foundations → HTML & CSS → JavaScript → Python →
@@ -106,7 +149,10 @@ Mastery per skill tag is a documented point formula (lesson completion, guided/i
 exercise success, quiz accuracy, hint-use penalty), not a machine-learned model with no data to
 learn from. Spaced review uses fixed intervals (1/3/7/14/30 days), resetting to the first
 interval on a missed review without erasing completion or mastery. See
-`lib/learning/mastery.ts` and `lib/learning/review-schedule.ts`.
+`lib/learning/mastery.ts` and `lib/learning/review-schedule.ts`. Course/project/roadmap-step
+completion is likewise always derived from real underlying data, never an independently-settable
+flag (`lib/learning/completion.ts`); the dashboard's next-lesson recommendation is a documented,
+ordered priority function, not a model (`lib/learning/recommendation.ts`).
 
 ## 8. Acceptance criteria (see also PROJECT_STATUS.md)
 
@@ -116,4 +162,7 @@ no known broken navigation; no placeholder content in launch routes; guest progr
 refresh; code runners function safely and deterministically; mobile navigation works; light/dark
 themes are readable and pass automated contrast checks; search works without AI; the AI-disabled
 tutor state is honest; Supabase migrations and RLS policies exist (not deployed); no secrets are
-present in the repository.
+present in the repository; enrollment/roadmap/project progress survive a refresh as a guest; the
+guest-to-account sync lifecycle is unit-tested including stale-response and multi-account-privacy
+scenarios (mocked Supabase client, since no live project is provisioned); signing out never
+surfaces a previous account's data.

@@ -24,9 +24,82 @@ export interface StreakState {
   lastActiveDate: string | null;
 }
 
+/**
+ * A note on a lesson. Versioned so a guest-to-account merge never silently
+ * drops one side's writing: if both sides edited the same lesson's note to
+ * different text, the more recently edited one becomes `text` and the other
+ * is preserved under `conflict` for the learner to review and restore
+ * instead of being discarded (see `mergeProgress` in storage.ts).
+ */
+export interface NoteState {
+  text: string;
+  updatedAt: string;
+  conflict?: { text: string; updatedAt: string };
+}
+
+/** One row per course the learner has started. Enrolling is idempotent. */
+export interface EnrollmentState {
+  enrolledAt: string;
+  lastAccessedLessonId?: string;
+  lastAccessedAt?: string;
+}
+
+/**
+ * Progress following a public learning roadmap. `completedStepIds` only ever
+ * holds *self-reported* step ids -- steps whose completion can be derived
+ * from real data (a `course` step from lesson completion, a `project` step
+ * from milestone completion) are never stored here, to avoid a stored flag
+ * silently going stale and contradicting the derived truth. See
+ * `lib/learning/completion.ts#resolveStepStatus`.
+ */
+export interface RoadmapProgressState {
+  startedAt: string;
+  lastAccessedAt: string;
+  completedStepIds: string[];
+}
+
+/** Per-project milestone checklist progress. Project completion is derived (all milestone ids present). */
+export interface ProjectProgressState {
+  startedAt: string;
+  completedMilestoneIds: string[];
+}
+
+/**
+ * Small, explicit allowlist of event types -- kept short on purpose so the
+ * activity feed stays meaningful instead of becoming a raw interaction log.
+ */
+export type ActivityEventType =
+  | "lesson-completed"
+  | "course-enrolled"
+  | "course-completed"
+  | "roadmap-started"
+  | "roadmap-step-completed"
+  | "roadmap-completed"
+  | "project-milestone-completed"
+  | "project-completed"
+  | "bookmark-added";
+
+export interface ActivityEvent {
+  /** Stable, idempotent id (e.g. "lesson-completed:js-variables") -- logging the same event twice never duplicates it. */
+  id: string;
+  type: ActivityEventType;
+  refId: string;
+  title: string;
+  at: string;
+}
+
+export interface ProfileState {
+  displayName: string | null;
+  learningGoal: string | null;
+  currentRoadmapId: string | null;
+  /** IANA timezone (e.g. "America/Los_Angeles"); null means "use the browser's timezone". */
+  timezone: string | null;
+  updatedAt: string;
+}
+
 /** The full shape persisted to localStorage (guest mode) or Supabase (signed in). */
 export interface ProgressState {
-  version: 2;
+  version: 3;
   lessonStatus: Record<string, LessonStatus>;
   exerciseAttempts: Record<string, ExerciseAttemptState>;
   quizResults: Record<string, QuizResultState>;
@@ -35,16 +108,25 @@ export interface ProgressState {
   /** lesson id -> review scheduling state; only present once a lesson is completed */
   reviewQueue: Record<string, ReviewState>;
   bookmarks: string[];
-  notes: Record<string, string>;
+  notes: Record<string, NoteState>;
   streak: StreakState;
   dailyGoalMinutes: number;
   /** lesson ids, most recently viewed first, capped at 10 */
   recentlyViewed: string[];
+  /** course id -> enrollment state */
+  enrollments: Record<string, EnrollmentState>;
+  /** learning path id -> roadmap progress state */
+  roadmapProgress: Record<string, RoadmapProgressState>;
+  /** project id -> milestone checklist progress */
+  projectProgress: Record<string, ProjectProgressState>;
+  /** newest first, capped at 50 */
+  activity: ActivityEvent[];
+  profile: ProfileState;
 }
 
 export function createEmptyProgress(): ProgressState {
   return {
-    version: 2,
+    version: 3,
     lessonStatus: {},
     exerciseAttempts: {},
     quizResults: {},
@@ -55,5 +137,16 @@ export function createEmptyProgress(): ProgressState {
     streak: { current: 0, lastActiveDate: null },
     dailyGoalMinutes: 20,
     recentlyViewed: [],
+    enrollments: {},
+    roadmapProgress: {},
+    projectProgress: {},
+    activity: [],
+    profile: {
+      displayName: null,
+      learningGoal: null,
+      currentRoadmapId: null,
+      timezone: null,
+      updatedAt: new Date(0).toISOString(),
+    },
   };
 }

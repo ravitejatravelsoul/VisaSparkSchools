@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import {
-  getPublicLearningPaths,
-  getLearningPathBySlug,
-  getTechnologyById,
-} from "@/lib/directory/registry";
-import { getCourseBySlug, getProjectBySlug } from "@/lib/content/registry";
-import type { PathStep } from "@/lib/directory/types";
+import { getPublicLearningPaths, getLearningPathBySlug } from "@/lib/directory/registry";
 import { siteConfig } from "@/lib/site-config";
+import { RoadmapStartControls, RoadmapStepList } from "@/components/roadmap/roadmap-progress";
 
 export function generateStaticParams() {
   return getPublicLearningPaths().map((p) => ({ pathSlug: p.slug }));
@@ -31,30 +25,6 @@ export async function generateMetadata({
     alternates: { canonical: `${siteConfig.url}/roadmaps/${path.slug}` },
   };
 }
-
-function stepHref(step: PathStep): string | undefined {
-  if (step.type === "technology-guide") {
-    const tech = getTechnologyById(step.refId);
-    return tech ? `/technologies/${tech.slug}` : undefined;
-  }
-  if (step.type === "course") {
-    const course = getCourseBySlug(step.refId);
-    return course ? `/courses/${course.slug}` : undefined;
-  }
-  if (step.type === "project") {
-    const project = getProjectBySlug(step.refId);
-    return project ? `/projects/${project.slug}` : undefined;
-  }
-  return undefined;
-}
-
-const STEP_TYPE_LABEL: Record<PathStep["type"], string> = {
-  "technology-guide": "Guide",
-  course: "Course",
-  practice: "Practice",
-  project: "Project",
-  assessment: "Assessment",
-};
 
 export default async function RoadmapDetailPage({
   params,
@@ -97,41 +67,11 @@ export default async function RoadmapDetailPage({
         ))}
       </div>
 
+      <RoadmapStartControls path={path} />
+
       <section className="mt-10">
         <h2 className="text-lg font-semibold">Steps</h2>
-        <ol className="mt-4 flex flex-col gap-3">
-          {path.steps.map((step, i) => {
-            const href = stepHref(step);
-            const content = (
-              <>
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-(--color-brand-contrast) text-xs font-semibold text-(--color-brand-strong)">
-                  {i + 1}
-                </span>
-                <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-medium">{step.title}</span>
-                    <Badge tone="neutral">{STEP_TYPE_LABEL[step.type]}</Badge>
-                    {!step.required && <Badge tone="accent">Optional</Badge>}
-                  </div>
-                </div>
-              </>
-            );
-            return (
-              <li
-                key={step.id}
-                className="flex items-center gap-3 rounded-xl border border-(--color-border) bg-(--color-surface) p-4"
-              >
-                {href ? (
-                  <Link href={href} className="flex flex-1 items-center gap-3 hover:opacity-80">
-                    {content}
-                  </Link>
-                ) : (
-                  content
-                )}
-              </li>
-            );
-          })}
-        </ol>
+        <RoadmapStepList path={path} />
       </section>
 
       {path.milestones.length > 0 && (

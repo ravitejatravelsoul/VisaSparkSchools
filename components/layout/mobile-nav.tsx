@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { navLinks } from "@/lib/site-config";
+import { AccountNav } from "@/components/auth/account-nav";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -110,6 +111,9 @@ export function MobileNav() {
                 </li>
               </ul>
             </nav>
+            <div className="mt-4 border-t border-(--color-border) pt-4">
+              <AccountNav />
+            </div>
           </div>
         </div>
       )}

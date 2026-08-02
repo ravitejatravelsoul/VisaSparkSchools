@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { getProjectBySlug, getLessonById, allTracks, allProjects } from "@/lib/content/registry";
+import { ProjectMilestoneChecklist } from "@/components/project/project-milestone-checklist";
 
 type Params = Promise<{ projectSlug: string }>;
 
@@ -76,24 +77,7 @@ export default async function ProjectDetailPage({ params }: { params: Params }) 
 
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-semibold">Milestones</h2>
-        <div className="flex flex-col gap-4">
-          {project.milestones.map((milestone, i) => (
-            <div
-              key={milestone.id}
-              className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4"
-            >
-              <p className="font-semibold">
-                {i + 1}. {milestone.title}
-              </p>
-              <p className="mt-1 text-sm text-(--color-ink-muted)">{milestone.description}</p>
-              <ul className="mt-2 ml-5 list-disc space-y-1 text-sm">
-                {milestone.checklist.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        <ProjectMilestoneChecklist project={project} />
       </section>
 
       {project.references.length > 0 && (

@@ -60,14 +60,32 @@ describe("mergeProgress (guest -> account merge)", () => {
     expect(merged.reviewQueue["lesson-a"].dueAt).toBe("2026-02-01T00:00:00.000Z");
   });
 
-  it("prefers local notes when both sides have a note for the same lesson", () => {
+  it("keeps the more recently edited note when both sides wrote the same lesson identically", () => {
     const local = createEmptyProgress();
-    local.notes["lesson-a"] = "local note";
+    local.notes["lesson-a"] = { text: "same note", updatedAt: "2026-01-01T00:00:00.000Z" };
     const remote = createEmptyProgress();
-    remote.notes["lesson-a"] = "remote note";
+    remote.notes["lesson-a"] = { text: "same note", updatedAt: "2026-01-02T00:00:00.000Z" };
 
     const merged = mergeProgress(local, remote);
-    expect(merged.notes["lesson-a"]).toBe("local note");
+    expect(merged.notes["lesson-a"]).toEqual({
+      text: "same note",
+      updatedAt: "2026-01-02T00:00:00.000Z",
+    });
+    expect(merged.notes["lesson-a"].conflict).toBeUndefined();
+  });
+
+  it("never silently discards a note: a genuine conflict keeps the newer text but preserves the older one", () => {
+    const local = createEmptyProgress();
+    local.notes["lesson-a"] = { text: "local note", updatedAt: "2026-01-02T00:00:00.000Z" };
+    const remote = createEmptyProgress();
+    remote.notes["lesson-a"] = { text: "remote note", updatedAt: "2026-01-01T00:00:00.000Z" };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.notes["lesson-a"].text).toBe("local note");
+    expect(merged.notes["lesson-a"].conflict).toEqual({
+      text: "remote note",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    });
   });
 
   it("keeps the higher streak between local and remote", () => {
@@ -78,5 +96,124 @@ describe("mergeProgress (guest -> account merge)", () => {
 
     const merged = mergeProgress(local, remote);
     expect(merged.streak.current).toBe(10);
+  });
+
+  it("merges enrollments: earliest enrolledAt, latest lastAccessed wins", () => {
+    const local = createEmptyProgress();
+    local.enrollments["python-fundamentals"] = {
+      enrolledAt: "2026-01-05T00:00:00.000Z",
+      lastAccessedLessonId: "py-lists",
+      lastAccessedAt: "2026-01-10T00:00:00.000Z",
+    };
+    const remote = createEmptyProgress();
+    remote.enrollments["python-fundamentals"] = {
+      enrolledAt: "2026-01-01T00:00:00.000Z",
+      lastAccessedLessonId: "py-variables",
+      lastAccessedAt: "2026-01-03T00:00:00.000Z",
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.enrollments["python-fundamentals"]).toEqual({
+      enrolledAt: "2026-01-01T00:00:00.000Z",
+      lastAccessedLessonId: "py-lists",
+      lastAccessedAt: "2026-01-10T00:00:00.000Z",
+    });
+  });
+
+  it("merges roadmap progress: unions completed steps, keeps earliest start and latest access", () => {
+    const local = createEmptyProgress();
+    local.roadmapProgress["backend-developer"] = {
+      startedAt: "2026-01-05T00:00:00.000Z",
+      lastAccessedAt: "2026-01-10T00:00:00.000Z",
+      completedStepIds: ["step-1"],
+    };
+    const remote = createEmptyProgress();
+    remote.roadmapProgress["backend-developer"] = {
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastAccessedAt: "2026-01-02T00:00:00.000Z",
+      completedStepIds: ["step-2"],
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.roadmapProgress["backend-developer"]).toEqual({
+      startedAt: "2026-01-01T00:00:00.000Z",
+      lastAccessedAt: "2026-01-10T00:00:00.000Z",
+      completedStepIds: expect.arrayContaining(["step-1", "step-2"]),
+    });
+  });
+
+  it("merges activity by id, keeping the earliest occurrence and capping at 50", () => {
+    const local = createEmptyProgress();
+    local.activity = [
+      {
+        id: "lesson-completed:a",
+        type: "lesson-completed",
+        refId: "a",
+        title: "A",
+        at: "2026-01-02T00:00:00.000Z",
+      },
+    ];
+    const remote = createEmptyProgress();
+    remote.activity = [
+      {
+        id: "lesson-completed:a",
+        type: "lesson-completed",
+        refId: "a",
+        title: "A",
+        at: "2026-01-01T00:00:00.000Z",
+      },
+    ];
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.activity).toHaveLength(1);
+    expect(merged.activity[0].at).toBe("2026-01-01T00:00:00.000Z");
+  });
+
+  it("merges profile preferences as a whole using the most recent updatedAt (never stitches fields)", () => {
+    const local = createEmptyProgress();
+    local.profile = {
+      displayName: "Local Name",
+      learningGoal: null,
+      currentRoadmapId: null,
+      timezone: null,
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    const remote = createEmptyProgress();
+    remote.profile = {
+      displayName: "Remote Name",
+      learningGoal: "Get a job",
+      currentRoadmapId: "backend-developer",
+      timezone: "America/Chicago",
+      updatedAt: "2026-01-05T00:00:00.000Z",
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.profile).toEqual(remote.profile);
+  });
+
+  it("never lets an empty auto-created remote profile row outrank real local preferences, even if it's timestamped later", () => {
+    // Reproduces: a guest sets a learning goal at T1, then signs up at T2 >
+    // T1. Supabase's handle_new_user trigger creates an empty profiles row
+    // stamped ~T2. A naive updatedAt comparison would pick that empty row
+    // and silently erase the guest's preference.
+    const local = createEmptyProgress();
+    local.profile = {
+      displayName: null,
+      learningGoal: "Get a job in frontend",
+      currentRoadmapId: null,
+      timezone: null,
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    const remote = createEmptyProgress();
+    remote.profile = {
+      displayName: null,
+      learningGoal: null,
+      currentRoadmapId: null,
+      timezone: null,
+      updatedAt: "2026-01-05T00:00:00.000Z", // newer, but empty
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.profile.learningGoal).toBe("Get a job in frontend");
   });
 });

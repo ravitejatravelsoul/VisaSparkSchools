@@ -34,8 +34,8 @@ learning experience (lessons, runners, exercises, quizzes, search, guest progres
 - Sandboxed **iframe** for HTML/CSS/JS; **Pyodide** (Web Worker) for Python; **sql.js** (Web
   Worker, WebAssembly SQLite) for SQL
 - **Fuse.js** for local, AI-free fuzzy search
-- **Supabase** (Postgres + Auth) — optional, for accounts (progress sync is schema-ready but not
-  yet wired up — see "Known limitations" below)
+- **Supabase** (Postgres + Auth) — optional; when configured, accounts sync guest progress on
+  sign-in and keep syncing afterward (see "Guest mode vs. accounts" below)
 - **Vitest** + **React Testing Library** for unit/integration tests; **Playwright** +
   **@axe-core/playwright** for end-to-end and accessibility tests
 
@@ -78,15 +78,17 @@ exists when it doesn't; see `docs/CONTENT_AUTHORING.md` for exactly how that's e
 ## Guest mode vs. accounts
 
 Every learner starts as a **guest**: progress, exercise attempts, quiz results, bookmarks, notes,
-mastery, and the spaced-review schedule are stored in `localStorage` (see `lib/learning/`). This
-works with zero configuration and zero backend cost.
+mastery, spaced-review schedule, enrollments, roadmap/project progress, and preferences are stored
+in `localStorage` (see `lib/learning/`). This works with zero configuration and zero backend cost.
 
 If you configure Supabase (see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)), learners can create an
-account and sign in. **Progress currently still lives only in `localStorage`, even when signed
-in** — the Supabase migration, RLS policies, and a non-destructive merge algorithm
-(`lib/learning/storage.ts#mergeProgress`, unit-tested) all exist, but no code yet calls it on
-sign-in or reads/writes the Supabase progress tables. Wiring that up is the largest remaining gap
-before accounts are more than an authentication shell — see `PROJECT_STATUS.md`.
+account and sign in — guest progress is automatically merged into that account (non-destructive,
+per-field union/max/latest-wins, `lib/learning/storage.ts#mergeProgress`) once per sign-in, and
+again on a manual retry after a failure. This is **not** a continuous background sync: local
+changes made after signing in are cached to that account's local key immediately and pushed to
+Supabase the next time a sync actually runs. Signing out, or a different account signing in on the
+same device, never surfaces another account's data — see `docs/ARCHITECTURE.md`'s "Learning engine
+and account sync" section for exactly how.
 
 ## The optional AI tutor
 
@@ -97,12 +99,15 @@ guessing. See [`docs/SECURITY.md`](docs/SECURITY.md) for its prompt-injection an
 
 ## Known limitations (beta)
 
-- **Supabase progress sync is not wired up.** Accounts (sign-up/sign-in/reset) work end to end
-  once Supabase is configured, but lesson/exercise/quiz/mastery/review/bookmark/note data is only
-  ever read from and written to `localStorage` — no code currently calls Supabase for any of the
-  `lesson_progress`/`exercise_attempts`/`quiz_attempts`/`skill_mastery`/`review_queue`/`bookmarks`/`notes`
-  tables. The merge algorithm and schema are ready (see `lib/learning/storage.ts#mergeProgress`
-  and `supabase/migrations/0001_init.sql`); the sync integration itself still needs to be built.
+- **The guest-to-account sync lifecycle is unit- and integration-tested against a mocked Supabase
+  client, not execution-tested against a live project** — this beta doesn't provision any cloud
+  services, so the real end-to-end browser flow (sign up, sign in on a second device, observe a
+  merge) has not been run against an actual Postgres instance. `tests/unit/sync-lifecycle.test.ts`
+  and `tests/integration/auth-provider.test.tsx` cover the merge/push/pull logic and the
+  sign-out/multi-account privacy guarantees with a fake client instead.
+- Per-exercise saved code (the editor's "restore my last attempt" convenience) stays a local-only
+  `localStorage` feature — it is not part of the Supabase sync layer, since no requirement was
+  identified for syncing it and doing so would need its own migration and merge rule.
 - Search is keyword/fuzzy (Fuse.js) by design — no vector/embedding search is required for basic
   discovery, per the "search must work without AI" requirement. The AI tutor's retrieval layer
   additionally supports merging in vector scores once an embedding provider is configured, but no
