@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Fuse from "fuse.js";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardBody } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { difficultyTone } from "@/lib/ui/difficulty";
 import type { SearchDocument } from "@/lib/search/types";
+
+const KNOWN_DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
 
 const TYPE_LABELS: Record<SearchDocument["type"], string> = {
   lesson: "Lesson",
@@ -99,28 +104,40 @@ export function SearchClient() {
       </p>
 
       {docs.length > 0 && results.length === 0 && (
-        <p className="mt-8 text-(--color-ink-muted)">
-          No results for &quot;{query}&quot;. Try a different word, or clear the filters above.
-        </p>
+        <EmptyState
+          className="mt-8"
+          title={`No results for "${query}"`}
+          description="Try a different word, or clear the filters above."
+        />
       )}
 
       <ul className="mt-4 flex flex-col gap-3">
-        {results.slice(0, 40).map((doc) => (
-          <li key={`${doc.type}-${doc.id}`}>
-            <Link
-              href={doc.url}
-              className="block rounded-lg border border-(--color-border) bg-(--color-surface) p-4 hover:border-(--color-border-strong)"
-            >
-              <div className="mb-1 flex flex-wrap items-center gap-2">
-                <Badge tone="neutral">{TYPE_LABELS[doc.type]}</Badge>
-                {doc.difficulty && <Badge tone="brand">{doc.difficulty}</Badge>}
-                <span className="text-xs text-(--color-ink-faint)">{doc.trackTitle}</span>
-              </div>
-              <p className="font-medium">{doc.title}</p>
-              <p className="text-sm text-(--color-ink-muted)">{doc.description}</p>
-            </Link>
-          </li>
-        ))}
+        {results.slice(0, 40).map((doc) => {
+          const knownDifficulty = KNOWN_DIFFICULTIES.find((d) => d === doc.difficulty);
+          return (
+            <li key={`${doc.type}-${doc.id}`}>
+              <Link href={doc.url} className="group block">
+                <Card interactive>
+                  <CardBody>
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <Badge tone="neutral">{TYPE_LABELS[doc.type]}</Badge>
+                      {knownDifficulty && (
+                        <Badge tone={difficultyTone(knownDifficulty)} dot>
+                          {knownDifficulty}
+                        </Badge>
+                      )}
+                      <span className="text-xs text-(--color-ink-faint)">{doc.trackTitle}</span>
+                    </div>
+                    <p className="font-medium group-hover:text-(--color-brand-strong)">
+                      {doc.title}
+                    </p>
+                    <p className="text-sm text-(--color-ink-muted)">{doc.description}</p>
+                  </CardBody>
+                </Card>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

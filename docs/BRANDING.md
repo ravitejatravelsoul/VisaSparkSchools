@@ -13,8 +13,8 @@ ever disagree, `lib/site-config.ts` and the files in `public/brand/` are authori
 - **Short name** (for space-constrained UI like a home-screen icon label): VisaSpark.
 - **Tagline:** Learn. Build. Prove.
 - **Positioning statement:** A self-paced learning and practice platform for programming,
-  artificial intelligence, data, and career-ready skills — with hands-on lessons, guided
-  projects, and honest completion certificates.
+  artificial intelligence, data, and career-ready skills — with hands-on lessons, real
+  runnable code, and guided projects.
 
 Do not abbreviate to "VSS" in learner-facing copy — it's undocumented and reads as a typo. It's
 fine internally (e.g. a Slack channel name) but not in the product.
@@ -126,8 +126,9 @@ Per the product brief, the mark and all brand imagery deliberately avoid:
 Plain, direct, technically credible, and honest about beta status and current limitations (see
 "Known limitations" in `PROJECT_STATUS.md` and `README.md`). Never claim accreditation,
 certification authority, learner counts, ratings, or testimonials that don't exist — this rule
-applies to marketing copy exactly as much as it applies to application code; see
-`docs/CERTIFICATES.md` for the specific wording rules around completion certificates.
+applies to marketing copy exactly as much as it applies to application code. Completion
+certificates are not implemented yet (tracked as a future phase); do not reference them in
+learner-facing copy until they ship.
 
 ## Where branding is centralized in code
 

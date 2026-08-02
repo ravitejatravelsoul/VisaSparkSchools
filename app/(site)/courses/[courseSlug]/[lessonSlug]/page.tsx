@@ -11,6 +11,8 @@ import {
 } from "@/lib/content/registry";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { difficultyTone } from "@/lib/ui/difficulty";
 import { Markdown } from "@/components/lesson/markdown";
 import { ExampleBlock } from "@/components/lesson/example-block";
 import { ExercisePanel } from "@/components/lesson/exercise-panel";
@@ -59,15 +61,13 @@ export default async function LessonPage({ params }: { params: Params }) {
   return (
     <Container className="py-8">
       <LessonViewTracker lessonId={lesson.id} />
-      <nav aria-label="Breadcrumb" className="mb-4 text-sm text-(--color-ink-faint)">
-        <Link href="/paths" className="hover:text-(--color-ink)">
-          {track?.title}
-        </Link>{" "}
-        /{" "}
-        <Link href={`/courses/${course.slug}`} className="hover:text-(--color-ink)">
-          {course.title}
-        </Link>
-      </nav>
+      <Breadcrumbs
+        items={[
+          ...(track ? [{ label: track.title, href: "/paths" }] : []),
+          { label: course.title, href: `/courses/${course.slug}` },
+          { label: lesson.title },
+        ]}
+      />
 
       <CourseNavMobile
         courseSlug={course.slug}
@@ -85,9 +85,11 @@ export default async function LessonPage({ params }: { params: Params }) {
         />
 
         <div className="min-w-0 flex-1">
-          <header className="mb-6">
+          <header className="reading-column mb-6">
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge tone="brand">{lesson.difficulty}</Badge>
+              <Badge tone={difficultyTone(lesson.difficulty)} dot>
+                {lesson.difficulty}
+              </Badge>
               <Badge tone="neutral">{lesson.estimatedMinutes} min</Badge>
               <BookmarkButton lessonId={lesson.id} />
             </div>
@@ -130,21 +132,21 @@ export default async function LessonPage({ params }: { params: Params }) {
             )}
           </Section>
 
-          <Section title="Example">
+          <Section title="Example" narrow={false}>
             <ExampleBlock id={`${lesson.id}-example`} example={lesson.example} />
           </Section>
 
           {lesson.editableExample && (
-            <Section title="Try it yourself">
+            <Section title="Try it yourself" narrow={false}>
               <ExampleBlock id={`${lesson.id}-editable`} example={lesson.editableExample} />
             </Section>
           )}
 
-          <Section title="Guided exercise">
+          <Section title="Guided exercise" narrow={false}>
             <ExercisePanel exercise={lesson.guidedExercise} />
           </Section>
 
-          <Section title="Independent exercise">
+          <Section title="Independent exercise" narrow={false}>
             <ExercisePanel exercise={lesson.independentExercise} />
           </Section>
 
@@ -214,9 +216,18 @@ export default async function LessonPage({ params }: { params: Params }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  narrow = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  /** Caps prose sections to a comfortable reading width; code/exercise sections opt out to use the full column. */
+  narrow?: boolean;
+}) {
   return (
-    <section className="mb-8">
+    <section className={`mb-8${narrow ? "reading-column" : ""}`}>
       <h2 className="mb-3 text-lg font-semibold">{title}</h2>
       {children}
     </section>

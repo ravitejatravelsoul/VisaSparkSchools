@@ -19,19 +19,23 @@ test("Learn page renders with correctly spaced dynamic text", async ({ page }) =
 
 test("Learn page links to categories, technologies, courses, and roadmaps", async ({ page }) => {
   await page.goto("/learn");
-  await expect(page.getByRole("link", { name: "Explore categories →" })).toHaveAttribute(
+  // Each entry-point card is itself the link (a larger click target than
+  // just the trailing call-to-action text), so its accessible name is the
+  // whole card's text; match on the call-to-action phrase as a substring.
+  // The trailing arrow is now a decorative (aria-hidden) icon, not text.
+  await expect(page.getByRole("link", { name: "Explore categories" })).toHaveAttribute(
     "href",
     "/categories",
   );
-  await expect(page.getByRole("link", { name: "Search technologies →" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Search technologies" })).toHaveAttribute(
     "href",
     "/technologies",
   );
-  await expect(page.getByRole("link", { name: "Browse courses →" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "Browse courses" })).toHaveAttribute(
     "href",
     "/courses",
   );
-  await expect(page.getByRole("link", { name: "See roadmaps →" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: "See roadmaps" })).toHaveAttribute(
     "href",
     "/roadmaps",
   );

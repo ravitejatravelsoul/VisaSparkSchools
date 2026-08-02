@@ -63,6 +63,8 @@ learning experience (lessons, runners, exercises, quizzes, search, guest progres
 - [`docs/CONTENT_AUTHORING.md`](docs/CONTENT_AUTHORING.md) — how to safely add a technology,
   category, or learning roadmap to the Phase 3 directory
 - [`docs/BRANDING.md`](docs/BRANDING.md) — logo system, brand voice, naming
+- [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — visual design tokens, UI primitives, and
+  interaction conventions
 - [`docs/SECURITY.md`](docs/SECURITY.md) — threat model and safeguards
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — Supabase and Vercel setup, step by step
 - [`PROJECT_STATUS.md`](PROJECT_STATUS.md) — durable, up-to-date implementation checklist

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
+import { PageHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getPublicTechnologies, getPublicCategories } from "@/lib/directory/registry";
 import { TechnologyDirectoryClient } from "@/components/directory/technology-directory-client";
 import { siteConfig } from "@/lib/site-config";
@@ -16,12 +18,10 @@ export default function TechnologiesPage() {
 
   return (
     <Container className="py-10">
-      <h1 className="text-3xl font-bold">Technology directory</h1>
-      <p className="mt-2 max-w-2xl text-(--color-ink-muted)">
-        {technologies.length} technology guides across {categories.length} categories. Every guide
-        honestly shows whether a full course, playground, or project ideas actually exist for it
-        today -- a guide is not the same as a complete course.
-      </p>
+      <PageHeader
+        title="Technology directory"
+        description={`${technologies.length} technology guides across ${categories.length} categories. Every guide honestly shows whether a full course, playground, or project ideas actually exist for it today -- a guide is not the same as a complete course.`}
+      />
 
       <div className="mt-8">
         <Suspense fallback={<DirectorySkeleton count={technologies.length} />}>
@@ -42,19 +42,16 @@ export default function TechnologiesPage() {
 function DirectorySkeleton({ count }: { count: number }) {
   return (
     <div aria-hidden="true">
-      <div className="h-[42px] animate-pulse rounded-lg bg-(--color-canvas)" />
+      <Skeleton className="h-[42px]" />
       <div className="mt-4 hidden gap-3 sm:flex">
         {Array.from({ length: 7 }).map((_, i) => (
-          <div key={i} className="h-9 w-28 animate-pulse rounded-lg bg-(--color-canvas)" />
+          <Skeleton key={i} className="h-9 w-28" />
         ))}
       </div>
-      <div className="mt-4 h-5 w-32 animate-pulse rounded bg-(--color-canvas)" />
+      <Skeleton className="mt-4 h-5 w-32" />
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: Math.min(count, 12) }).map((_, i) => (
-          <div
-            key={i}
-            className="h-[168px] animate-pulse rounded-xl border border-(--color-border) bg-(--color-canvas)"
-          />
+          <Skeleton key={i} className="h-[168px]" />
         ))}
       </div>
     </div>

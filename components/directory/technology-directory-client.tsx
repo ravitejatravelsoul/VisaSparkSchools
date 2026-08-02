@@ -1,12 +1,17 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef, type RefObject } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardBody } from "@/components/ui/card";
+import { CloseIcon, ArrowRightIcon } from "@/components/ui/icons";
 import type { Technology, Category } from "@/lib/directory/types";
 import { getTechnologyAvailability, describeAvailability } from "@/lib/directory/availability";
+import { categoryAccent, accentClasses } from "@/lib/ui/category-accent";
+import { difficultyTone } from "@/lib/ui/difficulty";
+import { useModalA11y } from "@/lib/hooks/use-modal-a11y";
 
 export type SortMode = "name" | "recently-reviewed";
 
@@ -73,6 +78,7 @@ export function TechnologyDirectoryClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const filterTriggerRef = useRef<HTMLButtonElement>(null);
 
   // Filters are derived directly from the URL on every render (not local
   // state kept in sync via an effect) -- this is what makes them naturally
@@ -144,6 +150,7 @@ export function TechnologyDirectoryClient({
           />
         </label>
         <Button
+          ref={filterTriggerRef}
           type="button"
           variant="secondary"
           className="sm:hidden"
@@ -165,6 +172,7 @@ export function TechnologyDirectoryClient({
           onChange={updateFilters}
           onReset={resetFilters}
           onClose={() => setDrawerOpen(false)}
+          triggerRef={filterTriggerRef}
         />
       )}
 
@@ -201,21 +209,29 @@ export function TechnologyDirectoryClient({
 function TechnologyCard({ tech, categories }: { tech: Technology; categories: Category[] }) {
   const availability = getTechnologyAvailability(tech);
   const category = categories.find((c) => c.id === tech.category);
+  const accent = accentClasses(categoryAccent(tech.category));
   return (
-    <Link
-      href={`/technologies/${tech.slug}`}
-      className="flex h-full flex-col rounded-xl border border-(--color-border) bg-(--color-surface) p-4 transition-shadow hover:shadow-[var(--shadow-md)]"
-    >
-      <p className="text-xs font-medium tracking-wide text-(--color-ink-faint) uppercase">
-        {category?.name}
-      </p>
-      <h2 className="mt-1 font-semibold">{tech.name}</h2>
-      <p className="mt-1 flex-1 text-sm text-(--color-ink-muted)">{tech.description}</p>
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {tech.status === "legacy" && <Badge tone="accent">Legacy</Badge>}
-        {tech.beginnerFriendly && <Badge tone="success">Beginner-friendly</Badge>}
-        <Badge tone="neutral">{describeAvailability(availability.status)}</Badge>
-      </div>
+    <Link href={`/technologies/${tech.slug}`} className="group block h-full">
+      <Card interactive className="flex h-full flex-col overflow-hidden">
+        <span aria-hidden="true" className={`block h-1 ${accent.bar}`} />
+        <CardBody className="flex flex-1 flex-col">
+          <p className="text-xs font-medium tracking-wide text-(--color-ink-faint) uppercase">
+            {category?.name}
+          </p>
+          <h2 className="mt-1 font-semibold group-hover:text-(--color-brand-strong)">
+            {tech.name}
+          </h2>
+          <p className="mt-1 flex-1 text-sm text-(--color-ink-muted)">{tech.description}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            <Badge tone={difficultyTone(tech.difficulty)} dot>
+              {tech.difficulty}
+            </Badge>
+            {tech.status === "legacy" && <Badge tone="accent">Legacy</Badge>}
+            {tech.beginnerFriendly && <Badge tone="success">Beginner-friendly</Badge>}
+            <Badge tone="neutral">{describeAvailability(availability.status)}</Badge>
+          </div>
+        </CardBody>
+      </Card>
     </Link>
   );
 }
@@ -318,20 +334,25 @@ function FilterDrawer({
   onChange,
   onReset,
   onClose,
+  triggerRef,
 }: {
   filters: Filters;
   categories: Category[];
   onChange: (next: Partial<Filters>) => void;
   onReset: () => void;
   onClose: () => void;
+  triggerRef: RefObject<HTMLButtonElement | null>;
 }) {
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useModalA11y({
+    open: true,
+    onClose,
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    triggerRef,
+  });
 
   return (
     <div className="fixed inset-0 z-50 sm:hidden">
@@ -342,16 +363,23 @@ function FilterDrawer({
         className="absolute inset-0 bg-black/40"
       />
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Filter technologies"
-        className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-2xl bg-(--color-surface) p-4"
+        className="animate-fade-up absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-2xl bg-(--color-surface) p-4 shadow-[var(--shadow-lg)]"
       >
         <div className="mb-3 flex items-center justify-between">
           <p className="font-semibold">Filters</p>
-          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-            Close
-          </Button>
+          <button
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close filters"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-(--color-border-strong) hover:bg-(--color-surface-sunken)"
+          >
+            <CloseIcon width={16} height={16} />
+          </button>
         </div>
         <div className="flex flex-col gap-3">
           <FilterControls filters={filters} categories={categories} onChange={onChange} />
@@ -361,7 +389,10 @@ function FilterDrawer({
             Reset
           </Button>
           <Button type="button" onClick={onClose} className="flex-1">
-            Show {"→"}
+            <span className="inline-flex items-center gap-1">
+              Show
+              <ArrowRightIcon width={14} height={14} />
+            </span>
           </Button>
         </div>
       </div>

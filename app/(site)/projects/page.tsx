@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { PageHeader, SectionHeader } from "@/components/ui/page-header";
 import { allProjects } from "@/lib/content/registry";
+import { difficultyTone } from "@/lib/ui/difficulty";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -16,17 +18,20 @@ export default function ProjectsPage() {
 
   return (
     <Container className="py-10">
-      <h1 className="text-3xl font-bold">Projects</h1>
-      <p className="mt-2 max-w-2xl text-(--color-ink-muted)">
-        Guided projects build one track&apos;s skills into something real. Capstones combine
-        multiple tracks into a complete application.
-      </p>
+      <PageHeader
+        title="Projects"
+        description="Guided projects build one track's skills into something real. Capstones combine multiple tracks into a complete application."
+      />
 
-      <h2 className="mt-10 mb-4 text-xl font-semibold">Guided projects</h2>
-      <ProjectGrid projects={guided} />
+      <div className="mt-10">
+        <SectionHeader title="Guided projects" />
+        <ProjectGrid projects={guided} />
+      </div>
 
-      <h2 className="mt-10 mb-4 text-xl font-semibold">Capstones</h2>
-      <ProjectGrid projects={capstones} />
+      <div className="mt-10">
+        <SectionHeader title="Capstones" />
+        <ProjectGrid projects={capstones} />
+      </div>
     </Container>
   );
 }
@@ -35,13 +40,17 @@ function ProjectGrid({ projects }: { projects: typeof allProjects }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {projects.map((project) => (
-        <Link key={project.slug} href={`/projects/${project.slug}`}>
-          <Card className="h-full transition-shadow hover:shadow-[var(--shadow-md)]">
+        <Link key={project.slug} href={`/projects/${project.slug}`} className="group">
+          <Card interactive className="h-full">
             <CardBody>
-              <h3 className="mb-2 font-semibold">{project.title}</h3>
+              <h3 className="mb-2 font-semibold group-hover:text-(--color-brand-strong)">
+                {project.title}
+              </h3>
               <p className="mb-3 text-sm text-(--color-ink-muted)">{project.description}</p>
               <div className="flex flex-wrap gap-2">
-                <Badge tone="brand">{project.difficulty}</Badge>
+                <Badge tone={difficultyTone(project.difficulty)} dot>
+                  {project.difficulty}
+                </Badge>
                 <Badge tone="neutral">{project.estimatedHours}h</Badge>
               </div>
             </CardBody>

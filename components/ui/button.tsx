@@ -1,8 +1,8 @@
 import Link from "next/link";
-import type { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode } from "react";
+import type { ButtonHTMLAttributes, AnchorHTMLAttributes, ReactNode, Ref } from "react";
 import { cn } from "@/lib/utils/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
+type Variant = "primary" | "secondary" | "accent" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
@@ -10,6 +10,9 @@ const variantClasses: Record<Variant, string> = {
     "bg-(--color-brand) text-(--color-brand-contrast) hover:brightness-110 border border-transparent",
   secondary:
     "bg-(--color-surface) text-(--color-ink) border border-(--color-border-strong) hover:bg-(--color-canvas)",
+  /** The "spark" accent -- for a meaningful action that isn't the page's primary one (e.g. "Try the playground" next to "Start learning"). */
+  accent:
+    "bg-(--color-accent) text-(--color-accent-contrast) hover:brightness-110 border border-transparent",
   ghost: "bg-transparent text-(--color-ink) border border-transparent hover:bg-(--color-surface)",
   danger: "bg-(--color-danger) text-white border border-transparent hover:brightness-110",
 };
@@ -21,7 +24,7 @@ const sizeClasses: Record<Size, string> = {
 };
 
 const base =
-  "inline-flex items-center justify-center rounded-lg font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none";
+  "inline-flex items-center justify-center rounded-lg font-medium transition-[color,background-color,border-color,transform] duration-[var(--motion-fast)] active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100";
 
 interface CommonProps {
   variant?: Variant;
@@ -35,10 +38,15 @@ export function Button({
   size = "md",
   className,
   children,
+  ref,
   ...props
-}: CommonProps & ButtonHTMLAttributes<HTMLButtonElement>) {
+}: CommonProps & ButtonHTMLAttributes<HTMLButtonElement> & { ref?: Ref<HTMLButtonElement> }) {
   return (
-    <button className={cn(base, variantClasses[variant], sizeClasses[size], className)} {...props}>
+    <button
+      ref={ref}
+      className={cn(base, variantClasses[variant], sizeClasses[size], className)}
+      {...props}
+    >
       {children}
     </button>
   );

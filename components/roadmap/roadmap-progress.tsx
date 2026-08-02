@@ -12,7 +12,11 @@ import { getCourseBySlug, getProjectBySlug } from "@/lib/content/registry";
 import { getTechnologyById } from "@/lib/directory/registry";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { StepMarker } from "@/components/ui/step-marker";
 import type { LearningPath, PathStep } from "@/lib/directory/types";
+import type { CSSProperties } from "react";
 
 /**
  * Resolved client-side (not passed in as a prop) because a function isn't
@@ -57,12 +61,20 @@ export function RoadmapStartControls({ path }: { path: LearningPath }) {
   const percent = getRoadmapCompletionPercent(path, state);
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-3">
+    <div className="mt-4">
       {started ? (
-        <>
-          <span className="text-sm text-(--color-ink-muted)">
-            {percent}% of required steps complete
-          </span>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="mb-1.5 text-sm text-(--color-ink-muted)">
+              {percent}% of required steps complete
+            </p>
+            <ProgressBar
+              value={percent}
+              label={`${path.name} completion`}
+              tone={percent >= 100 ? "success" : "brand"}
+              className="max-w-xs"
+            />
+          </div>
           {!isCurrent && (
             <Button
               type="button"
@@ -74,7 +86,7 @@ export function RoadmapStartControls({ path }: { path: LearningPath }) {
             </Button>
           )}
           {isCurrent && <Badge tone="brand">Your current roadmap</Badge>}
-        </>
+        </div>
       ) : (
         <Button
           type="button"
@@ -95,51 +107,51 @@ export function RoadmapStepList({ path }: { path: LearningPath }) {
   const toggleRoadmapStep = useProgressStore((s) => s.toggleRoadmapStep);
 
   return (
-    <ol className="mt-4 flex flex-col gap-3">
+    <ol className="path-track mt-4 flex flex-col gap-3">
+      <span
+        className="path-track-line"
+        style={{ "--track-line-left": "1.9375rem" } as CSSProperties}
+        aria-hidden="true"
+      />
       {path.steps.map((step, i) => {
         const status = resolveStepStatus(step, path.slug, state);
         const href = stepHref(step);
         const selfReported = SELF_REPORTED_STEP_TYPES.includes(step.type);
 
         return (
-          <li
-            key={step.id}
-            className="flex items-center gap-3 rounded-xl border border-(--color-border) bg-(--color-surface) p-4"
-          >
-            <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-              style={{
-                background: status === "completed" ? "var(--color-brand-contrast)" : undefined,
-                color: status === "completed" ? "var(--color-brand-strong)" : undefined,
-              }}
-            >
-              {status === "completed" ? "✓" : i + 1}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                {href ? (
-                  <Link href={href} className="font-medium hover:underline">
-                    {step.title}
-                  </Link>
-                ) : (
-                  <span className="font-medium">{step.title}</span>
+          <li key={step.id}>
+            <Card className="relative">
+              <div className="flex items-center gap-3 p-4">
+                <StepMarker status={status} index={i + 1} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {href ? (
+                      <Link href={href} className="font-medium hover:underline">
+                        {step.title}
+                      </Link>
+                    ) : (
+                      <span className="font-medium">{step.title}</span>
+                    )}
+                    <Badge tone="neutral">{STEP_TYPE_LABEL[step.type]}</Badge>
+                    {!step.required && <Badge tone="accent">Optional</Badge>}
+                    <Badge tone={STATUS_TONE[status]} dot>
+                      {STATUS_LABEL[status]}
+                    </Badge>
+                  </div>
+                </div>
+                {selfReported && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    aria-pressed={status === "completed"}
+                    onClick={() => toggleRoadmapStep(path.slug, step.id)}
+                  >
+                    {status === "completed" ? "Mark incomplete" : "Mark complete"}
+                  </Button>
                 )}
-                <Badge tone="neutral">{STEP_TYPE_LABEL[step.type]}</Badge>
-                {!step.required && <Badge tone="accent">Optional</Badge>}
-                <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
               </div>
-            </div>
-            {selfReported && (
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                aria-pressed={status === "completed"}
-                onClick={() => toggleRoadmapStep(path.slug, step.id)}
-              >
-                {status === "completed" ? "Mark incomplete" : "Mark complete"}
-              </Button>
-            )}
+            </Card>
           </li>
         );
       })}

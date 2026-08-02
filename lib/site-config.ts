@@ -8,7 +8,7 @@ export const siteConfig = {
   shortName: "VisaSpark",
   tagline: "Learn. Build. Prove.",
   description:
-    "VisaSparkSchools is a self-paced learning and practice platform for programming, artificial intelligence, data, and career-ready skills -- with hands-on lessons, guided projects, and honest completion certificates.",
+    "VisaSparkSchools is a self-paced learning and practice platform for programming, artificial intelligence, data, and career-ready skills -- with hands-on lessons, real runnable code, and guided projects.",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
   developerName: "Raviteja Vemulapelli",
   locale: "en-US",

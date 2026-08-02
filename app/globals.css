@@ -1,15 +1,25 @@
 @import "tailwindcss";
 
 /*
- * VisaSparkSchools design tokens.
- * Light is the default; dark is opted into via `prefers-color-scheme`
- * and can be forced either way with `data-theme="light"|"dark"` on <html>,
- * which always wins over the media query (see ThemeProvider).
+ * VisaSparkSchools design tokens -- "spark & pathway" visual system.
+ * See docs/DESIGN_SYSTEM.md for the full rationale, usage rules, and a
+ * worked example of every token below. Light is the default; dark is
+ * opted into via `prefers-color-scheme` and can be forced either way with
+ * `data-theme="light"|"dark"` on <html>, which always wins over the media
+ * query (see ThemeProvider).
+ *
+ * Brand color stays the deep evergreen from Phase 1-4 (trust, growth,
+ * "reading room" calm); the warm amber "spark" accent marks anything that
+ * represents forward motion -- a CTA that isn't the primary action, a
+ * streak, a highlighted step on a path. Eight muted category-accent hues
+ * (below) let course/technology cards carry a whisper of color without
+ * ever becoming a colored card background -- see lib/ui/category-accent.ts.
  */
 :root {
   --color-canvas: #fbfaf8;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
+  --color-surface-sunken: #f4f2ec;
   --color-border: #e4e1da;
   --color-border-strong: #cfcabd;
   --color-ink: #201d17;
@@ -19,27 +29,61 @@
   --color-brand: #14532d;
   --color-brand-strong: #0d3d21;
   --color-brand-contrast: #ecfdf3;
+  --color-brand-soft: #e4f3e9;
   --color-accent: #b45309;
+  --color-accent-strong: #92400e;
   --color-accent-contrast: #fff7ec;
 
   --color-success: #157347;
+  --color-success-contrast: #ecfdf3;
   --color-danger: #b3261e;
+  --color-danger-contrast: #fef2f1;
   --color-warning: #92600a;
+  --color-warning-contrast: #fef8ec;
   --color-info: #1d4ed8;
+  --color-info-contrast: #eef3ff;
 
   --color-code-bg: #f3f1ea;
   --color-focus-ring: #b45309;
 
+  /* Category accents: a small fixed palette of muted hues used only as
+     small accents (an icon chip, a left border, a badge) -- never a full
+     card background. Assigned deterministically per category, see
+     lib/ui/category-accent.ts. */
+  --accent-blue: #2563eb;
+  --accent-blue-contrast: #eaf1fe;
+  --accent-purple: #7c3aed;
+  --accent-purple-contrast: #f3ecfe;
+  --accent-teal: #0d9488;
+  --accent-teal-contrast: #e6f6f4;
+  --accent-rose: #be123c;
+  --accent-rose-contrast: #fdecf0;
+  --accent-indigo: #4338ca;
+  --accent-indigo-contrast: #ecebfc;
+  --accent-amber: #b45309;
+  --accent-amber-contrast: #fff2e0;
+  --accent-cyan: #0e7490;
+  --accent-cyan-contrast: #e3f4f8;
+  --accent-lime: #4d7c0f;
+  --accent-lime-contrast: #eef6de;
+
   --shadow-sm: 0 1px 2px rgba(32, 29, 23, 0.06);
   --shadow-md: 0 4px 16px rgba(32, 29, 23, 0.08);
   --shadow-lg: 0 12px 32px rgba(32, 29, 23, 0.12);
+
+  /* Motion: fast for hover/press feedback, base for menus/sheets/section
+     reveals. Never used for anything that gates reading or navigation. */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-canvas: #14130f;
     --color-surface: #1c1a15;
-    --color-surface-raised: #232019;
+    --color-surface-raised: #211e18;
+    --color-surface-sunken: #100f0c;
     --color-border: #35322a;
     --color-border-strong: #4a4638;
     --color-ink: #f2efe8;
@@ -49,16 +93,39 @@
     --color-brand: #4ade80;
     --color-brand-strong: #86efac;
     --color-brand-contrast: #08240f;
+    --color-brand-soft: #132a1a;
     --color-accent: #fb923c;
+    --color-accent-strong: #fdba74;
     --color-accent-contrast: #2a1503;
 
     --color-success: #4ade80;
+    --color-success-contrast: #0e2417;
     --color-danger: #f87171;
+    --color-danger-contrast: #2a1413;
     --color-warning: #fbbf24;
+    --color-warning-contrast: #2a2107;
     --color-info: #60a5fa;
+    --color-info-contrast: #101c33;
 
     --color-code-bg: #232019;
     --color-focus-ring: #fb923c;
+
+    --accent-blue: #60a5fa;
+    --accent-blue-contrast: #101c33;
+    --accent-purple: #a78bfa;
+    --accent-purple-contrast: #1e1733;
+    --accent-teal: #2dd4bf;
+    --accent-teal-contrast: #0b2523;
+    --accent-rose: #fb7185;
+    --accent-rose-contrast: #2a1219;
+    --accent-indigo: #818cf8;
+    --accent-indigo-contrast: #1a1a35;
+    --accent-amber: #fb923c;
+    --accent-amber-contrast: #2a1806;
+    --accent-cyan: #22d3ee;
+    --accent-cyan-contrast: #082226;
+    --accent-lime: #a3e635;
+    --accent-lime-contrast: #1c2408;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
@@ -71,6 +138,7 @@
   --color-canvas: #fbfaf8;
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
+  --color-surface-sunken: #f4f2ec;
   --color-border: #e4e1da;
   --color-border-strong: #cfcabd;
   --color-ink: #201d17;
@@ -79,21 +147,44 @@
   --color-brand: #14532d;
   --color-brand-strong: #0d3d21;
   --color-brand-contrast: #ecfdf3;
+  --color-brand-soft: #e4f3e9;
   --color-accent: #b45309;
+  --color-accent-strong: #92400e;
   --color-accent-contrast: #fff7ec;
   --color-success: #157347;
+  --color-success-contrast: #ecfdf3;
   --color-danger: #b3261e;
+  --color-danger-contrast: #fef2f1;
   --color-warning: #92600a;
+  --color-warning-contrast: #fef8ec;
   --color-info: #1d4ed8;
+  --color-info-contrast: #eef3ff;
   --color-code-bg: #f3f1ea;
   --color-focus-ring: #b45309;
+  --accent-blue: #2563eb;
+  --accent-blue-contrast: #eaf1fe;
+  --accent-purple: #7c3aed;
+  --accent-purple-contrast: #f3ecfe;
+  --accent-teal: #0d9488;
+  --accent-teal-contrast: #e6f6f4;
+  --accent-rose: #be123c;
+  --accent-rose-contrast: #fdecf0;
+  --accent-indigo: #4338ca;
+  --accent-indigo-contrast: #ecebfc;
+  --accent-amber: #b45309;
+  --accent-amber-contrast: #fff2e0;
+  --accent-cyan: #0e7490;
+  --accent-cyan-contrast: #e3f4f8;
+  --accent-lime: #4d7c0f;
+  --accent-lime-contrast: #eef6de;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
   --color-canvas: #14130f;
   --color-surface: #1c1a15;
-  --color-surface-raised: #232019;
+  --color-surface-raised: #211e18;
+  --color-surface-sunken: #100f0c;
   --color-border: #35322a;
   --color-border-strong: #4a4638;
   --color-ink: #f2efe8;
@@ -102,20 +193,43 @@
   --color-brand: #4ade80;
   --color-brand-strong: #86efac;
   --color-brand-contrast: #08240f;
+  --color-brand-soft: #132a1a;
   --color-accent: #fb923c;
+  --color-accent-strong: #fdba74;
   --color-accent-contrast: #2a1503;
   --color-success: #4ade80;
+  --color-success-contrast: #0e2417;
   --color-danger: #f87171;
+  --color-danger-contrast: #2a1413;
   --color-warning: #fbbf24;
+  --color-warning-contrast: #2a2107;
   --color-info: #60a5fa;
+  --color-info-contrast: #101c33;
   --color-code-bg: #232019;
   --color-focus-ring: #fb923c;
+  --accent-blue: #60a5fa;
+  --accent-blue-contrast: #101c33;
+  --accent-purple: #a78bfa;
+  --accent-purple-contrast: #1e1733;
+  --accent-teal: #2dd4bf;
+  --accent-teal-contrast: #0b2523;
+  --accent-rose: #fb7185;
+  --accent-rose-contrast: #2a1219;
+  --accent-indigo: #818cf8;
+  --accent-indigo-contrast: #1a1a35;
+  --accent-amber: #fb923c;
+  --accent-amber-contrast: #2a1806;
+  --accent-cyan: #22d3ee;
+  --accent-cyan-contrast: #082226;
+  --accent-lime: #a3e635;
+  --accent-lime-contrast: #1c2408;
 }
 
 @theme inline {
   --color-canvas: var(--color-canvas);
   --color-surface: var(--color-surface);
   --color-surface-raised: var(--color-surface-raised);
+  --color-surface-sunken: var(--color-surface-sunken);
   --color-border: var(--color-border);
   --color-border-strong: var(--color-border-strong);
   --color-ink: var(--color-ink);
@@ -124,12 +238,18 @@
   --color-brand: var(--color-brand);
   --color-brand-strong: var(--color-brand-strong);
   --color-brand-contrast: var(--color-brand-contrast);
+  --color-brand-soft: var(--color-brand-soft);
   --color-accent: var(--color-accent);
+  --color-accent-strong: var(--color-accent-strong);
   --color-accent-contrast: var(--color-accent-contrast);
   --color-success: var(--color-success);
+  --color-success-contrast: var(--color-success-contrast);
   --color-danger: var(--color-danger);
+  --color-danger-contrast: var(--color-danger-contrast);
   --color-warning: var(--color-warning);
+  --color-warning-contrast: var(--color-warning-contrast);
   --color-info: var(--color-info);
+  --color-info-contrast: var(--color-info-contrast);
   --color-code-bg: var(--color-code-bg);
   --font-sans: var(--font-app-sans);
   --font-mono: var(--font-app-mono);
@@ -194,4 +314,75 @@ samp {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/*
+ * Typography: headings use a tighter tracking + heavier weight than body
+ * text so they read as distinctly "editorial" against calm, generous body
+ * copy -- see docs/DESIGN_SYSTEM.md's typography section for the full
+ * scale. This is a base rule, not a utility class, so every heading gets
+ * it without every page having to opt in.
+ */
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.015em;
+  font-weight: 700;
+}
+
+/* A comfortable, book-like reading measure for lesson/article prose. */
+.reading-column {
+  max-width: 42rem;
+}
+
+/*
+ * One small, purposeful entrance transition -- a short fade+rise used for
+ * section reveals (homepage sections, dashboard cards mounting). Never
+ * used for anything that gates reading, navigation, or an action; always
+ * disabled under reduced motion via the rule below.
+ */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up var(--motion-base) var(--motion-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+}
+
+/*
+ * Pathway motif: a thin connecting line drawn behind a vertical list of
+ * step markers (roadmap steps, course lesson nav). Applied to the marker
+ * column via `.path-track`, with `.path-track > * + *::before` drawing the
+ * segment above each step after the first -- pure CSS, no images, and it
+ * degrades to plain spacing if a step list ever renders as a single item.
+ */
+.path-track {
+  position: relative;
+}
+
+.path-track-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  /* Defaults to a centered line; pass an inline `--track-line-left` (e.g.
+     half the marker width) when markers sit in a left-hand column instead
+     of being centered in the track. */
+  left: var(--track-line-left, 50%);
+  width: 2px;
+  background: var(--color-border-strong);
+  transform: translateX(-50%);
 }

@@ -1,12 +1,18 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StepMarker } from "@/components/ui/step-marker";
+import { ArrowRightIcon } from "@/components/ui/icons";
+import { trackAccent } from "@/lib/ui/track-accent";
+import { accentClasses } from "@/lib/ui/category-accent";
 import { siteConfig } from "@/lib/site-config";
 import { allTracks, getCoursesForTrack, getLessonsForCourse } from "@/lib/content/registry";
 import { JsonLd } from "@/components/seo/json-ld";
+import { cn } from "@/lib/utils/cn";
 
 export const metadata: Metadata = {
   // `absolute` opts out of the root layout's `%s | {name}` title template --
@@ -52,8 +58,8 @@ export default function HomePage() {
         }}
       />
       <section className="border-b border-(--color-border) bg-(--color-surface)">
-        <Container className="grid gap-8 py-16 lg:grid-cols-[3fr_2fr] lg:items-center lg:py-20">
-          <div>
+        <Container className="grid gap-10 py-12 lg:grid-cols-[3fr_2fr] lg:items-center lg:py-14">
+          <div className="animate-fade-up">
             <Badge tone="brand">Public beta</Badge>
             <h1 className="mt-4 text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">
               {siteConfig.tagline}
@@ -74,18 +80,22 @@ export default function HomePage() {
               to sync it.
             </p>
           </div>
-          <Card>
+
+          <Card className="animate-fade-up">
             <CardBody>
-              <p className="mb-3 text-sm font-semibold tracking-wide text-(--color-ink-faint) uppercase">
+              <p className="mb-4 text-sm font-semibold tracking-wide text-(--color-ink-faint) uppercase">
                 The path
               </p>
-              <ol className="flex flex-col gap-2 text-sm">
+              <ol className="path-track flex flex-col gap-4">
+                <span
+                  className="path-track-line"
+                  style={{ "--track-line-left": "0.875rem" } as CSSProperties}
+                  aria-hidden="true"
+                />
                 {allTracks.map((track, i) => (
-                  <li key={track.slug} className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-(--color-brand-contrast) text-xs font-semibold text-(--color-brand-strong)">
-                      {i + 1}
-                    </span>
-                    <span>{track.title}</span>
+                  <li key={track.slug} className="relative flex items-center gap-3">
+                    <StepMarker status="not-started" index={i + 1} />
+                    <span className="text-sm font-medium">{track.title}</span>
                   </li>
                 ))}
               </ol>
@@ -94,32 +104,38 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section className="py-16">
+      <section className="py-14">
         <Container>
           <h2 className="mb-8 text-2xl font-bold">How a lesson works</h2>
           <div className="grid gap-6 sm:grid-cols-3">
             {steps.map((step, i) => (
-              <div key={step.title}>
-                <p className="mb-2 text-sm font-semibold text-(--color-brand-strong)">
-                  Step {i + 1}
-                </p>
-                <h3 className="mb-1 font-semibold">{step.title}</h3>
-                <p className="text-sm text-(--color-ink-muted)">{step.body}</p>
+              <div key={step.title} className="flex gap-4">
+                <span
+                  aria-hidden="true"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-(--color-brand-contrast) text-sm font-semibold text-(--color-brand-strong)"
+                >
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 className="mb-1 font-semibold">{step.title}</h3>
+                  <p className="text-sm text-(--color-ink-muted)">{step.body}</p>
+                </div>
               </div>
             ))}
           </div>
         </Container>
       </section>
 
-      <section className="border-t border-(--color-border) bg-(--color-surface) py-16">
+      <section className="border-t border-(--color-border) bg-(--color-surface) py-14">
         <Container>
           <div className="mb-8 flex items-end justify-between">
             <h2 className="text-2xl font-bold">Learning paths</h2>
             <Link
               href="/paths"
-              className="text-sm font-medium text-(--color-brand-strong) hover:underline"
+              className="inline-flex items-center gap-1 text-sm font-medium text-(--color-brand-strong) hover:underline"
             >
-              View all paths →
+              View all paths
+              <ArrowRightIcon width={14} height={14} />
             </Link>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -129,11 +145,15 @@ export default function HomePage() {
                 (sum, c) => sum + getLessonsForCourse(c.slug).length,
                 0,
               );
+              const accent = accentClasses(trackAccent(track.slug));
               return (
-                <Link key={track.slug} href={`/paths/${track.slug}`}>
-                  <Card className="h-full transition-shadow hover:shadow-[var(--shadow-md)]">
+                <Link key={track.slug} href={`/paths/${track.slug}`} className="group">
+                  <Card interactive className="h-full overflow-hidden">
+                    <span aria-hidden="true" className={cn("block h-1", accent.bar)} />
                     <CardBody>
-                      <h3 className="mb-2 font-semibold">{track.title}</h3>
+                      <h3 className="mb-2 font-semibold group-hover:text-(--color-brand-strong)">
+                        {track.title}
+                      </h3>
                       <p className="mb-3 text-sm text-(--color-ink-muted)">{track.description}</p>
                       <Badge tone="neutral">{lessonCount} lessons</Badge>
                     </CardBody>
@@ -145,7 +165,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      <section className="py-16">
+      <section className="py-14">
         <Container className="max-w-3xl text-center">
           <h2 className="text-2xl font-bold">Built for people who learn by doing</h2>
           <p className="mt-4 text-(--color-ink-muted)">

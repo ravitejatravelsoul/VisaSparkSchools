@@ -112,7 +112,8 @@ test("the dashboard's daily goal reflects real minutes from lessons completed to
 
   // found-how-computers-run-code has estimatedMinutes: 20.
   await page.goto("/dashboard");
-  await expect(page.getByText("20 of 20 minutes today — goal met!")).toBeVisible();
+  await expect(page.getByText("20 of 20 minutes today")).toBeVisible();
+  await expect(page.getByText("Goal met", { exact: true })).toBeVisible();
 });
 
 test("profile preferences (display name, learning goal) save and survive a refresh", async ({
@@ -122,7 +123,7 @@ test("profile preferences (display name, learning goal) save and survive a refre
   await page.getByLabel("Display name").fill("Ravi");
   await page.getByLabel("Learning goal").fill("Get a frontend job");
   await page.getByRole("button", { name: "Save profile" }).click();
-  await expect(page.getByText("Saved.")).toBeVisible();
+  await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 
   await page.reload();
   await expect(page.getByLabel("Display name")).toHaveValue("Ravi");

@@ -19,6 +19,10 @@ import {
 } from "@/lib/learning/completion";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert } from "@/components/ui/alert";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { SectionHeader } from "@/components/ui/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LinkButton, Button } from "@/components/ui/button";
 import type { ActivityEvent } from "@/lib/learning/types";
 
@@ -89,25 +93,45 @@ export function DashboardClient() {
   return (
     <div className="flex flex-col gap-8">
       {featureFlags.supabaseEnabled && userId && (
-        <Card>
-          <CardBody className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-xs font-medium tracking-wide text-(--color-ink-faint) uppercase">
-                Sync status
-              </p>
-              <p className="mt-1 text-sm">
-                {syncStatus === "syncing" && "Syncing your progress…"}
-                {syncStatus === "synced" &&
-                  `Synced${lastSyncedAt ? ` at ${new Date(lastSyncedAt).toLocaleTimeString()}` : ""}`}
-                {syncStatus === "error" && `Sync failed: ${lastSyncError ?? "unknown error"}`}
-                {syncStatus === "idle" && "Not synced yet this session"}
-              </p>
-            </div>
+        <Alert
+          tone={syncStatus === "error" ? "danger" : syncStatus === "synced" ? "success" : "neutral"}
+          title="Sync status"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span>
+              {syncStatus === "syncing" && "Syncing your progress…"}
+              {syncStatus === "synced" &&
+                `Synced${lastSyncedAt ? ` at ${new Date(lastSyncedAt).toLocaleTimeString()}` : ""}`}
+              {syncStatus === "error" && `Sync failed: ${lastSyncError ?? "unknown error"}`}
+              {syncStatus === "idle" && "Not synced yet this session"}
+            </span>
             {syncStatus === "error" && (
               <Button type="button" variant="secondary" size="sm" onClick={() => retrySync(userId)}>
                 Retry sync
               </Button>
             )}
+          </div>
+        </Alert>
+      )}
+
+      {recommendation && (
+        <Card className="border-(--color-brand) bg-(--color-brand-contrast)">
+          <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-medium tracking-wide text-(--color-brand-strong) uppercase">
+                {recommendation.reason}
+              </p>
+              <h2 className="text-lg font-semibold">{recommendation.lesson.title}</h2>
+              <p className="text-sm text-(--color-ink-muted)">
+                {recommendation.lesson.description}
+              </p>
+            </div>
+            <LinkButton
+              size="lg"
+              href={`/courses/${recommendation.lesson.courseSlug}/${recommendation.lesson.slug}`}
+            >
+              Continue
+            </LinkButton>
           </CardBody>
         </Card>
       )}
@@ -121,30 +145,9 @@ export function DashboardClient() {
         <StatCard label="Due reviews" value={String(dueReviews.length)} />
       </section>
 
-      {recommendation && (
-        <Card>
-          <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-medium tracking-wide text-(--color-ink-faint) uppercase">
-                {recommendation.reason}
-              </p>
-              <h2 className="font-semibold">{recommendation.lesson.title}</h2>
-              <p className="text-sm text-(--color-ink-muted)">
-                {recommendation.lesson.description}
-              </p>
-            </div>
-            <LinkButton
-              href={`/courses/${recommendation.lesson.courseSlug}/${recommendation.lesson.slug}`}
-            >
-              Continue
-            </LinkButton>
-          </CardBody>
-        </Card>
-      )}
-
       {currentRoadmap && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Your current roadmap</h2>
+          <SectionHeader title="Your current roadmap" />
           <Card>
             <CardBody>
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -170,7 +173,7 @@ export function DashboardClient() {
 
       {enrolledCourses.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Your courses</h2>
+          <SectionHeader title="Your courses" />
           <ul className="flex flex-col gap-2">
             {enrolledCourses.map((course) => {
               const percent = getCourseCompletionPercent(course.slug, state);
@@ -187,15 +190,18 @@ export function DashboardClient() {
                     >
                       {course.title}
                     </Link>
-                    <div className="mt-1.5 h-1.5 w-full max-w-xs rounded-full bg-(--color-canvas)">
-                      <div
-                        className="h-1.5 rounded-full bg-(--color-brand)"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
+                    <ProgressBar
+                      value={percent}
+                      label={`${course.title} completion`}
+                      size="sm"
+                      tone={complete ? "success" : "brand"}
+                      className="mt-1.5 max-w-xs"
+                    />
                   </div>
                   {complete ? (
-                    <Badge tone="brand">Completed</Badge>
+                    <Badge tone="success" dot>
+                      Completed
+                    </Badge>
                   ) : (
                     <span className="shrink-0 text-xs text-(--color-ink-faint)">{percent}%</span>
                   )}
@@ -208,7 +214,7 @@ export function DashboardClient() {
 
       {projectsInProgress.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Your projects</h2>
+          <SectionHeader title="Your projects" />
           <ul className="flex flex-col gap-2">
             {projectsInProgress.map((project) => {
               const percent = getProjectCompletionPercent(project.slug, state);
@@ -232,7 +238,7 @@ export function DashboardClient() {
       )}
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Progress by skill</h2>
+        <SectionHeader title="Progress by skill" />
         {skillEntries.length === 0 ? (
           <p className="text-sm text-(--color-ink-faint)">
             Complete a lesson or exercise to start tracking mastery.
@@ -245,19 +251,7 @@ export function DashboardClient() {
                   <span>{skill}</span>
                   <span className="text-(--color-ink-faint)">{score}/100</span>
                 </div>
-                <div
-                  className="h-2 w-full rounded-full bg-(--color-canvas)"
-                  role="progressbar"
-                  aria-valuenow={score}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`${skill} mastery`}
-                >
-                  <div
-                    className="h-2 rounded-full bg-(--color-brand)"
-                    style={{ width: `${score}%` }}
-                  />
-                </div>
+                <ProgressBar value={score} label={`${skill} mastery`} />
               </div>
             ))}
           </div>
@@ -265,7 +259,7 @@ export function DashboardClient() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Due for review</h2>
+        <SectionHeader title="Due for review" />
         {dueReviews.length === 0 ? (
           <p className="text-sm text-(--color-ink-faint)">
             Nothing due right now — nice work staying on top of it.
@@ -306,7 +300,7 @@ export function DashboardClient() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Recent activity</h2>
+        <SectionHeader title="Recent activity" />
         {state.activity.length === 0 ? (
           <p className="text-sm text-(--color-ink-faint)">
             What you complete, enroll in, and finish shows up here.
@@ -325,49 +319,51 @@ export function DashboardClient() {
         )}
       </section>
 
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Recently viewed</h2>
-        {recentlyViewed.length === 0 ? (
-          <p className="text-sm text-(--color-ink-faint)">
-            Nothing yet — start a lesson to see it here.
-          </p>
-        ) : (
-          <ul className="flex flex-wrap gap-2">
-            {recentlyViewed.map((lesson) => (
-              <li key={lesson!.id}>
-                <Link href={`/courses/${lesson!.courseSlug}/${lesson!.slug}`}>
-                  <Badge tone="neutral">{lesson!.title}</Badge>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+      <section className="grid gap-8 sm:grid-cols-2">
+        <div>
+          <SectionHeader title="Recently viewed" />
+          {recentlyViewed.length === 0 ? (
+            <p className="text-sm text-(--color-ink-faint)">
+              Nothing yet — start a lesson to see it here.
+            </p>
+          ) : (
+            <ul className="flex flex-wrap gap-2">
+              {recentlyViewed.map((lesson) => (
+                <li key={lesson!.id}>
+                  <Link href={`/courses/${lesson!.courseSlug}/${lesson!.slug}`}>
+                    <Badge tone="neutral">{lesson!.title}</Badge>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <SectionHeader title="Bookmarks" />
+          {bookmarks.length === 0 ? (
+            <p className="text-sm text-(--color-ink-faint)">
+              Bookmark a lesson to find it here quickly.
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {bookmarks.map((lesson) => (
+                <li key={lesson!.id}>
+                  <Link
+                    href={`/courses/${lesson!.courseSlug}/${lesson!.slug}`}
+                    className="text-sm hover:underline"
+                  >
+                    {lesson!.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Bookmarks</h2>
-        {bookmarks.length === 0 ? (
-          <p className="text-sm text-(--color-ink-faint)">
-            Bookmark a lesson to find it here quickly.
-          </p>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {bookmarks.map((lesson) => (
-              <li key={lesson!.id}>
-                <Link
-                  href={`/courses/${lesson!.courseSlug}/${lesson!.slug}`}
-                  className="text-sm hover:underline"
-                >
-                  {lesson!.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Your notes</h2>
+        <SectionHeader title="Your notes" />
         {notesEntries.length === 0 ? (
           <p className="text-sm text-(--color-ink-faint)">
             Notes you write on lessons show up here.
@@ -397,19 +393,23 @@ export function DashboardClient() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-lg font-semibold">Daily learning goal</h2>
-        <p className="text-sm text-(--color-ink-muted)">
-          {dailyGoal.minutesToday} of {dailyGoal.targetMinutes} minutes today
-          {dailyGoal.met ? " — goal met!" : ""}
-        </p>
-        <div className="mt-2 h-2 w-full max-w-xs rounded-full bg-(--color-canvas)">
-          <div
-            className="h-2 rounded-full bg-(--color-brand)"
-            style={{
-              width: `${Math.min(100, Math.round((dailyGoal.minutesToday / dailyGoal.targetMinutes) * 100))}%`,
-            }}
-          />
+        <SectionHeader title="Daily learning goal" />
+        <div className="mb-1 flex items-center gap-2 text-sm text-(--color-ink-muted)">
+          <span>
+            {dailyGoal.minutesToday} of {dailyGoal.targetMinutes} minutes today
+          </span>
+          {dailyGoal.met && (
+            <Badge tone="success" dot>
+              Goal met
+            </Badge>
+          )}
         </div>
+        <ProgressBar
+          value={Math.round((dailyGoal.minutesToday / dailyGoal.targetMinutes) * 100)}
+          label="Daily learning goal progress"
+          tone={dailyGoal.met ? "success" : "brand"}
+          className="max-w-xs"
+        />
         <label className="mt-3 flex items-center gap-3 text-sm">
           Minutes per day
           <input
@@ -454,16 +454,16 @@ function StatCard({ label, value }: { label: string; value: string }) {
 function DashboardSkeleton() {
   return (
     <div aria-hidden="true" className="flex flex-col gap-8">
+      <Skeleton className="h-[96px]" />
       <section className="grid gap-4 sm:grid-cols-3">
         {[0, 1, 2].map((i) => (
-          <div key={i} className="h-[76px] animate-pulse rounded-xl bg-(--color-canvas)" />
+          <Skeleton key={i} className="h-[76px]" />
         ))}
       </section>
-      <div className="h-[96px] animate-pulse rounded-xl bg-(--color-canvas)" />
       {[0, 1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="flex flex-col gap-3">
-          <div className="h-5 w-40 animate-pulse rounded bg-(--color-canvas)" />
-          <div className="h-16 animate-pulse rounded-xl bg-(--color-canvas)" />
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-16" />
         </div>
       ))}
     </div>

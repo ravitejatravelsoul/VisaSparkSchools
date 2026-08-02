@@ -3,8 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardBody } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { SectionHeader } from "@/components/ui/page-header";
 import { CategoryIcon } from "@/components/directory/category-icon";
+import { categoryAccent, accentClasses } from "@/lib/ui/category-accent";
+import { difficultyTone } from "@/lib/ui/difficulty";
 import {
   getPublicCategories,
   getCategoryBySlug,
@@ -50,6 +54,7 @@ export default async function CategoryPage({
     .filter((c): c is NonNullable<typeof c> => Boolean(c));
   const relatedPaths = getLearningPathsForCategory(category.id);
   const suggestedStart = technologies[0];
+  const accent = accentClasses(categoryAccent(category.id));
 
   return (
     <Container className="py-10">
@@ -60,7 +65,7 @@ export default async function CategoryPage({
       <div className="flex items-start gap-4">
         <span
           aria-hidden="true"
-          className="mt-1 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-(--color-brand-contrast) text-(--color-brand-strong)"
+          className={`mt-1 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${accent.chipBg} ${accent.chipFg}`}
         >
           <CategoryIcon id={category.id} size={26} />
         </span>
@@ -70,7 +75,7 @@ export default async function CategoryPage({
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-(--color-border) bg-(--color-surface) p-4 text-sm">
+      <Card className="mt-6 p-4 text-sm">
         <p>
           <span className="font-semibold">Who this is for:</span> {category.audience}
         </p>
@@ -85,25 +90,32 @@ export default async function CategoryPage({
             </Link>
           </p>
         )}
-      </div>
+      </Card>
 
       <section className="mt-10">
-        <h2 className="text-lg font-semibold">Technologies ({technologies.length})</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <SectionHeader title={`Technologies (${technologies.length})`} />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {technologies.map((tech) => {
             const availability = getTechnologyAvailability(tech);
             return (
-              <Link
-                key={tech.id}
-                href={`/technologies/${tech.slug}`}
-                className="flex flex-col rounded-xl border border-(--color-border) bg-(--color-surface) p-4 transition-shadow hover:shadow-[var(--shadow-md)]"
-              >
-                <h3 className="font-semibold">{tech.name}</h3>
-                <p className="mt-1 flex-1 text-sm text-(--color-ink-muted)">{tech.description}</p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {tech.status === "legacy" && <Badge tone="accent">Legacy</Badge>}
-                  <Badge tone="neutral">{describeAvailability(availability.status)}</Badge>
-                </div>
+              <Link key={tech.id} href={`/technologies/${tech.slug}`} className="group">
+                <Card interactive className="flex h-full flex-col">
+                  <CardBody className="flex flex-1 flex-col">
+                    <h3 className="font-semibold group-hover:text-(--color-brand-strong)">
+                      {tech.name}
+                    </h3>
+                    <p className="mt-1 flex-1 text-sm text-(--color-ink-muted)">
+                      {tech.description}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      <Badge tone={difficultyTone(tech.difficulty)} dot>
+                        {tech.difficulty}
+                      </Badge>
+                      {tech.status === "legacy" && <Badge tone="accent">Legacy</Badge>}
+                      <Badge tone="neutral">{describeAvailability(availability.status)}</Badge>
+                    </div>
+                  </CardBody>
+                </Card>
               </Link>
             );
           })}
@@ -113,7 +125,7 @@ export default async function CategoryPage({
       {(withCourses.length > 0 || withRunners.length > 0) && (
         <section className="mt-10 grid gap-6 sm:grid-cols-2">
           {withCourses.length > 0 && (
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4">
+            <Card className="p-4">
               <h2 className="font-semibold">Available courses</h2>
               <ul className="mt-2 flex flex-col gap-1.5 text-sm">
                 {withCourses.map((t) => {
@@ -130,10 +142,10 @@ export default async function CategoryPage({
                   );
                 })}
               </ul>
-            </div>
+            </Card>
           )}
           {withRunners.length > 0 && (
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4">
+            <Card className="p-4">
               <h2 className="font-semibold">Practice and playgrounds</h2>
               <ul className="mt-2 flex flex-col gap-1.5 text-sm">
                 {withRunners.map((t) => {
@@ -150,23 +162,22 @@ export default async function CategoryPage({
                   );
                 })}
               </ul>
-            </div>
+            </Card>
           )}
         </section>
       )}
 
       {relatedPaths.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-lg font-semibold">Related learning roadmaps</h2>
-          <ul className="mt-3 flex flex-col gap-2">
+          <SectionHeader title="Related learning roadmaps" />
+          <ul className="flex flex-col gap-2">
             {relatedPaths.map((p) => (
               <li key={p.id}>
-                <Link
-                  href={`/roadmaps/${p.slug}`}
-                  className="block rounded-lg border border-(--color-border) bg-(--color-surface) p-3 text-sm hover:border-(--color-border-strong)"
-                >
-                  <span className="font-medium">{p.name}</span>
-                  <span className="ml-2 text-(--color-ink-faint)">{p.description}</span>
+                <Link href={`/roadmaps/${p.slug}`} className="block">
+                  <Card interactive className="p-3 text-sm">
+                    <span className="font-medium">{p.name}</span>
+                    <span className="ml-2 text-(--color-ink-faint)">{p.description}</span>
+                  </Card>
                 </Link>
               </li>
             ))}
@@ -176,8 +187,8 @@ export default async function CategoryPage({
 
       {relatedCategories.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-lg font-semibold">Related categories</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <SectionHeader title="Related categories" />
+          <div className="flex flex-wrap gap-2">
             {relatedCategories.map((c) => (
               <Link key={c.id} href={`/categories/${c.slug}`}>
                 <Badge tone="neutral">{c.name}</Badge>

@@ -1,6 +1,6 @@
 # Project Status — VisaSparkSchools
 
-Last updated: 2026-08-01. This is the durable checklist for the CodeWise → VisaSparkSchools
+Last updated: 2026-08-02. This is the durable checklist for the CodeWise → VisaSparkSchools
 expansion — update it precisely as work progresses. Do not mark anything done that hasn't
 actually been run and verified. Do not mark a later phase complete based only on scaffolding.
 
@@ -96,7 +96,15 @@ re-verified against source and executable tests before committing. Found and fix
   verification, while guide prose quality relied on the automated checks plus this session's
   original authoring care.
 
-## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), and Phase 4 (learning and accounts) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Committed as a single local checkpoint commit on top of `f85b1d8`; exact hash recorded in `git log`. Phases 5–9 not started.
+## Phase 4.5 commit
+
+Committed locally on top of `c670ef1` as `feat: redesign the learner experience`, after the full
+verification suite passed (format, lint, typecheck, content validation, 214 unit/integration
+tests, the full Playwright suite including new focus-trap regression tests, production build,
+axe accessibility sweep, and before/after Lighthouse). **Not pushed** (no remote configured).
+`c670ef1` was not amended or rewritten.
+
+## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phases 5–9 not started.
 
 This file replaces the previous CodeWise-era status document. That document's own numbering
 ("Phase 1–10") described the _original build_, not this expansion's 9-phase plan below — see
@@ -157,6 +165,15 @@ This file replaces the previous CodeWise-era status document. That document's ow
       real working systems, a non-punitive daily goal, a deterministic next-lesson recommendation,
       and a profile/preferences page — all implemented and tested, not scaffolded. Left
       intentionally uncommitted for review.
+- [x] **Phase 4.5 — UI/UX redesign.** Complete. Details below. A cohesive "spark and pathway"
+      visual design system (tokens, typography/spacing/motion rules, category- and track-accent
+      colors, a reusable component set) applied across every route redesigned in Phases 1-4 —
+      navigation, homepage, catalog, course/lesson pages, dashboard, roadmaps, profile/auth,
+      technology directory/search/playground. Presentation and interaction only; no learning/
+      account/sync behavior changed. Found and fixed 2 real pre-existing bugs (a mobile-nav
+      containing-block/CSS bug, a Tailwind dynamic-class-generation bug silently dropping category
+      accent colors) and added a missing keyboard focus trap to 4 modal dialogs that previously let
+      Tab escape into the page behind them.
 - [ ] **Phase 5 — Aptitude and career.** Not started. Zero aptitude/reasoning/GD/career content
       exists yet. This is a large, content-heavy phase (26 aptitude topics + 20 reasoning topics +
       GD/career modules, each needing deterministic, seeded question generation) that has not been
@@ -767,6 +784,213 @@ profile/course/roadmap/project components (verified by grep, no bundle analyzer 
 this project). Manual console/network check across 8 key pages in Supabase-disabled mode: 0
 console errors, 0 failed requests.
 
+## Phase 4.5 — UI/UX redesign: what was actually done
+
+Governing instruction: the application was functionally strong (Phases 1-4) but visually generic —
+perform a complete UI/UX audit and cohesive, student-focused visual redesign, presentation and
+interaction only, with an explicit "not authorized" list covering every learning/account/sync/
+privacy/completion/recommendation behavior. Began by actually running the app and taking baseline
+screenshots (light/dark, 375/1440px) of the homepage, catalog, a course overview, a lesson, the
+dashboard, a roadmap, and the technology directory before writing any code — confirmed the premise
+was accurate: a generic template-like homepage, zero visual differentiation between course/
+technology cards of different subjects, and no trace of any "pathway" motif on the one page
+(`/paths`) whose entire content is a literally ordered sequence of steps.
+
+### Design system (tokens → primitives → pages)
+
+**Tokens** (`app/globals.css`): a "spark and pathway" direction — the existing brand green kept as
+primary, the existing amber reserved exclusively for the brand's own accent (never reused for
+category color, so a category chip is never mistaken for a call-to-action); added 7 muted
+category/track accent hues (blue/purple/teal/rose/indigo/cyan/lime), each with a light-mode and
+dark-mode value plus a paired light-tint "contrast" value for chip backgrounds; added
+`--color-surface-sunken`, `--color-brand-soft`, and dedicated success/warning/danger/info
+"contrast" tokens (previously `success` badges reused the unrelated `brand-contrast` token — an
+inconsistency fixed in passing); added three motion tokens (`--motion-fast`/`--motion-base`/
+`--motion-ease`) so every transition in the app now shares one timing vocabulary instead of ad hoc
+per-component durations; added a `.reading-column` (42rem) rule for comfortable lesson-prose width
+and a `.path-track`/`.path-track-line` pair for the connecting-line pathway motif (its line
+position is a CSS custom property, `--track-line-left`, set per call site so the same rule serves
+both a centered vertical timeline and a left-aligned marker column). No existing token was renamed
+or removed, and no default Tailwind color palette is used anywhere in this codebase (confirmed
+unchanged) — every color in every component below resolves through one of these named tokens.
+
+**Primitives** (`components/ui/`, `lib/ui/`): `ProgressBar` (consolidates 4 previously separate
+hand-rolled `<div>`-with-inline-width progress bars — course overview, dashboard course rows,
+dashboard skill mastery, dashboard daily goal, roadmap completion — into one component with real
+`role="progressbar"` semantics; two of the four originals had no ARIA attributes at all before this
+pass), `Alert` (a calm, left-border status banner — replaces one-off status boxes for sync status,
+the roadmap "not a certifiable path" notice, the legacy-technology notice, and auth form messages;
+`role="alert"` only for warning/danger tones, `role="status"` otherwise, so a routine sync hiccup
+doesn't interrupt a screen reader the way a real error should), `EmptyState`, `PageHeader`/
+`SectionHeader` (replace ad hoc `<h1 className="text-3xl font-bold">` pairs repeated near-
+identically across ~15 pages), `Skeleton` (a single loading-placeholder primitive now used by all
+three CLS-sensitive skeletons — dashboard, technology directory, and the newly-added playground
+one, see below), `StepMarker` (the numbered/checked circular marker for the pathway motif, status-
+driven — not-started/in-progress/completed — with a `current` ring variant; meaning is never
+color-only, since the check glyph and the number both carry it independent of color), a small
+hand-drawn icon set (`components/ui/icons.tsx`, same 24×24/`currentColor` convention as the
+existing `CategoryIcon`, replacing unicode glyphs `»`/`«`/`☰`/`✓`/`→` that were scattered across the
+app with inconsistent sizing), `lib/ui/category-accent.ts` (explicit category-id → hue map, plus a
+`bar`/`chipBg`/`chipFg`/`border` class set per hue), `lib/ui/track-accent.ts` (the same idea for
+the 6 learning tracks), and `lib/ui/difficulty.ts` (`beginner`/`intermediate`/`advanced` → badge
+tone, so difficulty is visually differentiated everywhere it appears, not just labeled). `Button`
+gained an `accent` variant and a `ref` prop (needed for the focus-trap work below — added as a
+plain typed prop, not `forwardRef`, since this is React 19). `Card` gained an `interactive` prop
+(hover lift + border/shadow transition, for any card that is itself a link/button target). `Badge`
+gained `warning`/`danger`/`info` tones and an optional `dot` (a small colored dot before the label,
+so status is never conveyed by badge color alone — the label text and, optionally, the dot both
+carry it).
+
+### Two real bugs found during this pass (not assumed from reading code — confirmed by rendering)
+
+1. **A genuine CSS containing-block bug in the mobile navigation drawer**, found by actually
+   opening it and screenshotting the result rather than trusting the markup: `Header`'s sticky bar
+   has `backdrop-blur` (a `backdrop-filter`), which — like `filter` — creates a new containing
+   block for `position: fixed` descendants per the CSS spec. `MobileNav`'s drawer, nested inside
+   `<header>`, was a `fixed inset-0` panel; with a `backdrop-filter` ancestor, "fixed" resolved
+   against the header's own small box instead of the viewport, so the drawer rendered squeezed into
+   a 64px-tall strip with the rest of the page bleeding through underneath it — a real, pre-existing
+   bug (present before this session), not something this redesign introduced, just never visually
+   verified until now. Fixed by rendering the drawer through a React portal to `document.body`
+   (`createPortal`), which is unaffected by any ancestor's `filter`/`backdrop-filter`/`transform`.
+2. **A Tailwind v4 dynamic-class-generation bug**, found the same way: `lib/ui/category-accent.ts`'s
+   first draft built class names via template-literal interpolation
+   (`` `border-(--accent-${hue})` ``); Tailwind's build-time scanner only recognizes complete,
+   literal class-name strings in source text, so every category/track accent color silently
+   generated no CSS at all — every "colored" card rendered with the same neutral border, confirmed
+   by screenshotting the catalog page and by reading the computed `border-top-color` directly (it
+   matched the neutral token exactly, not the intended hue). Fixed by rewriting the module as an
+   explicit per-hue literal map instead of computed strings — and, once real colors did render,
+   found a second-order issue: any element that already carries a `border` (all four sides,
+   including a card's own default border) cannot reliably have just one side recolored by a second,
+   separately-generated `border-color` utility class, because two same-property utility classes
+   resolve by their position in the _compiled_ stylesheet, not by their order in `className`. Fixed
+   by using a small colored top `background-color` bar (a new `bar` field on the accent map) instead
+   of a border-color override wherever a card needed a category/track accent alongside its existing
+   border — this has no such collision risk and reads more clearly as an accent stripe besides.
+
+### A pre-existing false marketing claim, corrected
+
+`siteConfig.description` (and its copies in `docs/BRANDING.md`'s positioning statement) claimed
+"honest completion certificates" as a current, delivered feature. Certificates are Phase 8, not
+implemented — `README.md` already correctly said "No certificates... included in this beta," so the
+two docs directly contradicted each other, and the homepage surfaced the false claim to every
+visitor. Since this exact copy is what the homepage redesign put front and center, fixed it in
+place: replaced with "real runnable code" (accurate, verifiable, already true today) in both
+`lib/site-config.ts` and `docs/BRANDING.md`, and clarified `docs/BRANDING.md`'s voice/tone section
+to state plainly that certificates aren't implemented yet and shouldn't be referenced in
+learner-facing copy until they ship (the doc's own dangling reference to a `docs/CERTIFICATES.md`
+file that doesn't exist was also removed).
+
+### A missing keyboard focus trap, found and fixed across 4 dialogs
+
+Confirmed by actually tabbing through the open mobile navigation drawer (not by reading the
+`useEffect` and assuming it was complete): the existing dialog implementations focused an initial
+element on open and (inconsistently) handled Escape, but none of them ever intercepted Tab —
+tabbing through a dialog's last focusable element moved focus onto page content underneath, sitting
+behind the same overlay in the DOM but still fully visible during the visual/keyboard-focus jump.
+This affected 4 separate hand-rolled `fixed inset-0` dialogs (`MobileNav`, the lesson page's
+`CourseNavMobile`, the technology directory's `FilterDrawer`, and `TutorLauncher`'s mobile panel) —
+the exact "repeated bottom-sheet pattern across 4 components" cross-cutting inconsistency already
+flagged for consolidation. Fixed with one shared hook, `lib/hooks/use-modal-a11y.ts`: focuses an
+initial element on open, traps Tab/Shift+Tab within the dialog's container, closes on Escape,
+restores focus to the trigger element on close, and locks body scroll — all 4 dialogs now use it
+instead of their own separate (and previously incomplete) keyboard handling. Verified with real
+keyboard-driven Playwright tests (not just code review) that tab through every focusable element in
+each dialog plus two more and assert focus never leaves the dialog, then assert Escape returns
+focus to the exact trigger element — new coverage in `tests/e2e/navigation.spec.ts`,
+`tests/e2e/mobile-and-modes.spec.ts` (which also had its own test **renamed**, since its name
+literally said "...without trapping focus" describing the bug as accepted behavior), and
+`tests/e2e/technology-directory.spec.ts`.
+
+### Per-page redesign summary
+
+**Navigation** (`Header`/`MobileNav`/`PrimaryNav`): active-route underline + `aria-current="page"`
+on the desktop nav (new, computed via a small client component so the rest of `Header` stays a
+server component — no unnecessary server→client conversion); no auth-flash (already correct from
+Phase 4, unchanged); mobile drawer fixed as above. **Homepage**: hero de-emphasized (no longer
+dominates the first screen), the "path" card now uses the connecting-line motif with real track
+data, category-accent top bars on the learning-path cards — all real registry-derived content, no
+fake stats/testimonials added. **Learn page & catalog**: entry-point cards, category chips with
+accent colors, course cards with track-accent bars and difficulty-toned badges. **Course overview**:
+breadcrumbs, accent dot, `ProgressBar`-based pre/post-enrollment states (0% never implies done,
+`Completed` only renders when `isCourseComplete()` is actually true), numbered lesson list.
+**Lesson page**: comfortable `.reading-column` width for prose sections, full width preserved for
+code/exercise sections (a docs-site-style split, not a blanket narrow column), `StepMarker` +
+connecting line in the course-nav sidebar (now reflecting real per-lesson status from the existing
+progress store — this is a presentation change over already-existing data, not new tracking
+behavior). **Dashboard**: the "continue learning" recommendation promoted above the stat-card row
+and given the strongest visual treatment (single dominant next-action, per the brief), sync status
+migrated to `Alert`, `Recently viewed`/`Bookmarks` combined into a two-column layout to reduce
+vertical density, all hand-rolled progress bars replaced with `ProgressBar` — **the CLS-0 skeleton
+fix from Phase 4 was preserved by construction**: `DashboardSkeleton`'s block sizes were kept
+matched to the reordered real layout (re-verified by Lighthouse below, still 0.000). **Roadmaps**:
+the `/paths` and `/roadmaps/[slug]` step lists now use the actual connecting-line pathway motif
+with `StepMarker`s — the single most literal opportunity for it in the app, previously plain
+numbered circles with no line at all; the corrected cross-roadmap step-isolation behavior from the
+Phase 4 audit is untouched (verified by e2e test, unchanged). **Profile/auth**: `Alert`-based guest/
+signed-in status, no continuous-sync wording (already correct from the Phase 4 doc fix, preserved),
+the "Supabase not configured" sign-in state remains a real explanatory page with a working
+"Continue as a guest" link, not a dead form. **Technology directory/search/playground**: category-
+accent bars and difficulty badges on technology cards; the `/playground` page's `Suspense
+fallback={null}` (a real, previously-flagged CLS gap — the same class of bug already fixed on
+`/technologies` and `/dashboard` in earlier phases, just never applied here) replaced with a
+properly-dimensioned skeleton; Monaco/Pyodide/sql.js loading boundaries and the runner components
+themselves were not touched.
+
+### Responsive, motion, and accessibility verification
+
+Checked 375/768/1024/1440px on every redesigned page via real rendered screenshots (not just
+Tailwind breakpoint reasoning), plus a 200% zoom equivalent (a 640×480 layout viewport, the
+standard way to approximate real browser zoom — an initial attempt using the CSS `zoom` property
+produced a flexbox `gap` rendering artifact specific to that non-standard property, not a real bug,
+confirmed by re-testing with an actual reduced viewport instead). A scripted sweep asserted zero
+horizontal overflow (`document.documentElement.scrollWidth` ≤ `clientWidth`) across 17 routes × 4
+widths (68 checks, all passing). `prefers-reduced-motion` is honored by a pre-existing global rule
+(`animation-duration`/`transition-duration` forced to near-zero for every element) that already
+covered everything added in this pass; the one new keyframe animation (`.animate-fade-up`, a subtle
+entrance transition never gating navigation or reading) has its own explicit reduced-motion
+override besides. No scroll-jacking, parallax, or looping decorative animation was added anywhere.
+The existing automated accessibility suite (`tests/e2e/accessibility.spec.ts`, 25 routes × axe,
+`wcag2a`/`wcag2aa`/`wcag22aa` tags) was re-run against the full redesign with zero changes needed —
+**0 critical/serious violations**, same as before. Manual keyboard-only workflows verified end to
+end via Playwright (`page.keyboard`, no mouse): enrolling in a course, marking a self-reported
+roadmap step complete, and editing/saving profile preferences all work with keyboard alone.
+
+### Performance verification (Lighthouse, production build, desktop preset, before vs. after)
+
+Built and served the pre-Phase-4.5 code (`c670ef1`, in a separate `git worktree` so the working
+tree with Phase 4.5's uncommitted changes was never touched) and the current code side by side on
+different ports, then ran Lighthouse (`performance`+`accessibility` categories) against the same 3
+pages on both:
+
+| page            | performance (before→after) | accessibility (before→after) | CLS (before→after) | LCP ms (before→after) |
+| --------------- | :------------------------: | :--------------------------: | :----------------: | :-------------------: |
+| `/` (home)      |          99 → 99           |          100 → 100           |   0.000 → 0.000    |       850 → 850       |
+| `/dashboard`    |          99 → 99           |          100 → 100           |   0.000 → 0.000    |       861 → 850       |
+| course overview |          99 → 99           |          100 → 100           |   0.000 → 0.000    |       901 → 889       |
+
+No material regression on any metric, on any page; CLS stayed at a perfect 0 throughout (confirming
+the dashboard/technology-directory/playground skeleton work above didn't reintroduce the historical
+CLS bugs), and LCP improved slightly on two of the three pages. No new runtime dependency was
+added, no new font request, no heavy UI framework — only existing Tailwind utilities, hand-authored
+SVG icons, and CSS custom properties.
+
+### Testing
+
+Preserved every Phase 1-4 test; updated only what the redesign's DOM/copy changes required, and
+only by matching the new (still equivalent, still real) markup — never by weakening an assertion:
+`tests/e2e/learn-page.spec.ts` (link accessible names changed because entry-point cards became
+larger, whole-card link targets, and a "→" character became a decorative icon), `tests/e2e/
+phase4-learning-account.spec.ts` (the daily-goal "goal met!" text and the profile "Saved." text
+each split from one paragraph into a text node plus a separate `Badge`, so the tests now check both
+pieces). Added new coverage: 4 focus-trap/restoration tests (one per dialog, described above). Full
+suite after all changes: **214 unit/integration tests, all passing**; **73 unique Playwright
+scenarios** (including the 4 new focus-trap tests), run across the `chromium` and `mobile-chromium`
+projects, all passing (skips are the pre-existing, intentional `isMobile`-gated desktop-only
+tests). Deleted the temporary, never-committed `tests/e2e/tmp-baseline.spec.ts` scratch file used
+for this session's own before/after screenshot comparisons before finishing.
+
 ## Verified-green commands (run this session, after all Phase 2 and Phase 3 changes)
 
 ```bash
@@ -830,6 +1054,21 @@ DEPLOYMENT.md` still only has its name updated, since nothing about the deployme
   Tools) — each technology has exactly one `category`, by schema design, so every technology
   needed one primary home; see `lib/directory/data/*.ts` for where each landed and adjust via
   `docs/CONTENT_AUTHORING.md`'s process if a different placement is preferred.
+- **Phase 4.5 is presentation and interaction only.** It did not touch, and was explicitly
+  prohibited from touching, any learning/account/sync/merge/privacy/enrollment/completion/roadmap/
+  daily-goal/recommendation behavior — the two known-limitations items above about the mocked
+  Supabase sync and the unbuilt Phase 5-8 features are unchanged by this pass.
+- **The category/track accent-color palette (7 hues) is necessarily approximate at 16 categories
+  and 6 tracks** — a few visually adjacent categories share a hue (documented explicitly in
+  `lib/ui/category-accent.ts`'s own comments, with a note on which pairs were kept apart
+  deliberately) rather than expanding to enough uniquely distinguishable hues to risk a garish,
+  low-contrast palette. Rebalancing individual category→hue assignments is a one-line change per
+  category in that file if a specific collision becomes a real problem.
+- **Firefox/WebKit visual verification was not performed** (same limitation as every prior phase —
+  Playwright's Chromium + mobile-Chromium projects only). The redesign uses only standard CSS
+  (flexbox, grid, custom properties, `backdrop-filter` with a `@supports` fallback already in place
+  from Phase 2) with no Chromium-specific features knowingly introduced, but this claim is
+  unverified outside Chromium.
 
 ## If you pick this up next
 
@@ -839,6 +1078,7 @@ a guest first, sign in, verify the merge; sign out and confirm nothing leaks; si
 account on the same device and confirm the same). Everything is implemented and mock-tested
 (Phase 4 report, items 17-24), but "the mock behaves correctly" and "the real Postgres/RLS/auth
 stack behaves correctly" are different claims, and only the first has been verified in this build.
+Phase 4.5's redesign is visual/interaction-only and doesn't change this recommendation.
 
 Recommended next _phase_: **Phase 5 (Aptitude, Reasoning, and career content)**, which would
 finally let the three currently-internal categories and the one currently-draft learning roadmap

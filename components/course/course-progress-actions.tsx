@@ -3,13 +3,17 @@
 import { useProgressStore } from "@/lib/learning/store";
 import { getCourseCompletionPercent, isCourseComplete } from "@/lib/learning/completion";
 import { LinkButton } from "@/components/ui/button";
+import { ProgressBar } from "@/components/ui/progress-bar";
+import { Badge } from "@/components/ui/badge";
 import type { Lesson } from "@/lib/content/types";
 
 export function CourseProgressActions({
   courseSlug,
+  courseTitle,
   lessons,
 }: {
   courseSlug: string;
+  courseTitle: string;
   lessons: Lesson[];
 }) {
   const state = useProgressStore((s) => s.state);
@@ -25,37 +29,41 @@ export function CourseProgressActions({
   if (!lessons[0]) return null;
 
   return (
-    <div className="mt-6">
-      <div className="mb-2 flex items-center justify-between text-sm">
-        <span className="text-(--color-ink-muted)">
-          {enrollment ? `${percent}% complete` : "Not started"}
-        </span>
-        {complete && <span className="font-medium text-(--color-success)">Completed</span>}
-      </div>
-      <div
-        className="h-2 w-full max-w-xs rounded-full bg-(--color-canvas)"
-        role="progressbar"
-        aria-valuenow={percent}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`${courseSlug} completion`}
-      >
-        <div className="h-2 rounded-full bg-(--color-brand)" style={{ width: `${percent}%` }} />
-      </div>
-      <div className="mt-4 flex gap-3">
-        {enrollment ? (
-          <LinkButton href={`/courses/${courseSlug}/${resumeLesson!.slug}`}>
-            {complete ? "Review this course" : "Continue this course"}
-          </LinkButton>
-        ) : (
+    <div className="mt-6 rounded-xl border border-(--color-border) bg-(--color-surface) p-5">
+      {enrollment ? (
+        <>
+          <div className="mb-2 flex items-center justify-between text-sm">
+            <span className="text-(--color-ink-muted)">{percent}% complete</span>
+            {complete && (
+              <Badge tone="success" dot>
+                Completed
+              </Badge>
+            )}
+          </div>
+          <ProgressBar
+            value={percent}
+            label={`${courseTitle} completion`}
+            tone={complete ? "success" : "brand"}
+          />
+          <div className="mt-4">
+            <LinkButton href={`/courses/${courseSlug}/${resumeLesson!.slug}`}>
+              {complete ? "Review this course" : "Continue this course"}
+            </LinkButton>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-(--color-ink-muted)">
+            Not started — {lessons.length} lessons, no account required.
+          </p>
           <LinkButton
             href={`/courses/${courseSlug}/${lessons[0].slug}`}
             onClick={() => enroll(courseSlug)}
           >
             Start this course
           </LinkButton>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

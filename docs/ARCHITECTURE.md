@@ -38,7 +38,9 @@ Supabase (optional, not provisioned in this beta)
 ```
 app/                      Routes (App Router), grouped under (site) for the shared header/footer
 components/
-  ui/                      Design-system primitives (Button, Card, Badge, Container)
+  ui/                      Design-system primitives (Button, Card, Badge, Container, Alert,
+                           EmptyState, PageHeader/SectionHeader, Skeleton, ProgressBar, StepMarker,
+                           Breadcrumbs, icons.tsx — see docs/DESIGN_SYSTEM.md)
   layout/                  Header, footer, theme provider/toggle, mobile nav, skip link
   lesson/                  Lesson-reader building blocks (markdown, exercise panel, quiz, course nav,
                            bookmarks, notes, completion actions)
@@ -70,6 +72,9 @@ lib/
   ai/                      Provider abstraction, chunking, retrieval, prompt building, safety, quota
   supabase/                Browser/server client factories + hand-maintained typed schema
   search/                  Search document type shared by the index-builder script and the UI
+  ui/                      category-accent.ts/track-accent.ts (id -> accent hue maps), difficulty.ts
+                           (difficulty -> badge tone) — presentation-only helpers, no business logic
+  hooks/                   use-modal-a11y.ts (shared focus-trap/restore dialog behavior)
   site-config.ts           Single source of truth for branding, nav, and feature flags
 supabase/migrations/       SQL migrations (schema + RLS), never applied to a live project by this build
 scripts/                   content:validate, content:search-index, content:ai-index (ai-ingest preview)
@@ -254,6 +259,26 @@ are never included, since the script only ever calls `getPublic*()`. Common abbr
 DSA, AI, ML, LLM, RAG, CI/CD, QA) resolve correctly because they're present in the relevant
 technology's own `searchKeywords` field, verified in `tests/unit/directory-search-aliases.test.ts`
 using the exact same Fuse.js configuration as the real search UI.
+
+## UI design system (Phase 4.5)
+
+A token → primitive → page architecture, added in Phase 4.5 as a presentation-only pass over every
+existing route (no learning/account/sync behavior changed). Full design direction, token
+inventory, primitive catalog, and conventions are in `docs/DESIGN_SYSTEM.md`; the summary here is
+just the architectural shape.
+
+- **Tokens** (`app/globals.css`): every color in the app is a CSS custom property (no Tailwind
+  default palette in use anywhere), declared for light/dark/forced-theme once each.
+- **Primitives** (`components/ui/*`): `Button`, `Card`, `Badge`, `Alert`, `EmptyState`,
+  `PageHeader`/`SectionHeader`, `Skeleton`, `ProgressBar`, `StepMarker`, `Breadcrumbs`, and a
+  hand-drawn icon set — pages compose these instead of repeating raw Tailwind strings.
+- **Category/track accent mapping** (`lib/ui/category-accent.ts`, `lib/ui/track-accent.ts`):
+  explicit, literal (not computed/interpolated — see the design doc for why interpolation silently
+  breaks Tailwind's class scanner) per-id → hue maps, consumed by course/technology/roadmap cards.
+- **Shared modal accessibility** (`lib/hooks/use-modal-a11y.ts`): one hook used by all 4
+  drawer-style dialogs in the app (header mobile nav, lesson course-contents drawer, technology
+  filter drawer, AI tutor panel) for focus-trap/restore/Escape/scroll-lock behavior, replacing four
+  separate hand-rolled (and, before Phase 4.5, incomplete) implementations.
 
 ## Why params/searchParams are awaited
 

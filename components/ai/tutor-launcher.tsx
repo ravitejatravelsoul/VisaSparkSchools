@@ -1,10 +1,12 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { Lesson } from "@/lib/content/types";
 import { featureFlags } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/lesson/markdown";
+import { CloseIcon } from "@/components/ui/icons";
+import { useModalA11y } from "@/lib/hooks/use-modal-a11y";
 import type { Citation } from "@/lib/ai/types";
 
 interface ChatTurn {
@@ -136,6 +138,17 @@ function DisabledTutorNotice() {
 
 export function TutorLauncher({ lesson }: { lesson: Lesson }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useModalA11y({
+    open,
+    onClose: () => setOpen(false),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    triggerRef,
+  });
 
   return (
     <>
@@ -151,7 +164,13 @@ export function TutorLauncher({ lesson }: { lesson: Lesson }) {
       </div>
 
       <div className="fixed right-4 bottom-4 z-40 xl:hidden">
-        <Button type="button" size="sm" onClick={() => setOpen(true)} aria-haspopup="dialog">
+        <Button
+          ref={triggerRef}
+          type="button"
+          size="sm"
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
+        >
           AI tutor
         </Button>
       </div>
@@ -164,19 +183,22 @@ export function TutorLauncher({ lesson }: { lesson: Lesson }) {
             aria-hidden="true"
           />
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label="AI tutor"
-            className="absolute inset-x-0 bottom-0 flex h-[80vh] flex-col rounded-t-2xl bg-(--color-surface) p-4 shadow-[var(--shadow-lg)]"
+            className="animate-fade-up absolute inset-x-0 bottom-0 flex h-[80vh] flex-col rounded-t-2xl bg-(--color-surface) p-4 shadow-[var(--shadow-lg)]"
           >
             <div className="mb-2 flex items-center justify-between">
               <p className="font-semibold">AI tutor</p>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg border border-(--color-border-strong) px-2 py-1 text-xs"
+                aria-label="Close AI tutor"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-(--color-border-strong) hover:bg-(--color-surface-sunken)"
               >
-                Close
+                <CloseIcon width={16} height={16} />
               </button>
             </div>
             {featureFlags.aiTutorEnabled ? (

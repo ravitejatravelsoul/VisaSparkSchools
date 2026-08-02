@@ -168,3 +168,30 @@ test("mobile: technology directory filter drawer opens, applies a filter, and cl
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(page).toHaveURL(/category=databases/);
 });
+
+test("mobile: filter drawer traps Tab focus and restores it to the trigger on Escape", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto("/technologies");
+  const trigger = page.getByRole("button", { name: /^Filters/ });
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "Filter technologies" });
+  await expect(dialog).toBeVisible();
+
+  const focusableCount = await dialog
+    .locator("a[href], button:not([disabled]), select, input")
+    .count();
+  for (let i = 0; i < focusableCount + 2; i++) {
+    await page.keyboard.press("Tab");
+    const activeInDialog = await dialog.evaluate(
+      (el, active) => el.contains(active),
+      await page.evaluateHandle(() => document.activeElement),
+    );
+    expect(activeInDialog).toBe(true);
+  }
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+});

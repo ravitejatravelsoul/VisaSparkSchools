@@ -5,6 +5,9 @@ import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { featureFlags } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
+import { Card, CardBody } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { ArrowRightIcon } from "@/components/ui/icons";
 
 type Mode = "sign-in" | "sign-up" | "reset";
 
@@ -59,20 +62,23 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   if (!featureFlags.supabaseEnabled) {
     return (
-      <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
-        <h1 className="text-xl font-semibold">{copy.title}</h1>
-        <p className="mt-3 text-sm text-(--color-ink-muted)">
-          Accounts aren&apos;t configured for this deployment yet. You can still use every lesson,
-          exercise, quiz, and search as a guest — your progress is saved on this device. Once
-          Supabase is configured, this page becomes a working sign-in form.
-        </p>
-        <Link
-          href="/paths"
-          className="mt-4 inline-block text-sm font-medium text-(--color-brand-strong) hover:underline"
-        >
-          Continue as a guest →
-        </Link>
-      </div>
+      <Card>
+        <CardBody className="p-6">
+          <h1 className="text-xl font-semibold">{copy.title}</h1>
+          <p className="mt-3 text-sm text-(--color-ink-muted)">
+            Accounts aren&apos;t configured for this deployment yet. You can still use every lesson,
+            exercise, quiz, and search as a guest — your progress is saved on this device. Once
+            Supabase is configured, this page becomes a working sign-in form.
+          </p>
+          <Link
+            href="/paths"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-(--color-brand-strong) hover:underline"
+          >
+            Continue as a guest
+            <ArrowRightIcon width={14} height={14} />
+          </Link>
+        </CardBody>
+      </Card>
     );
   }
 
@@ -106,45 +112,44 @@ export function AuthForm({ mode }: { mode: Mode }) {
   };
 
   return (
-    <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-6">
-      <h1 className="text-xl font-semibold">{copy.title}</h1>
-      <form onSubmit={submit} className="mt-4 flex flex-col gap-3">
-        <label className="text-sm font-medium">
-          Email
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-(--color-border-strong) bg-(--color-canvas) px-3 py-2 text-sm"
-          />
-        </label>
-        {mode !== "reset" && (
+    <Card>
+      <CardBody className="p-6">
+        <h1 className="text-xl font-semibold">{copy.title}</h1>
+        <form onSubmit={submit} className="mt-4 flex flex-col gap-3">
           <label className="text-sm font-medium">
-            Password
+            Email
             <input
-              type="password"
+              type="email"
               required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full rounded-lg border border-(--color-border-strong) bg-(--color-canvas) px-3 py-2 text-sm"
             />
           </label>
+          {mode !== "reset" && (
+            <label className="text-sm font-medium">
+              Password
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-(--color-border-strong) bg-(--color-canvas) px-3 py-2 text-sm"
+              />
+            </label>
+          )}
+          <Button type="submit" disabled={status === "loading"}>
+            {status === "loading" ? "Please wait…" : copy.cta}
+          </Button>
+        </form>
+        {message && (
+          <Alert tone={status === "error" ? "danger" : "success"} className="mt-4">
+            {message}
+          </Alert>
         )}
-        <Button type="submit" disabled={status === "loading"}>
-          {status === "loading" ? "Please wait…" : copy.cta}
-        </Button>
-      </form>
-      {message && (
-        <p
-          role="status"
-          className={`mt-3 text-sm ${status === "error" ? "text-(--color-danger)" : "text-(--color-success)"}`}
-        >
-          {message}
-        </p>
-      )}
-      <div className="mt-4">{copy.footer}</div>
-    </div>
+        <div className="mt-4">{copy.footer}</div>
+      </CardBody>
+    </Card>
   );
 }

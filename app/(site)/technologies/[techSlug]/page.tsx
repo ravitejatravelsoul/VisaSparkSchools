@@ -5,6 +5,10 @@ import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { PageHeader } from "@/components/ui/page-header";
+import { Card } from "@/components/ui/card";
+import { Alert } from "@/components/ui/alert";
+import { difficultyTone } from "@/lib/ui/difficulty";
 import { JsonLd } from "@/components/seo/json-ld";
 import {
   allTechnologies,
@@ -40,6 +44,13 @@ const STATUS_LABEL: Record<string, string> = {
   legacy: "Legacy",
   specialized: "Specialized",
   conceptual: "Conceptual",
+};
+
+const STATUS_TONE: Record<string, "success" | "warning" | "info" | "neutral"> = {
+  current: "success",
+  legacy: "warning",
+  specialized: "info",
+  conceptual: "neutral",
 };
 
 export default async function TechnologyGuidePage({
@@ -78,27 +89,23 @@ export default async function TechnologyGuidePage({
         ]}
       />
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">{tech.name}</h1>
-          <p className="mt-2 max-w-2xl text-(--color-ink-muted)">{tech.description}</p>
-        </div>
-      </div>
+      <PageHeader title={tech.name} description={tech.description} />
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Badge tone={tech.status === "legacy" ? "accent" : "brand"}>
+        <Badge tone={STATUS_TONE[tech.status]} dot>
           {STATUS_LABEL[tech.status]}
         </Badge>
-        <Badge tone="neutral">{tech.difficulty}</Badge>
+        <Badge tone={difficultyTone(tech.difficulty)} dot>
+          {tech.difficulty}
+        </Badge>
         {tech.beginnerFriendly && <Badge tone="success">Beginner-friendly</Badge>}
         <Badge tone="neutral">{describeAvailability(availability.status)}</Badge>
       </div>
 
       {tech.status === "legacy" && tech.legacyNote && (
-        <div className="mt-6 rounded-xl border border-(--color-border-strong) bg-(--color-accent-contrast) p-4 text-sm text-(--color-ink)">
-          <p className="font-semibold text-(--color-accent)">Legacy technology</p>
-          <p className="mt-1">{tech.legacyNote}</p>
-        </div>
+        <Alert tone="warning" title="Legacy technology" className="mt-6">
+          {tech.legacyNote}
+        </Alert>
       )}
 
       <div className="mt-8 flex flex-wrap gap-3">
@@ -128,24 +135,24 @@ export default async function TechnologyGuidePage({
           </div>
 
           <dl className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4">
+            <Card className="p-4">
               <dt className="text-xs font-semibold tracking-wide text-(--color-ink-faint) uppercase">
                 What it is
               </dt>
               <dd className="mt-1 text-sm text-(--color-ink-muted)">{tech.whatItIs}</dd>
-            </div>
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4">
+            </Card>
+            <Card className="p-4">
               <dt className="text-xs font-semibold tracking-wide text-(--color-ink-faint) uppercase">
                 Why it&apos;s used
               </dt>
               <dd className="mt-1 text-sm text-(--color-ink-muted)">{tech.whyItsUsed}</dd>
-            </div>
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4">
+            </Card>
+            <Card className="p-4">
               <dt className="text-xs font-semibold tracking-wide text-(--color-ink-faint) uppercase">
                 Where it fits
               </dt>
               <dd className="mt-1 text-sm text-(--color-ink-muted)">{tech.whereItFits}</dd>
-            </div>
+            </Card>
           </dl>
 
           <div>
@@ -225,7 +232,7 @@ export default async function TechnologyGuidePage({
         </div>
 
         <aside className="flex flex-col gap-6">
-          <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4 text-sm">
+          <Card className="p-4 text-sm">
             <p className="font-semibold">Details</p>
             <dl className="mt-3 flex flex-col gap-2 text-(--color-ink-muted)">
               <div className="flex justify-between gap-2">
@@ -263,10 +270,10 @@ export default async function TechnologyGuidePage({
                 {tech.versionNotes}
               </p>
             )}
-          </div>
+          </Card>
 
           {prerequisites.length > 0 && (
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4 text-sm">
+            <Card className="p-4 text-sm">
               <p className="font-semibold">Prerequisites</p>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {prerequisites.map((p) => (
@@ -280,11 +287,11 @@ export default async function TechnologyGuidePage({
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           )}
 
           {related.length > 0 && (
-            <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4 text-sm">
+            <Card className="p-4 text-sm">
               <p className="font-semibold">Related technologies</p>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {related.map((r) => (
@@ -298,7 +305,7 @@ export default async function TechnologyGuidePage({
                   </li>
                 ))}
               </ul>
-            </div>
+            </Card>
           )}
         </aside>
       </section>

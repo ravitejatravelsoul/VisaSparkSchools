@@ -1,33 +1,27 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import { navLinks } from "@/lib/site-config";
+import { PrimaryNavMobile } from "@/components/layout/primary-nav";
 import { AccountNav } from "@/components/auth/account-nav";
+import { MenuIcon, CloseIcon } from "@/components/ui/icons";
+import { useModalA11y } from "@/lib/hooks/use-modal-a11y";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const dialogId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    closeButtonRef.current?.focus();
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [open]);
+  useModalA11y({
+    open,
+    onClose: () => setOpen(false),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    triggerRef,
+  });
 
   return (
     <div className="md:hidden">
@@ -37,86 +31,59 @@ export function MobileNav() {
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-controls={dialogId}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-border-strong)"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-border-strong) text-(--color-ink) transition-colors hover:bg-(--color-surface-sunken)"
         aria-label="Open navigation menu"
       >
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path strokeLinecap="round" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        <MenuIcon width={20} height={20} />
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
-          <div
-            id={dialogId}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Site navigation"
-            className="absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-(--color-surface) p-5 shadow-[var(--shadow-lg)]"
-          >
-            <div className="mb-6 flex items-center justify-between">
-              <span className="font-semibold">Menu</span>
-              <button
-                ref={closeButtonRef}
-                type="button"
-                onClick={() => setOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-border-strong)"
-                aria-label="Close navigation menu"
-              >
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
+      {open &&
+        createPortal(
+          <div className="fixed inset-0 z-50">
+            <div
+              className="absolute inset-0 bg-black/40"
+              onClick={() => setOpen(false)}
+              aria-hidden="true"
+            />
+            <div
+              ref={dialogRef}
+              id={dialogId}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Site navigation"
+              className="animate-fade-up absolute top-0 right-0 h-full w-72 max-w-[85vw] bg-(--color-surface) p-5 shadow-[var(--shadow-lg)]"
+            >
+              <div className="mb-6 flex items-center justify-between">
+                <span className="font-semibold">Menu</span>
+                <button
+                  ref={closeButtonRef}
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-border-strong) hover:bg-(--color-surface-sunken)"
+                  aria-label="Close navigation menu"
                 >
-                  <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
-                </svg>
-              </button>
-            </div>
-            <nav aria-label="Primary">
-              <ul className="flex flex-col gap-1">
-                {navLinks.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      onClick={() => setOpen(false)}
-                      className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-(--color-canvas)"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+                  <CloseIcon width={16} height={16} />
+                </button>
+              </div>
+              <PrimaryNavMobile onNavigate={() => setOpen(false)} />
+              <ul className="mt-1 flex flex-col gap-1">
                 <li>
                   <Link
                     href="/dashboard"
                     onClick={() => setOpen(false)}
-                    className="block rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-(--color-canvas)"
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"
                   >
                     Dashboard
                   </Link>
                 </li>
               </ul>
-            </nav>
-            <div className="mt-4 border-t border-(--color-border) pt-4">
-              <AccountNav />
+              <div className="mt-4 border-t border-(--color-border) pt-4">
+                <AccountNav />
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

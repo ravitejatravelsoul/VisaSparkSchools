@@ -5,12 +5,18 @@ import { Container } from "@/components/ui/container";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { PageHeader } from "@/components/ui/page-header";
 import {
   getTrackBySlug,
   getCoursesForTrack,
   getLessonsForCourse,
   allTracks,
 } from "@/lib/content/registry";
+import { trackAccent } from "@/lib/ui/track-accent";
+import { accentClasses } from "@/lib/ui/category-accent";
+import { difficultyTone } from "@/lib/ui/difficulty";
+import { cn } from "@/lib/utils/cn";
 
 type Params = Promise<{ trackSlug: string }>;
 
@@ -30,21 +36,20 @@ export default async function TrackDetailPage({ params }: { params: Params }) {
   const track = getTrackBySlug(trackSlug);
   if (!track) notFound();
   const courses = getCoursesForTrack(track.slug);
+  const accent = accentClasses(trackAccent(track.slug));
 
   return (
     <Container className="py-10">
-      <Link href="/paths" className="text-sm text-(--color-ink-faint) hover:text-(--color-ink)">
-        ← All paths
-      </Link>
-      <h1 className="mt-2 text-3xl font-bold">{track.title}</h1>
-      <p className="mt-2 max-w-2xl text-(--color-ink-muted)">{track.description}</p>
+      <Breadcrumbs items={[{ label: "Learning paths", href: "/paths" }, { label: track.title }]} />
+      <PageHeader title={track.title} description={track.description} />
 
       <div className="mt-8 flex flex-col gap-4">
         {courses.map((course) => {
           const lessons = getLessonsForCourse(course.slug);
           const firstLesson = lessons[0];
           return (
-            <Card key={course.slug}>
+            <Card key={course.slug} className="overflow-hidden">
+              <span aria-hidden="true" className={cn("block h-1", accent.bar)} />
               <CardBody>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -53,7 +58,9 @@ export default async function TrackDetailPage({ params }: { params: Params }) {
                     <div className="mt-2 flex gap-2">
                       <Badge tone="neutral">{lessons.length} lessons</Badge>
                       <Badge tone="neutral">{course.estimatedHours}h</Badge>
-                      <Badge tone="brand">{course.difficulty}</Badge>
+                      <Badge tone={difficultyTone(course.difficulty)} dot>
+                        {course.difficulty}
+                      </Badge>
                     </div>
                   </div>
                   {firstLesson && (

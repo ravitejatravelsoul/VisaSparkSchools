@@ -6,6 +6,8 @@ import { useSessionStore } from "@/lib/auth/session-store";
 import { featureFlags } from "@/lib/site-config";
 import { getPublicLearningPaths } from "@/lib/directory/registry";
 import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 
 const roadmaps = getPublicLearningPaths();
 
@@ -49,7 +51,7 @@ export function ProfileForm() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="rounded-xl border border-(--color-border) bg-(--color-surface) p-4 text-sm">
+      <Alert tone={featureFlags.supabaseEnabled && userId ? "success" : "neutral"}>
         {featureFlags.supabaseEnabled && userId ? (
           <p>
             Signed in{email ? ` as ${email}` : ""} — your profile and progress sync to your account.
@@ -65,7 +67,7 @@ export function ProfileForm() {
             {featureFlags.supabaseEnabled && " to sync it across devices."}
           </p>
         )}
-      </div>
+      </Alert>
 
       <form onSubmit={save} className="flex flex-col gap-5">
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -109,7 +111,11 @@ export function ProfileForm() {
 
         <div className="flex items-center gap-3">
           <Button type="submit">Save profile</Button>
-          {saved && <span className="text-sm text-(--color-success)">Saved.</span>}
+          {saved && (
+            <Badge tone="success" dot>
+              Saved
+            </Badge>
+          )}
         </div>
       </form>
 
