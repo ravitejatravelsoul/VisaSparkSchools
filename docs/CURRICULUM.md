@@ -1,5 +1,14 @@
 # Curriculum Matrix
 
+> **This document describes the original six-track lesson curriculum only.** As of Phase 3, the
+> platform also has a technology directory (~80 technology guides across 13 public categories) and
+> 15 public learning roadmaps — a different, complementary content system with its own documents:
+> see `docs/ARCHITECTURE.md`'s "Technology directory" section and `docs/CONTENT_AUTHORING.md`. A
+> technology guide is explicitly not the same thing as a course in this matrix — most technologies
+> below (HTML, CSS, JavaScript, Python, SQL, Git, AI/LLMs/RAG) now also have a directory guide
+> page, honestly cross-linked to the real course described here; most technologies in the
+> directory (React, Docker, Rust, etc.) have a guide only, with no course below.
+
 One connected path, six tracks, 50 lessons, 172 knowledge-check questions, 100 exercises (one
 guided + one independent per lesson), 6 guided projects, and 2 capstones. Every lesson includes:
 objectives, prerequisites, a plain-language explanation, a working example, an editable example

@@ -7,6 +7,8 @@
  */
 import { lessonSchema, courseSchema, trackSchema, projectSchema } from "../lib/content/types";
 import { allLessons, allTracks, allCourses, allProjects } from "../lib/content/registry";
+import { allCategories, allTechnologies, allLearningPaths } from "../lib/directory/registry";
+import { validateDirectory } from "../lib/directory/validate";
 
 let errorCount = 0;
 
@@ -148,6 +150,18 @@ for (const lesson of allLessons) {
     }
   }
 }
+
+// --- Technology directory (Phase 3): categories, technologies, learning paths ---
+// allCategories/allTechnologies/allLearningPaths already ran every record
+// through its Zod schema at import time (lib/directory/registry.ts), so a
+// malformed record throws before we even get here. This section covers the
+// cross-reference/business-rule checks a schema alone can't express.
+for (const issue of validateDirectory()) {
+  fail(`[directory] ${issue.record} (${issue.field}): ${issue.message}`);
+}
+ok(
+  `Directory-checked ${allCategories.length} categories, ${allTechnologies.length} technologies, ${allLearningPaths.length} learning paths.`,
+);
 
 console.log("");
 if (errorCount > 0) {

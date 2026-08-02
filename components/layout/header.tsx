@@ -16,12 +16,12 @@ export function Header() {
         </Link>
 
         <nav aria-label="Primary" className="hidden md:block">
-          <ul className="flex items-center gap-1">
+          <ul className="flex items-center gap-0.5">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-(--color-ink-muted) hover:bg-(--color-canvas) hover:text-(--color-ink)"
+                  className="rounded-lg px-2.5 py-2 text-sm font-medium whitespace-nowrap text-(--color-ink-muted) hover:bg-(--color-canvas) hover:text-(--color-ink)"
                 >
                   {link.label}
                 </Link>

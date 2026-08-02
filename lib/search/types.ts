@@ -1,6 +1,6 @@
 export interface SearchDocument {
   id: string;
-  type: "lesson" | "course" | "project";
+  type: "lesson" | "course" | "project" | "technology" | "category" | "learning-path";
   title: string;
   description: string;
   url: string;

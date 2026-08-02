@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Container } from "@/components/ui/container";
 import { PlaygroundClient } from "@/components/playground/playground-client";
 
@@ -16,7 +17,9 @@ export default function PlaygroundPage() {
         start typing.
       </p>
       <div className="mt-8">
-        <PlaygroundClient />
+        <Suspense fallback={null}>
+          <PlaygroundClient />
+        </Suspense>
       </div>
     </Container>
   );

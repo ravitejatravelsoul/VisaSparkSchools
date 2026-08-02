@@ -45,6 +45,9 @@ content/
   fixtures/sql-seed.ts     Shared SQL dataset used by every SQL lesson/exercise
 lib/
   content/                 Zod schema (types.ts) + registry (aggregation/query helpers)
+  directory/               Phase 3 technology directory: types, categories.ts, data/*.ts (~80
+                           technologies by category), learning-paths.ts, registry.ts, validate.ts,
+                           availability.ts (see "Technology directory" below)
   learning/                Mastery formula, review schedule, guest progress store + storage/merge
   runners/                 Runner doc-builder (HTML/JS) and the two Web Worker scripts
   ai/                      Provider abstraction, chunking, retrieval, prompt building, safety, quota
@@ -125,6 +128,56 @@ together and returns a "not enough evidence" response when nothing retrieved cle
 `lib/site-config.ts` exports `featureFlags.supabaseEnabled` and `featureFlags.aiTutorEnabled`,
 both computed from environment variables and `false` by default. Every optional-feature UI branch
 checks these flags and renders an honest "not available" state rather than a broken or fake one.
+
+## Technology directory (Phase 3)
+
+A second, independent content system alongside the original six-track curriculum, added in Phase
+3 and never modifying it. Lives in `lib/directory/` and mirrors the original content system's
+architecture deliberately: `types.ts` (Zod schemas, `Input`/output type split, same pattern as
+`lib/content/types.ts`), per-category data files under `data/`, `registry.ts` (aggregation/query
+helpers — `allCategories`/`allTechnologies`/`allLearningPaths`, each parsed through its schema at
+module load), and `validate.ts` (cross-reference checks a single-object schema can't express, run
+by `scripts/validate-content.ts` alongside the original content validation).
+
+**Categories** (`categories.ts`): 16 canonical taxonomy entries; 13 `publicVisibility: true`
+today, 3 (Quantitative Aptitude, Reasoning, Career/GD Prep) registered but not public until Phase
+5 builds real content for them.
+
+**Technologies** (`data/*.ts`, one file per category): ~80 records, each a genuine guide (what it
+is/why/where it fits, core concepts, an original example, use cases, project ideas, official
+references). A technology never claims a course, runner, or project exists directly via a
+boolean — instead it stores _references_ (`courseId`, `runnerSupport`, `projectIds`), and
+`availability.ts#getTechnologyAvailability()` is the single function that resolves those
+references against the live `lib/content/registry.ts` course/project registry to decide what a
+guide page may actually render. This is a deliberate design choice mirroring how
+`lib/learning/mastery.ts` centralizes progress-scoring logic: one function, not scattered
+booleans that could disagree with each other.
+
+**Learning roadmaps** (`learning-paths.ts`): 16 records, 15 public. Each `LearningPath` is an
+ordered list of `steps` (`technology-guide` | `course` | `project` | `practice` | `assessment`
+step types — the last two exist in the schema for future phases but cannot currently appear as a
+_required_ step on any public path, since neither a practice-assessment nor certificate system
+exists yet). `certificateEligible` and `finalAssessmentRequired` are hard-validated to `false` on
+every path, public or draft — `validate.ts` fails the build if either is ever `true`, so a future
+contributor can't accidentally ship a false promise ahead of Phase 8. A path only becomes public
+once every one of its `required` steps resolves to real content; the one path that currently can't
+meet that bar (Placement and Job Readiness, which needs Aptitude/Reasoning/GD content that doesn't
+exist yet) stays an internal draft — fully typed and validated, just not rendered or included in
+the sitemap/search index.
+
+**Routes**: `/technologies` (filterable directory, client-side filter state serialized to the URL
+via `components/directory/technology-directory-client.tsx`), `/technologies/[techSlug]` (guide),
+`/categories`, `/categories/[categorySlug]`, `/roadmaps`, `/roadmaps/[pathSlug]` — all under
+`app/(site)/`, all server components except the directory's filter UI. `notFound()` is called for
+any slug that doesn't resolve to a public record, so an internal-draft category/path 404s exactly
+like a nonexistent one — there's no separate "coming soon" state to accidentally leak.
+
+**Search**: `scripts/build-search-index.ts` adds public technologies/categories/roadmaps to the
+same `public/search-index.json` Fuse.js index used for lessons/courses/projects — internal drafts
+are never included, since the script only ever calls `getPublic*()`. Common abbreviations (JS, TS,
+DSA, AI, ML, LLM, RAG, CI/CD, QA) resolve correctly because they're present in the relevant
+technology's own `searchKeywords` field, verified in `tests/unit/directory-search-aliases.test.ts`
+using the exact same Fuse.js configuration as the real search UI.
 
 ## Why params/searchParams are awaited
 

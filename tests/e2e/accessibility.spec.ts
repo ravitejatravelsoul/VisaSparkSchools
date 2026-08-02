@@ -16,6 +16,14 @@ const routes = [
   "/sign-in",
   "/privacy",
   "/this-page-does-not-exist",
+  "/learn",
+  "/categories",
+  "/categories/artificial-intelligence",
+  "/technologies",
+  "/technologies/python",
+  "/technologies/angularjs",
+  "/roadmaps",
+  "/roadmaps/complete-beginner-to-web-developer",
 ];
 
 for (const route of routes) {

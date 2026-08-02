@@ -1,14 +1,17 @@
 # VisaSparkSchools
 
-A self-paced learning platform that takes learners from zero coding knowledge through web
-development, Python, APIs, SQL, and modern AI systems (LLMs, embeddings, RAG, and agents).
+A self-paced learning and practice platform for programming, AI, data, cloud, and career-ready
+skills. Its original six-track curriculum takes learners from zero coding knowledge through web
+development, Python, APIs, SQL, and modern AI systems (LLMs, embeddings, RAG, and agents); a
+technology directory of ~80 guides across 13 categories plus 15 learning roadmaps (Phase 3) helps
+learners orient across a much broader set of technologies, honestly distinguishing a guide from a
+full course.
 
-> **Product promise:** Start with zero coding knowledge. Finish by building and understanding real
-> AI applications.
+> **Product promise:** Learn. Build. Prove.
 
 This is a public beta. Core learning — lessons, interactive exercises, quizzes, progress tracking,
-and search — works fully in the browser with **no account and no paid service required**. Accounts
-(Supabase) and the AI tutor are optional, feature-flagged additions.
+the technology directory, and search — works fully in the browser with **no account and no paid
+service required**. Accounts (Supabase) and the AI tutor are optional, feature-flagged additions.
 
 ## Quick start
 
@@ -57,9 +60,20 @@ learning experience (lessons, runners, exercises, quizzes, search, guest progres
 - [`docs/PRD.md`](docs/PRD.md) — product requirements and scope
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system design, folder layout, data flow
 - [`docs/CURRICULUM.md`](docs/CURRICULUM.md) — curriculum matrix (tracks → courses → lessons → skills)
+- [`docs/CONTENT_AUTHORING.md`](docs/CONTENT_AUTHORING.md) — how to safely add a technology,
+  category, or learning roadmap to the Phase 3 directory
+- [`docs/BRANDING.md`](docs/BRANDING.md) — logo system, brand voice, naming
 - [`docs/SECURITY.md`](docs/SECURITY.md) — threat model and safeguards
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) — Supabase and Vercel setup, step by step
 - [`PROJECT_STATUS.md`](PROJECT_STATUS.md) — durable, up-to-date implementation checklist
+
+## Technology directory (Phase 3)
+
+Alongside the original curriculum, `/technologies`, `/categories`, and `/roadmaps` provide a
+browsable, filterable, searchable directory of ~80 technology guides across 13 public categories,
+plus 15 public learning roadmaps. Every guide honestly labels itself as guide-only,
+course-available, or runner-available — a guide never claims a course or interactive playground
+exists when it doesn't; see `docs/CONTENT_AUTHORING.md` for exactly how that's enforced.
 
 ## Guest mode vs. accounts
 

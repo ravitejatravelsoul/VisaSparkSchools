@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { HtmlJsRunner } from "@/components/runners/html-js-runner";
 import { PythonRunner } from "@/components/runners/python-runner";
 import { SqlRunner } from "@/components/runners/sql-runner";
@@ -23,8 +24,19 @@ const TABS: { id: PlaygroundLanguage; label: string }[] = [
   { id: "sql", label: "SQL" },
 ];
 
+const VALID_LANGUAGES: PlaygroundLanguage[] = ["html", "javascript", "python", "sql"];
+
+/** Lets technology guides deep-link to a specific tab, e.g. /playground?lang=python. */
+function useInitialLanguage(): PlaygroundLanguage {
+  const searchParams = useSearchParams();
+  const requested = searchParams.get("lang");
+  return VALID_LANGUAGES.includes(requested as PlaygroundLanguage)
+    ? (requested as PlaygroundLanguage)
+    : "html";
+}
+
 export function PlaygroundClient() {
-  const [active, setActive] = useState<PlaygroundLanguage>("html");
+  const [active, setActive] = useState<PlaygroundLanguage>(useInitialLanguage());
   const [code, setCode] = useState<Record<PlaygroundLanguage, string>>(STARTERS);
 
   const updateCode = (lang: PlaygroundLanguage, value: string) => {
