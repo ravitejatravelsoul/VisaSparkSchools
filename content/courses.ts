@@ -378,7 +378,7 @@ export const courses: CourseInput[] = [
       "Build a traceability matrix and choose what to automate versus test manually",
     ],
     prerequisiteCourseSlugs: [],
-    nextCourseSlugs: ["api-testing-and-automation"],
+    nextCourseSlugs: ["api-testing-and-automation", "playwright-web-automation"],
     relatedTechnologySlugs: ["software-testing-fundamentals"],
     modules: [
       {
@@ -654,7 +654,7 @@ export const courses: CourseInput[] = [
       "Add JUnit tests and use try-with-resources for guaranteed resource cleanup",
     ],
     prerequisiteCourseSlugs: ["javascript-fundamentals"],
-    nextCourseSlugs: ["data-structures-and-algorithms"],
+    nextCourseSlugs: ["data-structures-and-algorithms", "selenium-webdriver-automation"],
     relatedTechnologySlugs: ["java"],
     modules: [
       {
@@ -839,6 +839,301 @@ export const courses: CourseInput[] = [
         title: "Security and evolution",
         summary: "Views, roles and least privilege, and safe, ordered schema migrations.",
         lessonSlugs: ["pg-views-and-roles", "pg-migrations-and-operations"],
+      },
+    ],
+  },
+  {
+    id: "playwright-web-automation",
+    trackSlug: "playwright",
+    slug: "playwright-web-automation",
+    title: "Playwright Web Automation",
+    description:
+      "Automate real browsers with Playwright's modern, reliable API: locators, auto-waiting, fixtures, network mocking, authentication state, parallel execution, and CI-ready diagnostics.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 9,
+    audience:
+      "Developers or testers comfortable with JavaScript/TypeScript fundamentals and the vocabulary of Software Testing Foundations who want to automate real, cross-browser end-to-end tests. Familiarity with REST APIs (as covered in API Testing and Automation) helps with the network-related lessons but isn't required.",
+    learningOutcomes: [
+      "Explain Playwright's Browser/Context/Page model and set up a real, local multi-browser project",
+      "Write reliable tests using role-based locators, web-first assertions, and Playwright's auto-waiting, without fixed sleeps",
+      "Handle navigation, forms, frames, popups, dialogs, and file uploads/downloads",
+      "Observe and mock network requests, and use APIRequestContext and stored authentication state",
+      "Compose fixtures, design page objects and test data, and configure parallel execution with sensible retries and timeouts",
+      "Diagnose a failing test using the trace viewer, screenshots, and CI-produced reports",
+    ],
+    prerequisiteCourseSlugs: ["software-testing-foundations"],
+    nextCourseSlugs: ["test-automation-framework-engineering"],
+    relatedTechnologySlugs: ["playwright"],
+    modules: [
+      {
+        id: "pw-architecture-locators-module",
+        title: "Architecture and locators",
+        summary: "The Browser/Context/Page model, real local setup, and finding elements reliably.",
+        lessonSlugs: ["pw-architecture-and-setup", "pw-locators"],
+      },
+      {
+        id: "pw-waiting-navigation-module",
+        title: "Waiting, assertions, and navigation",
+        summary: "Auto-waiting and web-first assertions, then navigation and form interaction.",
+        lessonSlugs: ["pw-waiting-and-assertions", "pw-navigation-and-forms"],
+      },
+      {
+        id: "pw-multipage-network-module",
+        title: "Multi-page flows and network control",
+        summary:
+          "Frames, popups, and dialogs, then observing/mocking network calls and APIRequestContext.",
+        lessonSlugs: [
+          "pw-frames-popups-dialogs",
+          "pw-network-observation-mocking",
+          "pw-api-request-context",
+        ],
+      },
+      {
+        id: "pw-auth-structure-module",
+        title: "Authentication, fixtures, and structure",
+        summary:
+          "Reusable authentication state, custom fixtures and hooks, page objects and test data.",
+        lessonSlugs: [
+          "pw-auth-state-projects",
+          "pw-fixtures-and-hooks",
+          "pw-page-objects-test-data",
+        ],
+      },
+      {
+        id: "pw-execution-diagnostics-module",
+        title: "Execution and diagnostics",
+        summary: "Parallelism, retries, and timeouts, then the trace viewer and CI reporting.",
+        lessonSlugs: ["pw-parallelism-retries-timeouts", "pw-trace-debugging", "pw-reporting-ci"],
+      },
+      {
+        id: "pw-reliability-module",
+        title: "Reliability and architecture",
+        summary:
+          "Diagnosing flaky tests, accessibility-aware testing, and secure, maintainable suite design.",
+        lessonSlugs: ["pw-flaky-tests-a11y-security-architecture"],
+      },
+    ],
+  },
+  {
+    id: "selenium-webdriver-automation",
+    trackSlug: "selenium",
+    slug: "selenium-webdriver-automation",
+    title: "Selenium WebDriver Automation",
+    description:
+      "The long-established browser automation standard, in Java: the W3C WebDriver protocol, robust element location and synchronization, page objects, JUnit integration, Grid concepts, and CI execution.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 9,
+    audience:
+      "Developers who've completed Java Programming Foundations (or have equivalent Java comfort) and want to automate browser-based tests using Selenium WebDriver, the tool most common in existing, especially enterprise, Java test suites.",
+    learningOutcomes: [
+      "Explain the W3C WebDriver protocol and set up a real, local Java + Selenium + JUnit project",
+      "Choose stable, accessible element-location strategies and use explicit/fluent waits instead of unreliable fixed sleeps",
+      "Automate forms, dropdowns, alerts, frames, windows, and file uploads with the Actions API",
+      "Structure a suite with page objects, component objects, and JUnit parameterized tests",
+      "Configure parallel execution and understand Grid/remote WebDriver concepts",
+      "Diagnose common failures (stale elements, intercepted clicks, timing issues) and integrate a suite into CI reporting",
+    ],
+    prerequisiteCourseSlugs: ["java-programming-foundations"],
+    nextCourseSlugs: ["test-automation-framework-engineering"],
+    relatedTechnologySlugs: ["selenium"],
+    modules: [
+      {
+        id: "sel-webdriver-fundamentals-module",
+        title: "WebDriver fundamentals",
+        summary:
+          "The W3C WebDriver protocol, real local setup, and the driver lifecycle and navigation.",
+        lessonSlugs: ["sel-webdriver-architecture", "sel-driver-lifecycle-navigation"],
+      },
+      {
+        id: "sel-locating-synchronizing-module",
+        title: "Locating elements and synchronizing",
+        summary:
+          "Stable, accessible location strategies, then implicit, explicit, and fluent waits.",
+        lessonSlugs: ["sel-element-location", "sel-synchronization-waits"],
+      },
+      {
+        id: "sel-interacting-ui-module",
+        title: "Interacting with complex UI",
+        summary:
+          "Forms, dropdowns, and alerts; frames, windows, and the Actions API; uploads, cookies, and screenshots.",
+        lessonSlugs: [
+          "sel-forms-dropdowns-alerts",
+          "sel-frames-windows-actions",
+          "sel-uploads-cookies-screenshots",
+        ],
+      },
+      {
+        id: "sel-structuring-suites-module",
+        title: "Structuring test suites",
+        summary:
+          "Page objects and component objects, then JUnit integration and parameterized tests.",
+        lessonSlugs: ["sel-page-objects", "sel-junit-integration"],
+      },
+      {
+        id: "sel-execution-scale-module",
+        title: "Execution at scale",
+        summary:
+          "Parallel execution and Grid/remote WebDriver, failure diagnosis, and CI reporting.",
+        lessonSlugs: ["sel-parallel-grid-remote", "sel-failure-diagnosis", "sel-reporting-ci"],
+      },
+      {
+        id: "sel-maintainability-security-module",
+        title: "Maintainability and security",
+        summary:
+          "Designing a maintainable suite as it grows, and handling secrets and credentials safely.",
+        lessonSlugs: ["sel-maintainable-design", "sel-security-secrets"],
+      },
+    ],
+  },
+  {
+    id: "linux-shell-fundamentals",
+    trackSlug: "linux-shell",
+    slug: "linux-shell-fundamentals",
+    title: "Linux and Shell Fundamentals",
+    description:
+      "Linux user-space fundamentals and safe, automation-oriented Bash scripting: the filesystem, pipes and redirection, text processing, processes and permissions, defensive scripting, and CI/cron execution.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    audience:
+      "Developers who want real command-line literacy for testing, automation, CI, and backend workflows — Linux user-space fundamentals and safe shell scripting, not a system-administration certification course.",
+    learningOutcomes: [
+      "Navigate and safely manipulate files using Linux's single, rooted filesystem model",
+      "Use globbing, quoting, expansion, pipes, and redirection correctly, and read exit codes",
+      "Process text with grep, sed, awk, sort, uniq, cut, and related utilities",
+      "Manage environment variables, PATH, processes, signals, and file permissions",
+      "Write defensive Bash scripts using set -euo pipefail, safe temp files, cleanup traps, and useful logging",
+      "Explain why unattended execution (cron, CI) differs from interactive use, and design scripts with distinct, meaningful exit codes",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["bash", "linux"],
+    modules: [
+      {
+        id: "sh-filesystem-basics-module",
+        title: "Filesystem and shell basics",
+        summary:
+          "Navigation and safe file manipulation, then globbing/quoting/expansion and I/O redirection.",
+        lessonSlugs: [
+          "sh-filesystem-and-navigation",
+          "sh-globbing-quoting-expansion",
+          "sh-io-streams-redirection",
+        ],
+      },
+      {
+        id: "sh-text-processing-module",
+        title: "Text processing",
+        summary: "grep/sed/awk foundations, then sort/uniq/cut/head/tail/wc and archives.",
+        lessonSlugs: ["sh-text-processing-search", "sh-text-processing-utilities"],
+      },
+      {
+        id: "sh-environment-processes-module",
+        title: "Environment and processes",
+        summary: "Environment variables and PATH, then processes, signals, and permissions.",
+        lessonSlugs: ["sh-env-vars-path", "sh-processes-signals-permissions"],
+      },
+      {
+        id: "sh-scripting-module",
+        title: "Shell scripting",
+        summary:
+          "Positional parameters, conditionals, loops, and functions, then defensive scripting.",
+        lessonSlugs: ["sh-scripting-basics", "sh-defensive-scripting"],
+      },
+      {
+        id: "sh-robust-scripts-module",
+        title: "Robust, portable scripts",
+        summary:
+          "Temp files, cleanup traps, and logging; ShellCheck and portability; cron/CI execution.",
+        lessonSlugs: [
+          "sh-temp-files-cleanup-logging",
+          "sh-shellcheck-portability",
+          "sh-cron-ci-execution",
+        ],
+      },
+      {
+        id: "sh-networking-safety-module",
+        title: "Networking and safety",
+        summary:
+          "curl fundamentals, then secrets, command-history, and destructive-command safety.",
+        lessonSlugs: ["sh-networking-curl", "sh-secrets-destructive-safety"],
+      },
+    ],
+  },
+  {
+    id: "test-automation-framework-engineering",
+    trackSlug: "test-automation-framework",
+    slug: "test-automation-framework-engineering",
+    title: "Test Automation Framework Engineering",
+    description:
+      "An advanced integration course on the architecture behind a maintainable automation suite: layering, configuration, fixtures, test data, page/component/service objects, CI quality gates, and framework health at scale.",
+    order: 0,
+    difficulty: "advanced",
+    estimatedHours: 10,
+    audience:
+      "Developers or testers who've completed Playwright Web Automation (Selenium WebDriver Automation is valuable parallel background) and want to design the surrounding architecture that turns individual tests into a maintainable, scalable framework, using TypeScript and Playwright as the reference implementation.",
+    learningOutcomes: [
+      "Explain what distinguishes a genuine test automation framework from a folder of tests, and choose the right assertion layer (unit/API/UI)",
+      "Design environment-aware configuration, safe secret handling, and reusable test-data builders",
+      "Compose fixtures as dependency injection, and design page, component, and service-client objects at framework scale",
+      "Write domain-level assertions, design a tagging scheme, and achieve genuine test isolation for safe parallel execution",
+      "Design retry/timeout policy, structured diagnostics and reporting, and CI quality gates with sharding",
+      "Apply failure triage, plan an incremental migration, and track framework health beyond a bare pass/fail count",
+    ],
+    prerequisiteCourseSlugs: ["playwright-web-automation"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["playwright"],
+    modules: [
+      {
+        id: "tafe-architecture-module",
+        title: "Framework architecture",
+        summary:
+          "Framework goals and boundaries, the test pyramid, then repo structure and configuration.",
+        lessonSlugs: ["tafe-framework-goals-boundaries", "tafe-repo-structure-config"],
+      },
+      {
+        id: "tafe-data-fixtures-module",
+        title: "Test data and fixtures",
+        summary:
+          "The data-builder pattern and test-isolation strategy, then fixtures as dependency injection.",
+        lessonSlugs: ["tafe-test-data-builders", "tafe-fixtures-di"],
+      },
+      {
+        id: "tafe-layered-architecture-module",
+        title: "Layered test architecture",
+        summary:
+          "Page and component objects, service clients and DB-validation boundaries, and assertion design.",
+        lessonSlugs: [
+          "tafe-page-component-models",
+          "tafe-service-clients",
+          "tafe-assertion-design-dsl",
+        ],
+      },
+      {
+        id: "tafe-organization-execution-module",
+        title: "Test organization and execution",
+        summary:
+          "Tagging, selection, and genuine isolation, then retry/timeout policy and flaky-test management.",
+        lessonSlugs: ["tafe-tagging-test-selection", "tafe-retry-timeout-flake"],
+      },
+      {
+        id: "tafe-diagnostics-ci-module",
+        title: "Diagnostics and CI",
+        summary:
+          "Structured diagnostics and reporting, CI quality gates and sharding, and failure triage.",
+        lessonSlugs: [
+          "tafe-diagnostics-reporting",
+          "tafe-ci-quality-gates",
+          "tafe-failure-triage-ownership",
+        ],
+      },
+      {
+        id: "tafe-maturity-module",
+        title: "Framework maturity",
+        summary:
+          "Versioning, extensibility, and anti-patterns, then migration strategy and framework health.",
+        lessonSlugs: ["tafe-versioning-extensibility", "tafe-migration-health-docs"],
       },
     ],
   },

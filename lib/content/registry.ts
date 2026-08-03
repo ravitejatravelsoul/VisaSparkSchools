@@ -15,6 +15,10 @@ import { nodeExpressLessons } from "@/content/lessons/node-express";
 import { javaLessons } from "@/content/lessons/java";
 import { dsaLessons } from "@/content/lessons/dsa";
 import { postgresqlLessons } from "@/content/lessons/postgresql";
+import { playwrightLessons } from "@/content/lessons/playwright";
+import { seleniumLessons } from "@/content/lessons/selenium";
+import { linuxShellLessons } from "@/content/lessons/linux-shell";
+import { testAutomationFrameworkLessons } from "@/content/lessons/test-automation-framework";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -39,6 +43,10 @@ export const allLessons: Lesson[] = [
   ...javaLessons,
   ...dsaLessons,
   ...postgresqlLessons,
+  ...playwrightLessons,
+  ...seleniumLessons,
+  ...linuxShellLessons,
+  ...testAutomationFrameworkLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);

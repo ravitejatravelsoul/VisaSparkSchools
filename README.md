@@ -3,13 +3,14 @@
 A self-paced learning and practice platform for programming, AI, data, cloud, and career-ready
 skills. Its curriculum takes learners from zero coding knowledge through web development
 (HTML/CSS, JavaScript, TypeScript, React, Node.js and Express), Java, data structures and
-algorithms, Python, APIs, SQL, PostgreSQL database design, and modern AI systems (LLMs,
-embeddings, RAG, and agents, plus software testing and API test automation) across
-13 tracks and 14 complete courses; a technology directory of ~80 guides
-across 13 categories plus 15 learning roadmaps (Phase 3) helps learners orient across a much
+algorithms, Python, APIs, SQL, PostgreSQL database design, browser and desktop test automation
+(Playwright, Selenium, and framework engineering), Linux and shell scripting, and modern AI systems
+(LLMs, embeddings, RAG, and agents, plus software testing and API test automation) across
+17 tracks and 18 complete courses; a technology directory of ~80 guides
+across 16 categories plus 16 learning roadmaps helps learners orient across a much
 broader set of technologies, honestly distinguishing a guide from a full course — see
-[`docs/CURRICULUM.md`](docs/CURRICULUM.md) for the complete-course definition, the full 13-track
-long-term architecture, and exactly which of the 80 guides map to a real course today.
+[`docs/CURRICULUM.md`](docs/CURRICULUM.md) for the complete-course definition, the full track
+architecture, and exactly which of the 80 guides map to a real course today.
 
 > **Product promise:** Learn. Build. Prove.
 

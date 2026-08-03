@@ -119,7 +119,7 @@ export const testingQaTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "Broad language and browser support, and a very large existing ecosystem of tests and tutorials built on it.",
     whereItFits:
-      "An alternative to Playwright for browser-based end-to-end testing; commonly found in existing (especially Java-based) enterprise test suites.",
+      "An alternative to Playwright for browser-based end-to-end testing; commonly found in existing (especially Java-based) enterprise test suites. The Selenium WebDriver Automation course covers this in depth using Java, building on Java Programming Foundations: WebDriver architecture, explicit waits, page objects, JUnit integration, and CI execution.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["testing-fundamentals"],
@@ -137,19 +137,27 @@ export const testingQaTechnologies: TechnologyInput[] = [
         "Selenium drives a real browser through the WebDriver protocol -- the same approach (real browser automation, not a simulated DOM) that this platform's own end-to-end tests use, via Playwright instead.",
     },
     useCases: ["Automated browser testing", "Maintaining existing Selenium-based test suites"],
-    practiceOptions: [],
+    practiceOptions: ["Take the Selenium WebDriver Automation course"],
     projectIdeas: ["Automate a simple form submission and assertion on a test page"],
     references: [
       { label: "Selenium official documentation", url: "https://www.selenium.dev/documentation/" },
     ],
-    searchKeywords: ["browser automation", "webdriver", "e2e testing"],
+    searchKeywords: [
+      "browser automation",
+      "webdriver",
+      "e2e testing",
+      "explicit wait",
+      "page object",
+      "java automation",
+    ],
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "4.x",
     versionNotes:
       "Selenium remains actively maintained and widely used, though many new projects choose Playwright for its more modern, less flaky API.",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "selenium-webdriver-automation",
+    projectIds: ["maintainable-learning-portal-selenium-suite"],
     publicVisibility: true,
   },
   {
@@ -164,7 +172,7 @@ export const testingQaTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "Its auto-waiting and modern API reduce the flaky, intermittently-failing tests common with older tools.",
     whereItFits:
-      "An alternative to Selenium; this platform's own test suite (tests/e2e/) is a real, inspectable Playwright example, including accessibility sweeps via @axe-core/playwright.",
+      "An alternative to Selenium; this platform's own test suite (tests/e2e/) is a real, inspectable Playwright example, including accessibility sweeps via @axe-core/playwright. The Playwright Web Automation course covers this in depth: locators, auto-waiting, fixtures, authentication state, network mocking, parallel execution, and trace-based diagnostics.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["testing-fundamentals"],
@@ -186,19 +194,27 @@ export const testingQaTechnologies: TechnologyInput[] = [
       "Cross-browser testing",
       "Automated accessibility sweeps",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Playwright Web Automation course"],
     projectIdeas: [
       "Write a Playwright test that navigates a simple site and asserts a heading is visible",
     ],
     references: [
       { label: "Playwright official documentation", url: "https://playwright.dev/docs/intro" },
     ],
-    searchKeywords: ["e2e testing", "browser automation", "test automation"],
+    searchKeywords: [
+      "e2e testing",
+      "browser automation",
+      "test automation",
+      "locators",
+      "auto-waiting",
+      "trace viewer",
+    ],
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "1.x",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "playwright-web-automation",
+    projectIds: ["cross-browser-learning-platform-test-suite"],
     publicVisibility: true,
   },
   {

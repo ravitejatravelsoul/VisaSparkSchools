@@ -303,3 +303,88 @@ test("guest mode is explicit on the profile page when Supabase isn't configured"
   await page.goto("/profile");
   await expect(page.getByText(/browsing as a guest/i)).toBeVisible();
 });
+
+test("enrolling in Playwright Web Automation, Selenium WebDriver Automation, Linux and Shell Fundamentals, and Test Automation Framework Engineering (Phase 5C) tracks progress independently", async ({
+  page,
+}) => {
+  await page.goto("/courses/playwright-web-automation");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(/\/courses\/playwright-web-automation\/pw-architecture-and-setup$/);
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/selenium-webdriver-automation");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/selenium-webdriver-automation\/sel-webdriver-architecture$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/linux-shell-fundamentals");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/linux-shell-fundamentals\/sh-filesystem-and-navigation$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/test-automation-framework-engineering");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/test-automation-framework-engineering\/tafe-framework-goals-boundaries$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  // All four courses have 14 lessons -- one completed lesson each is 1/14 ≈ 7%.
+  for (const slug of [
+    "playwright-web-automation",
+    "selenium-webdriver-automation",
+    "linux-shell-fundamentals",
+    "test-automation-framework-engineering",
+  ]) {
+    await page.goto(`/courses/${slug}`);
+    await expect(page.getByText("7% complete")).toBeVisible();
+  }
+
+  await page.reload();
+  await expect(page.getByText("7% complete")).toBeVisible();
+});
+
+test("Playwright, Selenium, and Linux/Shell guided local labs show honest 'Runs on your computer' labeling and never a browser Run button for the lab itself", async ({
+  page,
+}) => {
+  await page.goto("/courses/playwright-web-automation/pw-architecture-and-setup");
+  await expect(page.getByText("Runs on your computer").first()).toBeVisible();
+  const pwLabSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "Guided local lab" }) });
+  await expect(pwLabSection.getByRole("button", { name: /^run$/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^run$/i }).first()).toBeVisible();
+
+  await page.goto("/courses/selenium-webdriver-automation/sel-webdriver-architecture");
+  await expect(page.getByText("Runs on your computer").first()).toBeVisible();
+  const selLabSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "Guided local lab" }) });
+  await expect(selLabSection.getByRole("button", { name: /^run$/i })).toHaveCount(0);
+
+  await page.goto("/courses/linux-shell-fundamentals/sh-filesystem-and-navigation");
+  await expect(page.getByText("Runs on your computer").first()).toBeVisible();
+  const shLabSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "Guided local lab" }) });
+  await expect(shLabSection.getByRole("button", { name: /^run$/i })).toHaveCount(0);
+});
+
+test("a Playwright lesson's browser exercise never claims a real browser was launched, and a Linux lesson's exercise never claims a real shell command ran", async ({
+  page,
+}) => {
+  await page.goto("/courses/playwright-web-automation/pw-locators");
+  await expect(page.getByText(/this exercise launched chromium/i)).toHaveCount(0);
+  await expect(page.getByText(/this ran selenium/i)).toHaveCount(0);
+
+  await page.goto("/courses/linux-shell-fundamentals/sh-globbing-quoting-expansion");
+  await expect(page.getByText(/no shell (is invoked|command)/i).first()).toBeVisible();
+});

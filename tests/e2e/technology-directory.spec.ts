@@ -122,6 +122,42 @@ test("the PostgreSQL technology guide (previously guide-only) now shows a real, 
   await expect(page).toHaveURL(/\/courses\/database-design-and-postgresql$/);
 });
 
+test("the Playwright technology guide (previously guide-only) now shows a real, working 'Start course' action (Phase 5C)", async ({
+  page,
+}) => {
+  await page.goto("/technologies/playwright");
+  const startCourse = page.getByRole("link", { name: /start course/i });
+  await expect(startCourse).toBeVisible();
+  await startCourse.click();
+  await expect(page).toHaveURL(/\/courses\/playwright-web-automation$/);
+});
+
+test("the Selenium technology guide (previously guide-only) now shows a real, working 'Start course' action (Phase 5C)", async ({
+  page,
+}) => {
+  await page.goto("/technologies/selenium");
+  const startCourse = page.getByRole("link", { name: /start course/i });
+  await expect(startCourse).toBeVisible();
+  await startCourse.click();
+  await expect(page).toHaveURL(/\/courses\/selenium-webdriver-automation$/);
+});
+
+test("the Bash and Linux technology guides (previously guide-only) now show a real, working 'Start course' action (Phase 5C)", async ({
+  page,
+}) => {
+  await page.goto("/technologies/bash");
+  const startCourseBash = page.getByRole("link", { name: /start course/i });
+  await expect(startCourseBash).toBeVisible();
+  await startCourseBash.click();
+  await expect(page).toHaveURL(/\/courses\/linux-shell-fundamentals$/);
+
+  await page.goto("/technologies/linux");
+  const startCourseLinux = page.getByRole("link", { name: /start course/i });
+  await expect(startCourseLinux).toBeVisible();
+  await startCourseLinux.click();
+  await expect(page).toHaveURL(/\/courses\/linux-shell-fundamentals$/);
+});
+
 test("a technology with runner support shows a working 'Open playground' action", async ({
   page,
 }) => {

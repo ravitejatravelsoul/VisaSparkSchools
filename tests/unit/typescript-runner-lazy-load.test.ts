@@ -140,3 +140,83 @@ describe("Guided local labs (React/Node.js/Java/PostgreSQL courses) add no new e
     }
   });
 });
+
+describe("Guided local labs (Playwright, Selenium, Linux/Shell, Test Automation Framework Engineering courses) add no new execution surface", () => {
+  // Phase 5C's four courses deliberately have no browser runner of their
+  // own -- every real Playwright/Selenium/Java/Bash/CI exercise is a guided
+  // local lab (static instructional text), never executed by this site or
+  // its server. These tests assert that architectural boundary at the
+  // source level, mirroring the equivalent Phase 5A.2/5B guard above.
+  it("lib/runners/ contains no Playwright, Selenium, Java, or shell-execution runner implementation", () => {
+    const runnerFiles = readdirSync(join(ROOT, "lib", "runners"));
+    const forbidden = runnerFiles.filter((f) =>
+      /playwright|selenium|webdriver|java|jvm|shell-exec|bash-exec|terminal/i.test(f),
+    );
+    expect(forbidden).toEqual([]);
+  });
+
+  it("no static import of playwright, selenium-webdriver, or a shell-execution package exists outside test config", () => {
+    const forbiddenImportPatterns = [
+      /from\s+["']playwright["']/,
+      /from\s+["']selenium-webdriver["']/,
+      /from\s+["']node-pty["']/,
+      /from\s+["']child_process["']/,
+    ];
+    // @playwright/test is legitimately imported by this repo's own e2e
+    // suite (tests/e2e/) and Playwright config -- those are this platform's
+    // OWN test infrastructure, not a learner-facing execution surface, so
+    // they're excluded from this scan.
+    const excludedDirs = [join(ROOT, "tests", "e2e"), join(ROOT, "node_modules")];
+    function walkAll(dir: string, files: string[] = []): string[] {
+      for (const entry of readdirSync(dir)) {
+        const full = join(dir, entry);
+        if (excludedDirs.some((excluded) => full.startsWith(excluded))) continue;
+        const stat = statSync(full);
+        if (stat.isDirectory()) {
+          if (entry === "node_modules" || entry === ".next" || entry === "tests") continue;
+          walkAll(full, files);
+        } else if (/\.(ts|tsx)$/.test(entry)) {
+          files.push(full);
+        }
+      }
+      return files;
+    }
+    const files = ["app", "components", "lib"].flatMap((dir) => walkAll(join(ROOT, dir)));
+    const offenders: string[] = [];
+    for (const file of files) {
+      const text = readFileSync(file, "utf8");
+      for (const pattern of forbiddenImportPatterns) {
+        if (pattern.test(text)) offenders.push(relative(ROOT, file));
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("GuidedLocalLabPanel still imports no runner code after Phase 5C", () => {
+    const text = readFileSync(
+      join(ROOT, "components", "lesson", "guided-local-lab-panel.tsx"),
+      "utf8",
+    );
+    expect(text).not.toMatch(/from ["']@\/lib\/runners/);
+    expect(text).not.toMatch(/from ["']@\/components\/runners/);
+  });
+
+  it("no browser-automation, Java, or shell-execution dependency was added to package.json for Phase 5C", () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+    const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+    // @playwright/test is this platform's own e2e testing infrastructure
+    // (pre-existing, unrelated to Phase 5C's learner-facing content) and is
+    // explicitly allowed; everything else here would indicate a new,
+    // learner-facing execution surface Phase 5C's brief explicitly forbids.
+    const forbiddenPackageNamePatterns = [
+      /^selenium-webdriver$/i,
+      /^webdriverio$/i,
+      /^node-pty$/i,
+      /^java$/i,
+    ];
+    const depNames = Object.keys(allDeps);
+    for (const pattern of forbiddenPackageNamePatterns) {
+      expect(depNames.filter((name) => pattern.test(name))).toEqual([]);
+    }
+  });
+});

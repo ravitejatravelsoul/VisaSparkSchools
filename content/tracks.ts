@@ -101,4 +101,36 @@ export const tracks: Track[] = [
       "Think like a tester: design techniques, risk-based planning, and clear defect reporting — plus automated API validation.",
     order: 12,
   },
+  {
+    id: "playwright",
+    slug: "playwright",
+    title: "Playwright Web Automation",
+    description:
+      "Automate real browsers with a modern, reliable API — locators, auto-waiting, fixtures, network mocking, and CI-ready end-to-end tests.",
+    order: 13,
+  },
+  {
+    id: "selenium",
+    slug: "selenium",
+    title: "Selenium WebDriver Automation",
+    description:
+      "The long-established, widely-deployed browser automation standard — WebDriver, explicit waits, page objects, and JUnit-driven test suites in Java.",
+    order: 14,
+  },
+  {
+    id: "linux-shell",
+    slug: "linux-shell",
+    title: "Linux & Shell Fundamentals",
+    description:
+      "Linux user-space fundamentals and safe, automation-oriented Bash scripting — the command-line literacy underneath testing, CI, and backend work.",
+    order: 15,
+  },
+  {
+    id: "test-automation-framework",
+    slug: "test-automation-framework",
+    title: "Test Automation Framework Engineering",
+    description:
+      "The architecture behind a maintainable automation suite: layering, fixtures, test data, CI quality gates, and framework health at scale.",
+    order: 16,
+  },
 ];

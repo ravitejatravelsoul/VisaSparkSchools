@@ -1286,12 +1286,13 @@ verified clean, one commit ahead of the prior `origin/main` at `c4b2d24`). A pub
 safety audit of `857edda` and the full `c4b2d24..857edda` range found no secrets, credentials, or
 confidential content, after which `857edda` was pushed normally (no force-push, no rewrite, no
 amend) — `origin/main` is now `857edda`. Phase 5B's own work — three new courses — was then built,
-verified, and committed **locally only**; it was not pushed.
+verified, and committed **locally only** as `0dfd44a`. That commit was later safety-audited and
+pushed at the start of the Phase 5C session below — see that section for the push checkpoint.
 
 **What shipped, genuinely complete and verified:**
 
 1. **Java Programming Foundations** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3
-   guided local labs, 1 guided project — *Course Enrollment and Progress Manager*). Version
+   guided local labs, 1 guided project — _Course Enrollment and Progress Manager_). Version
    assumption: Java 21 (LTS). Covers the JDK/JVM/bytecode model, variables/types/operators/strings,
    control flow, methods and overloading, arrays and collections, encapsulation/inheritance/
    composition/interfaces/polymorphism, checked and unchecked exceptions, generics and the
@@ -1304,7 +1305,7 @@ verified, and committed **locally only**; it was not pushed.
    real JUnit suite to a Maven project) are real, local, `javac`/`java`/`mvn`/JUnit work, never
    simulated in the browser.
 2. **Data Structures and Algorithms** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 1
-   guided project — *Learning Path Recommendation Engine*). Covers problem decomposition and
+   guided project — _Learning Path Recommendation Engine_). Covers problem decomposition and
    correctness, Big O/Ω/Θ (with an explicit empirical-timing-vs-asymptotic-analysis distinction),
    arrays/dynamic arrays/linked lists, stacks/queues/deques, hash tables, binary trees and the three
    depth-first traversals, binary search trees, heaps and priority queues, recursion and
@@ -1317,7 +1318,7 @@ verified, and committed **locally only**; it was not pushed.
    edge-case tests; a same-tree/BST-validity check with edge-case tests; the sort-choice
    justification) to satisfy the lab requirement inside the existing exercise schema.
 3. **Database Design and PostgreSQL** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3
-   guided local labs, 1 guided project — *Learning Platform Database Layer*). Version assumption:
+   guided local labs, 1 guided project — _Learning Platform Database Layer_). Version assumption:
    PostgreSQL 16 (examples remain valid on 17+). Builds on Git, APIs & SQL's existing SQL module
    (now its declared prerequisite) rather than duplicating it: relational modeling and cardinality/
    optionality, primary/foreign keys and natural-vs-surrogate key tradeoffs, 1NF/2NF/3NF and
@@ -1334,7 +1335,7 @@ verified, and committed **locally only**; it was not pushed.
    underlying decision (a type-selection function, a transaction-atomicity simulator, a lost-update
    reproduction, an EXPLAIN-output parser, a least-privilege-violation checker, a migration-order
    validator) plus static, non-executed reference PostgreSQL DDL/EXPLAIN output (`example.language:
-   "none"`, which renders with no Run button at all) — never silently running PostgreSQL-flavored
+"none"`, which renders with no Run button at all) — never silently running PostgreSQL-flavored
    SQL against SQLite. The three guided local labs (create and validate a normalized schema; add
    transactions/constraints/indexes and reproduce a real lost-update anomaly across two concurrent
    `psql` sessions; add ordered migrations, a least-privileged role, and a backup/recovery
@@ -1346,7 +1347,7 @@ verified, and committed **locally only**; it was not pushed.
    tracks total). Prerequisites: Java requires JavaScript Fundamentals (the real technical
    requirement, since Java's exercises don't depend on Node/Express/React knowledge); Data
    Structures and Algorithms requires JavaScript Fundamentals directly for the same honest reason
-   (its exercises are JS/TS, not Java), with Java offered only as a *recommended*, non-gating
+   (its exercises are JS/TS, not Java), with Java offered only as a _recommended_, non-gating
    continuation via `nextCourseSlugs`; Database Design and PostgreSQL requires Git, APIs & SQL.
    Reciprocal `nextCourseSlugs` were added on Node.js & Express (→ Java) and Git, APIs & SQL (→
    Database Design and PostgreSQL). The `java`, `data-structures-and-algorithms`, and `postgresql`
@@ -1402,26 +1403,214 @@ Vitest tests passed, 29 files), `build` (succeeds, 340 static params generated),
 metadata for this batch's exact pass/skip/fail counts, matching the pre-existing 5 skips unchanged
 and 0 failures).
 
+## Phase 5C — Web Automation, Framework Engineering, and Linux (2026-08-03, complete)
+
+Starting checkpoint for this batch: local `main` and `origin/main` both at `857edda` (Phase 5A.2),
+with Phase 5B's own commit (`0dfd44a`, "feat: add Java, algorithms, and PostgreSQL courses") sitting
+one commit ahead locally, not yet pushed. Verified independently via `git status --short` (clean),
+`git branch --show-current` (`main`), `git log --oneline --decorate`, `git show --stat --oneline
+HEAD`, `git rev-parse HEAD`/`origin/main`, and `git rev-list --left-right --count origin/main...HEAD`
+(1 ahead, 0 behind) — all matched expectations, no discrepancy. The stated starting inventory (13
+tracks / 14 courses / 160 lessons / 16 projects, 260 Vitest tests) was independently confirmed via
+`content:validate` and `test`, not assumed. A public-repository safety audit of `0dfd44a` and the
+full `857edda..0dfd44a` range found no secrets, credentials, API keys, private keys, Supabase
+secrets, env files, internal URLs, or unintended binaries, after which `0dfd44a` was pushed normally
+(no force-push, no rewrite, no amend) — `origin/main` is now `0dfd44a`. Phase 5C's own work — four
+new courses — was then built, verified, and committed **locally only**; it was not pushed.
+
+**What shipped, genuinely complete and verified:**
+
+1. **Playwright Web Automation** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3 guided
+   local labs, 1 guided project — _Build a Cross-Browser Learning Platform Test Suite_). Prerequisite:
+   Software Testing Foundations (API Testing and Automation is a recommended, non-mandatory
+   companion). Version assumption: Playwright 1.62.x (this repository's own `tests/e2e/` suite is
+   pinned to `@playwright/test ^1.62.0` — the exact, environment-verified version, not a guessed
+   "latest"), Node.js 20.x/22.x LTS. Covers the Browser/Context/Page model and setup, locators and
+   role-based locating, auto-waiting and web-first assertions, navigation/forms/frames/popups/
+   dialogs, network observation and mocking, `APIRequestContext`, authentication state and projects,
+   fixtures and hooks, page objects and test-data design, parallelism/retries/timeouts, the trace
+   viewer, and reporting/CI/flaky-test diagnosis/accessibility-aware testing/security. This platform
+   has no Playwright runtime in its browser sandbox and adds none — every browser exercise is
+   genuine, runnable JavaScript modeling the underlying decision (locator-stability scoring, a
+   retry/backoff policy, fixture-dependency resolution, trace-event classification) and every
+   exercise prompt is honest about modeling only. The three guided local labs (create and run a
+   multi-browser project; build reliable tests with locators/fixtures/auth state; diagnose failures
+   via traces/reports/screenshots/CI artifacts) are real, local `npx playwright install`/`npx
+playwright test` work.
+2. **Selenium WebDriver Automation** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3
+   guided local labs, 1 guided project — _Build a Maintainable Learning Portal Selenium Suite_).
+   Prerequisite: Java Programming Foundations (the real technical requirement, since the course is
+   Java-based). Version assumption: Java 21 LTS, Selenium WebDriver 4.x, JUnit 5.10+, Maven 3.9+.
+   Covers WebDriver/W3C WebDriver architecture, driver setup and lifecycle, element-location
+   strategies and accessible/stable locator principles, implicit/explicit/fluent waits (and why fixed
+   sleeps are unreliable), forms/dropdowns/alerts/frames/windows/the Actions API, uploads/cookies/
+   screenshots, page and component objects, JUnit integration and parameterized tests, parallel
+   execution and Grid/remote WebDriver concepts, failure diagnosis (stale elements, intercepted
+   clicks, timing failures), and reporting/CI/maintainable design/security. This platform has no JVM
+   or Selenium runtime and adds none — every browser exercise models the underlying decision (wait
+   selection, locator quality scoring, page-object responsibility) in genuine JavaScript, never
+   claiming a real browser was opened or controlled. The three guided local labs (a real Java +
+   Selenium + JUnit project; a realistic multi-page workflow with explicit waits; refactoring into
+   maintainable components and executing in CI) are real, local `mvn`/JUnit/browser work.
+3. **Linux and Shell Fundamentals** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3 guided
+   local labs, 1 guided project — _Build a Safe Project Validation CLI_). No prerequisite (a genuine
+   foundational course). Version assumption: Bash 5.x, a current Linux distribution (Ubuntu 22.04/
+   24.04 LTS or equivalent). Explicitly scoped to Linux user-space fundamentals, Bash-compatible
+   shell concepts, and safe, automation-oriented command-line usage — **not** a system-administration
+   certification course. Covers the filesystem model and safe navigation/manipulation, globbing/
+   quoting/expansion, stdin/stdout/stderr/pipes/redirection/exit codes, environment variables and
+   PATH, processes and signals, permissions, text processing (`grep`/`sed`/`awk`/`sort`/`uniq`/`cut`/
+   `head`/`tail`/`wc`), shell scripting (parameters/conditionals/loops/functions), defensive
+   scripting (`set -e`'s real, documented exceptions; `set -u`; `pipefail`), temp files/cleanup traps/
+   logging, ShellCheck and portability, cron/CI execution concepts, `curl`/networking fundamentals,
+   and secrets/command-history/destructive-command safety. **This is the strictest execution-honesty
+   policy on the platform**: this platform never executes a shell command anywhere, adds no shell
+   runner or terminal emulation, and every one of this course's 28 browser exercises' prompts
+   explicitly states it only models argument parsing, pipeline transformations, exit-code decisions,
+   or quoting/permission logic — verified by a dedicated test asserting every single guided/
+   independent exercise prompt in this course contains an explicit "no real script/shell" disclaimer.
+   No guided-local-lab content instructs a broad or unresolved recursive delete. The three guided
+   local labs (navigate and transform a safe, contained sample workspace under `~/shell-lab/`; build
+   a defensive log-analysis script; create a CI-friendly verification script with cleanup and
+   distinct exit codes) are real, local terminal work, run entirely by the learner.
+4. **Test Automation Framework Engineering** (6 modules, 14 lessons, 42 quiz questions, 28 exercises,
+   3 guided local labs, 1 guided project — _Build a Production-Grade Learning Platform Automation
+   Framework_). An advanced integration course, not a duplicate of Playwright or Selenium — its real
+   prerequisite is Playwright Web Automation only (Selenium is mentioned as valuable, non-mandatory
+   parallel background, never an impossible AND-prerequisite). Reference implementation: TypeScript
+   and Playwright, reusing the learner's existing Playwright knowledge with no new major runtime.
+   Covers framework goals/boundaries and the test pyramid's practical limits, repo structure/
+   configuration/secret handling, test-data builders, fixtures as dependency injection, page/
+   component/service-client objects and DB-validation-boundary design, domain assertion design and a
+   DSL-adoption tradeoff, tagging/test-selection/genuine isolation, retry/timeout policy and flaky-
+   test management, structured diagnostics and reporting, CI quality gates and sharding, failure
+   triage/ownership/code review standards, versioning/extensibility/anti-patterns, and migration
+   strategy/framework-health metrics/documentation. Its guided project's DB-validation adapter is a
+   **documented interface design plus an in-memory mock only** — no real database connection, no
+   real credential, and no Supabase integration anywhere in the course or project, verified by a
+   dedicated test scanning for Supabase URLs, embedded Postgres connection strings, and Supabase env
+   var names. The three guided local labs (scaffold a layered TypeScript automation framework; add
+   configuration/fixtures/test-data builders/diagnostics; add CI quality gates/reporting/sharding/
+   failure triage) are real, local TypeScript + Playwright + GitHub Actions work.
+5. Four new tracks (`playwright`, `selenium`, `linux-shell`, `test-automation-framework`) appended
+   after Software Testing & QA (orders 13-16, avoiding the Phase 5B-style mid-list renumbering risk;
+   final order: … → Software Testing & QA → **Playwright** → **Selenium** → **Linux & Shell
+   Fundamentals** → **Test Automation Framework Engineering** — 17 tracks total). Prerequisite chain
+   kept honest: Software Testing Foundations gained `playwright-web-automation` as an additional
+   `nextCourseSlugs` entry; Java Programming Foundations gained `selenium-webdriver-automation`
+   similarly; Test Automation Framework Engineering's only real prerequisite is Playwright Web
+   Automation, with Selenium explicitly never forced into an impossible combined prerequisite. The
+   `playwright`, `selenium`, `bash`, and `linux` technology-directory guides (previously guide-only)
+   now link to their real courses/projects, with `lastReviewed` updated and `whereItFits`/
+   `practiceOptions` prose upgraded. The pre-existing "Software Testing and Automation" roadmap had
+   its Playwright and Selenium steps upgraded from `technology-guide` to real `course`-type steps and
+   gained a new, optional Test Automation Framework Engineering step; the "Java Developer" roadmap
+   gained a new, optional Selenium step (the Java-based automation path, non-forced); the "Cloud and
+   DevOps Engineer" roadmap had its Bash guide step upgraded to the real Linux and Shell Fundamentals
+   course step.
+
+**Verification for this batch:** `content:validate` passes cleanly across **17 tracks / 18 courses /
+216 lessons / 20 projects** (computed, not asserted); `content:validate-snippets` proved all **402**
+browser-executable reference solutions (290 pre-existing + 112 new: 28 per course × 4 courses, all
+genuinely browser-executable JS/TS since none of these four courses use SQL/Python exercises)
+genuinely compile and pass their own harnesses, on the **first run after two authoring-time bugs
+were caught and fixed** — a duplicate `order` value across two Selenium lessons (caught by
+`content:validate`, not the snippet validator) and a guided-local-lab reference solution that was
+byte-identical to its starter file (Test Automation Framework Engineering's CI-quality-gates lab,
+fixed by turning the starter into a genuinely incomplete scaffold with explicit `TODO`s). New tests:
+a registry-level test extending the GLL-per-course check to all four new courses (exactly 3 each); a
+module/lesson/quiz/exercise exact-count test for all four new courses (6/14/42/28 each); a test
+confirming the platform-wide guided-local-lab total is exactly **24** (12 pre-Phase-5C + 12 new: 3
+Playwright + 3 Selenium + 3 Linux/Shell + 3 Test Automation Framework Engineering); two tests
+specifically checking Playwright and Selenium lessons never contain a false real-execution claim; a
+test confirming every single Linux/Shell exercise prompt explicitly states it models, not executes,
+shell behavior; two tests confirming Test Automation Framework Engineering never contains a real
+database credential/connection string/Supabase reference, and that its DB-validation-adapter lesson
+explicitly documents having no real database connection; two tests confirming the honest,
+non-impossible prerequisite chain (Test Automation Framework Engineering requires only Playwright;
+Selenium's real prerequisite is Java); a new architectural test-suite guard confirming no Playwright/
+Selenium/shell-execution runner or dependency was added to `lib/runners/` or `package.json` (with
+this platform's own pre-existing `@playwright/test` e2e infrastructure correctly excluded from the
+scan, since it is this platform's own test tooling, not a learner-facing execution surface); 3 new
+e2e enrollment/progress-independence tests spanning all four new courses; e2e tests confirming the
+Playwright/Selenium/Linux guided-local-lab sections never render a Run button while the lesson's own
+browser exercises still do; an e2e test confirming a Playwright lesson's exercise never claims a
+real browser was launched; 3 new e2e technology-directory tests confirming the Playwright, Selenium,
+Bash, and Linux guides now show real, working "Start course" links; e2e search tests for
+course-specific terms (trace viewer, fluent wait, pipefail, quality gates) and two new e2e quiz
+tests. **Accessibility**: 26 new routes (4 course overviews, 8 lessons — including a GLL lesson and a
+CI-quality-gates lesson per relevant course — 4 projects, 4 track/path pages, 2 upgraded roadmap
+pages) pass the full axe sweep with zero critical/serious violations, alongside the pre-existing
+41-route sweep, all green. Visually inspected (screenshots actually rendered via a real headless
+browser and opened, not just generated) at 375px and 1280px, light and dark: the 18-course catalog
+(correct "18 courses across 17 tracks" live count), a Playwright lesson (clean explanation
+typography, correct sidebar module list, readable dark-mode code blocks), a Linux guided-local-lab
+lesson (the execution-honesty banner and the lesson's own explicit "browser exercises model shell
+behavior... never execute real shell commands" disclosure both visible above the fold), and the
+Playwright technology-directory guide (real "Start course: Playwright Web Automation" button, correct
+`lastReviewed` date) all render cleanly with no visible layout defects, overflow, or truncation
+across every checked route/theme/viewport combination.
+
+**Bundle isolation and security**: no new npm dependency was added; `lib/runners/` still contains
+exactly the same four runner implementations from before this batch, with no Playwright, Selenium,
+Java, or shell-execution runner added; no learner code reaches a real browser, JVM, or shell; local
+commands throughout all twelve new guided local labs are shown as instructions only, never executed
+by this site or its server; no real database credential, connection string, or Supabase reference
+exists anywhere in the new content (verified by a dedicated test).
+
+**Full verification suite, run after all content and documentation changes**: `format:check`
+(14 files initially needed Prettier's `--write`, all cosmetic — trailing commas and line-wrapping in
+newly authored content/test files — then verified clean), `lint` (0 warnings), `typecheck` (clean),
+`content:validate` (17/18/216/20, pass), `content:validate-snippets` (402/402, pass, run three times
+across the batch — after authoring, after the two bugs above were fixed, and again after all
+documentation edits), `test` (**275/275** Vitest tests passed, 29 files, run twice, stable both
+times), `build` (succeeds, **408** static params generated, run twice, stable both times),
+`playwright test` (full suite across chromium + mobile-chromium, run **three** times across the
+batch — after authoring/wiring, after all content/test changes, and again after all documentation
+edits): **302 total (297 passed, 5 skipped, 0 failed)** on runs one and two; run three (the final
+pass, after documentation-only changes) recorded **296 passed, 1 failed, 5 skipped** — the failure
+was `typescript-runner.spec.ts`'s pre-existing, unrelated "genuine type error, not a fake pass"
+test on `mobile-chromium` only, which loads the ~8.7 MB TypeScript compiler chunk and is
+independently known to be timing-sensitive under heavy parallel load; re-run in isolation
+immediately after (3 consecutive repeats, `--repeat-each=3`), it passed all 3 times, confirming
+this is pre-existing flakiness unrelated to any Phase 5C change, not a regression. Every Phase
+5C-specific test passed in all three full-suite runs, including the one with the unrelated flake.
+One genuinely new e2e test needed a one-time fix during this batch — an assumption that every
+Playwright exercise prompt used the exact "This models..." phrasing that only the Linux/Shell and
+Test Automation Framework Engineering courses (authored later in this same session, under a
+stricter, newly-adopted convention) actually use — corrected to assert the absence of specific
+false-execution phrases instead, which is what the requirement actually called for.
+
 ## If you pick this up next
 
-Recommended next step before any further feature phase: **provision a real Supabase project and
-execution-test the guest-to-account sync lifecycle end to end** (sign up, complete some lessons as
-a guest first, sign in, verify the merge; sign out and confirm nothing leaks; sign in as a second
-account on the same device and confirm the same). Everything is implemented and mock-tested
-(Phase 4 report, items 17-24), but "the mock behaves correctly" and "the real Postgres/RLS/auth
-stack behaves correctly" are different claims, and only the first has been verified in this build.
-Phase 4.5's redesign is visual/interaction-only and doesn't change this recommendation.
+**Immediate next step**: Phase 5C's commit sits locally, one commit ahead of `origin/main` (still at
+`0dfd44a`), not yet pushed — safety-audit it (mirroring the audit process each phase above performed
+on the previous phase's commit) and push it before starting further work, so `origin/main` doesn't
+fall further behind local `main`.
 
-Recommended next _phase_: **Phase 5 (Aptitude, Reasoning, and career content)**, which would
-finally let the three currently-internal categories and the one currently-draft learning roadmap
-(Placement and Job Readiness) go public. Other options, not started, listed here only as
-possibilities: mapping more of the ~63 guide-only technologies to real courses as those courses get
-built; building out Study Studio (Phase 6) or Project Studio/Tools Lab (Phase 7), both large enough
-to warrant their own from-scratch planning pass the way this session did for Phase 3 and Phase 4;
-or building the course-reviews system deferred in Phase 4 (item 39), once a moderation/abuse/
-ownership model is designed. Whichever is chosen, re-run the full verified-green command list above
-before and after each coherent chunk of work, exactly as this session did, and do not add a
-navigation entry for any surface until its destination page is real and non-empty.
+Recommended next step before any further feature phase, still outstanding from earlier phases:
+**provision a real Supabase project and execution-test the guest-to-account sync lifecycle end to
+end** (sign up, complete some lessons as a guest first, sign in, verify the merge; sign out and
+confirm nothing leaks; sign in as a second account on the same device and confirm the same).
+Everything is implemented and mock-tested (Phase 4 report, items 17-24), but "the mock behaves
+correctly" and "the real Postgres/RLS/auth stack behaves correctly" are different claims, and only
+the first has been verified in this build. Phase 4.5's redesign is visual/interaction-only and
+doesn't change this recommendation.
+
+Recommended next _phase_: with Phase 5A/5A.2/5B/5C all complete (18 courses, 17 tracks, 216 lessons,
+20 projects, 24 guided local labs), **Phase 5 (Aptitude, Reasoning, and career content)** — letting
+the three currently-internal categories and the one currently-draft learning roadmap (Placement and
+Job Readiness) go public — is now the most direct remaining path to closing out the curriculum
+expansion's original scope. Other options, not started, listed here only as possibilities: mapping
+more of the remaining guide-only technologies (including automation-adjacent ones like Docker,
+Kubernetes, and GitHub Actions, now that Playwright/Selenium/Linux/Bash/Test-Automation-Framework
+guides all link to real courses) to real courses as those courses get built; building out Study
+Studio (Phase 6) or Project Studio/Tools Lab (Phase 7), both large enough to warrant their own
+from-scratch planning pass the way this session did for Phase 3 and Phase 4; or building the
+course-reviews system deferred in Phase 4 (item 39), once a moderation/abuse/ownership model is
+designed. Whichever is chosen, re-run the full verified-green command list above before and after
+each coherent chunk of work, exactly as this session did, and do not add a navigation entry for any
+surface until its destination page is real and non-empty.
 
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 

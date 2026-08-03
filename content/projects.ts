@@ -1189,4 +1189,389 @@ export const projects: Project[] = [
       },
     ],
   },
+  {
+    id: "cross-browser-learning-platform-test-suite",
+    slug: "cross-browser-learning-platform-test-suite",
+    title: "Build a Cross-Browser Learning Platform Test Suite",
+    description:
+      "Build a real, local Playwright + TypeScript test suite modeling a learning platform's key flows — locators, fixtures, authentication state, page objects, parallel execution, and trace-based diagnostics — running against multiple real browsers. Runs entirely on your own machine; this platform does not execute Playwright.",
+    difficulty: "intermediate",
+    estimatedHours: 9,
+    isCapstone: false,
+    trackSlugs: ["playwright"],
+    prerequisiteLessonIds: [
+      "pw-architecture-and-setup",
+      "pw-locators",
+      "pw-waiting-and-assertions",
+      "pw-navigation-and-forms",
+      "pw-auth-state-projects",
+      "pw-fixtures-and-hooks",
+      "pw-page-objects-test-data",
+      "pw-parallelism-retries-timeouts",
+      "pw-trace-debugging",
+      "pw-reporting-ci",
+    ],
+    objectives: [
+      "Configure a real, local Playwright project that runs the same suite against at least two browser engines",
+      "Write reliable tests using role-based locators and web-first assertions, with zero fixed sleeps",
+      "Compose fixtures for reusable authentication state and design at least two page objects",
+      "Configure parallel execution with a deliberate retry and timeout policy",
+      "Diagnose a failing test using the trace viewer, and wire the suite into a CI workflow that uploads diagnostics on failure",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Multi-browser project setup and first tests",
+        description:
+          "Scenario: you are building a real, local automated test suite for a small demo web app (any simple static site or local dev server you control, including a few pages of this very platform if you run it locally) — entirely on your own machine. Initialize a Playwright + TypeScript project (npm init playwright@latest), configure playwright.config.ts to run against at least Chromium and Firefox, and write a first smoke test that navigates to a page and asserts a heading is visible using a role-based locator.",
+        checklist: [
+          "npx playwright test runs the suite against at least two real, distinct browser engines",
+          "The first test uses a role-based locator (getByRole) and a web-first assertion, not a fixed sleep",
+          "playwright.config.ts defines at least two named projects, one per browser engine",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Reliable locators and multi-page navigation",
+        description:
+          "Add tests covering at least two more real user flows across multiple pages of your demo app — using only role-based or accessible locators, Playwright's auto-waiting, and web-first assertions (expect(locator).toBeVisible(), .toHaveText(), etc.). Include at least one test verifying an error or edge-case state (an invalid form submission, a not-found page), not just the happy path.",
+        checklist: [
+          "At least 2 additional tests cover distinct, multi-page user flows",
+          "Every locator is role-based or otherwise accessible-attribute-based -- no brittle CSS-position or XPath-index selectors",
+          "At least one test verifies an error or edge-case state, not only a success path",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Fixtures, authentication state, and page objects",
+        description:
+          "Build a custom fixture that establishes and reuses authentication state (a real storageState setup project, or a mocked login flow appropriate to your demo app) so authenticated tests don't each re-perform login from scratch. Introduce at least two page objects for the most-used pages, and refactor at least 3 existing tests to use them instead of inline locators.",
+        checklist: [
+          "A dedicated setup project or fixture establishes authentication state once and reuses it via storageState",
+          "At least 2 page objects exist, each wrapping one page's locators and actions behind a small, meaningful API",
+          "At least 3 tests use the page objects instead of constructing locators inline",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Test data, parallel execution, and retry/timeout policy",
+        description:
+          "Add a small test-data builder function (with sensible defaults and an overridable partial input) for any test data your suite creates. Configure fullyParallel: true and a deliberate, small retry count (1-2) with a documented, comfortable timeout margin above your app's normal response times. Confirm the full suite still passes running in parallel, with genuinely isolated tests (no shared, hardcoded test data).",
+        checklist: [
+          "At least one test-data builder function exists and is used by at least 2 tests with different overrides",
+          "playwright.config.ts sets fullyParallel: true and a small, documented retry count",
+          "The full suite passes when run in parallel, with no test depending on another test's data or execution order",
+        ],
+      },
+      {
+        id: "m5",
+        title: "Diagnostics and CI reporting",
+        description:
+          "Intentionally break one test (change an assertion to a wrong expected value), run the suite, and use the trace viewer (npx playwright show-trace) to diagnose exactly what happened -- then fix the test. Add a GitHub Actions workflow (.github/workflows/playwright.yml) that installs Playwright's browsers, runs the suite, and uploads the HTML report as an artifact on failure.",
+        checklist: [
+          "A real trace was captured for a genuinely failing test and inspected in the trace viewer to identify the cause",
+          "The suite is restored to a fully passing state after the diagnosis",
+          "A CI workflow file exists that installs browsers, runs the suite, and uploads the report artifact on failure",
+        ],
+      },
+    ],
+    references: [
+      { label: "Playwright Docs: Getting Started", url: "https://playwright.dev/docs/intro" },
+      { label: "Playwright Docs: Authentication", url: "https://playwright.dev/docs/auth" },
+      { label: "Playwright Docs: Trace Viewer", url: "https://playwright.dev/docs/trace-viewer" },
+    ],
+  },
+  {
+    id: "maintainable-learning-portal-selenium-suite",
+    slug: "maintainable-learning-portal-selenium-suite",
+    title: "Build a Maintainable Learning Portal Selenium Suite",
+    description:
+      "Build a real, local Java + Selenium WebDriver + JUnit test suite modeling a learning platform's key flows — explicit waits, page objects, component objects, and CI execution. Compiled and run entirely on your own machine; this platform does not execute Selenium or Java.",
+    difficulty: "intermediate",
+    estimatedHours: 9,
+    isCapstone: false,
+    trackSlugs: ["selenium"],
+    prerequisiteLessonIds: [
+      "sel-webdriver-architecture",
+      "sel-driver-lifecycle-navigation",
+      "sel-element-location",
+      "sel-synchronization-waits",
+      "sel-forms-dropdowns-alerts",
+      "sel-frames-windows-actions",
+      "sel-page-objects",
+      "sel-junit-integration",
+      "sel-failure-diagnosis",
+      "sel-reporting-ci",
+    ],
+    objectives: [
+      "Set up a real, local Maven project with Selenium WebDriver and JUnit 5",
+      "Automate a realistic multi-page workflow using only explicit or fluent waits, with zero fixed sleeps",
+      "Structure the suite with page objects and at least one reusable component object",
+      "Write JUnit parameterized tests covering multiple input scenarios",
+      "Diagnose a real failure (a stale element or timing issue) and integrate the suite into CI",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Maven project setup and first test",
+        description:
+          "Scenario: you are building a real, local automated test suite for a small demo web app (any simple static site or local dev server you control) -- entirely on your own machine. Initialize a Maven project with selenium-java and junit-jupiter dependencies, configure WebDriverManager (or manually manage a matching driver), and write a first JUnit test that opens a real browser, navigates to a page, and asserts an element's text using an explicit wait.",
+        checklist: [
+          "mvn test runs a real Selenium test that launches an actual browser",
+          "The test uses WebDriverWait with an explicit ExpectedCondition, not Thread.sleep",
+          "The driver is properly quit in an @AfterEach (or equivalent) so no browser process is left running",
+        ],
+      },
+      {
+        id: "m2",
+        title: "A realistic multi-page workflow",
+        description:
+          "Automate a multi-step workflow spanning at least 3 pages of your demo app (for example: search, view a result, submit a form) using accessible, stable locator strategies (id, name, or a stable data attribute over a brittle absolute XPath) and explicit waits at every step where content loads asynchronously. Include at least one assertion on an error or validation state.",
+        checklist: [
+          "The workflow spans at least 3 distinct pages/states in a single test",
+          "Every wait is explicit or fluent, never a fixed Thread.sleep",
+          "At least one assertion covers an error or validation state, not only the happy path",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Page objects and a reusable component object",
+        description:
+          "Refactor the workflow from Milestone 2 into page object classes (one per page, encapsulating that page's locators and actions behind clearly named methods) and extract at least one UI piece that appears on multiple pages (like a navigation bar) into a separate, reusable component object that the page objects hold an instance of.",
+        checklist: [
+          "At least 3 page object classes exist, each owning only its own page's locators and actions",
+          "At least 1 component object exists for a UI piece reused across multiple pages, held by the page objects that embed it",
+          "The test from Milestone 2 is rewritten to use only page/component objects, with no locators inline in the test itself",
+        ],
+      },
+      {
+        id: "m4",
+        title: "JUnit parameterized tests and the Actions API",
+        description:
+          "Convert at least one test into a JUnit 5 @ParameterizedTest covering at least 3 distinct input scenarios (for example, 3 different search terms or form inputs, including at least one invalid one). Add a test using the Actions API for a non-trivial interaction (a hover-triggered menu, a drag action, or a right-click, depending on your demo app).",
+        checklist: [
+          "At least one @ParameterizedTest exists, covering 3 or more distinct scenarios via @ValueSource, @CsvSource, or @MethodSource",
+          "At least one test uses the Actions API for an interaction plain click()/sendKeys() can't express",
+          "All parameterized scenarios pass",
+        ],
+      },
+      {
+        id: "m5",
+        title: "Failure diagnosis and CI execution",
+        description:
+          "Intentionally introduce a timing issue (remove an explicit wait) to reproduce a real stale-element or timing failure, capture a screenshot at the point of failure, diagnose and fix the root cause, and confirm the suite passes reliably across several consecutive runs. Add a GitHub Actions workflow that installs a JDK, runs mvn test with a headless browser, and publishes the test report.",
+        checklist: [
+          "A real, intentionally reproduced failure was diagnosed to its actual root cause (not just retried until it passed)",
+          "The suite passes reliably across at least 3 consecutive local runs after the fix",
+          "A CI workflow file exists that sets up Java, runs the suite headlessly, and publishes the test results",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "Selenium Docs: WebDriver",
+        url: "https://www.selenium.dev/documentation/webdriver/",
+      },
+      {
+        label: "Selenium Docs: Waits",
+        url: "https://www.selenium.dev/documentation/webdriver/waits/",
+      },
+      {
+        label: "JUnit 5 User Guide: Parameterized Tests",
+        url: "https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests",
+      },
+    ],
+  },
+  {
+    id: "safe-project-validation-cli",
+    slug: "safe-project-validation-cli",
+    title: "Build a Safe Project Validation CLI",
+    description:
+      "Build a real, local Bash CLI tool that validates a project folder's structure and content — defensive scripting (set -euo pipefail), text-processing checks, cleanup traps, and distinct, meaningful exit codes. Runs entirely on your own machine; this platform does not execute shell commands.",
+    difficulty: "intermediate",
+    estimatedHours: 7,
+    isCapstone: false,
+    trackSlugs: ["linux-shell"],
+    prerequisiteLessonIds: [
+      "sh-filesystem-and-navigation",
+      "sh-io-streams-redirection",
+      "sh-text-processing-search",
+      "sh-env-vars-path",
+      "sh-scripting-basics",
+      "sh-defensive-scripting",
+      "sh-temp-files-cleanup-logging",
+      "sh-shellcheck-portability",
+      "sh-cron-ci-execution",
+    ],
+    objectives: [
+      "Write a Bash CLI that parses arguments and prints clear usage/help output",
+      "Implement at least 4 distinct, safe (non-destructive) validation checks against a real project folder",
+      "Use set -euo pipefail, a safe temp file via mktemp, and a cleanup trap registered on EXIT",
+      "Use grep/sed/awk-based text-processing checks against real file content",
+      "Design distinct, documented exit codes and a clean ShellCheck run, suitable for CI use",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Argument parsing and usage output",
+        description:
+          "Scenario: you are building a real, local CLI tool a team could run before every commit to catch basic project-structure problems -- entirely on your own machine. Create validate.sh, starting with set -euo pipefail. Accept a project directory as $1, print a clear usage message and exit with a specific code if no argument is given, and print a specific error and exit with a different code if the given path doesn't exist or isn't a directory.",
+        checklist: [
+          "validate.sh begins with set -euo pipefail",
+          "Running it with no arguments prints a clear usage message to stderr and exits non-zero",
+          "Running it against a nonexistent path prints a clear, specific error and exits with a distinct, documented code",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Real, non-destructive validation checks",
+        description:
+          "Implement at least 4 distinct checks against the given project directory: for example, a README.md exists, a specific required subdirectory exists, no file larger than a chosen size threshold exists, and no filename contains a space (a common source of downstream scripting bugs). Every check must be read-only -- this script must never create, modify, or delete anything in the directory being validated.",
+        checklist: [
+          "At least 4 distinct, independent checks are implemented",
+          "Every check is genuinely read-only against the target directory (find, test, grep -- never rm, mv, or > into the target)",
+          "Each check prints a clear PASS or FAIL line naming exactly what it checked",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Cleanup traps and text-processing checks",
+        description:
+          "Create a temp file with mktemp to accumulate a results summary, and register a trap 'rm -f \"$tmpfile\"' EXIT immediately after creating it, so it's always removed. Add at least one check using grep, sed, or awk against real file content (for example: no file contains a hardcoded TODO older than a threshold, or a config file has a required key set).",
+        checklist: [
+          "A temp file is created with mktemp and cleaned up via a trap registered on EXIT, confirmed by checking it doesn't survive an intentionally forced early failure",
+          "At least one check uses grep, sed, or awk against real file content, not just filename/existence checks",
+          "The results summary temp file is genuinely used (written to and read from) during the run, not just created and discarded",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Distinct exit codes and CI-friendly design",
+        description:
+          "Assign a distinct, documented exit code to each category of failure (for example: 1 = usage error, 2 = missing required file, 3 = a text-content check failed, 4 = a size/naming check failed), with 0 reserved for a fully passing run. Ensure the script never assumes a particular working directory (only ever uses the passed-in path or absolute paths) and never relies on any environment variable being pre-set without an explicit default.",
+        checklist: [
+          "At least 4 distinct exit codes are used and documented in a comment at the top of the script",
+          "The script produces identical, correct results regardless of the working directory it's invoked from",
+          "set -u is active and the script runs correctly with no pre-set custom environment variables",
+        ],
+      },
+      {
+        id: "m5",
+        title: "ShellCheck and a CI workflow",
+        description:
+          "Run ShellCheck against validate.sh and resolve every reported issue (or document, with a comment, the specific, deliberate reason a particular warning is a false positive in this case). Add a GitHub Actions workflow that runs validate.sh against the repository itself as a real quality check, uploading the results summary as an artifact.",
+        checklist: [
+          "shellcheck validate.sh reports zero unaddressed warnings",
+          "A CI workflow file exists that runs validate.sh against a real target directory and reflects its exit code in the job's result",
+          "The results summary is uploaded as a CI artifact on the workflow run",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "GNU Bash Manual: The Set Builtin",
+        url: "https://www.gnu.org/software/bash/manual/bash.html#The-Set-Builtin",
+      },
+      { label: "ShellCheck", url: "https://www.shellcheck.net/" },
+      {
+        label: "GNU Coreutils Manual: mktemp invocation",
+        url: "https://www.gnu.org/software/coreutils/manual/html_node/mktemp-invocation.html",
+      },
+    ],
+  },
+  {
+    id: "production-grade-learning-platform-automation-framework",
+    slug: "production-grade-learning-platform-automation-framework",
+    title: "Build a Production-Grade Learning Platform Automation Framework",
+    description:
+      "Build a real, local, layered TypeScript + Playwright automation framework — configuration, fixtures, test-data builders, page/component/service objects, domain assertions, tagging, diagnostics, and a CI pipeline with quality gates. Runs entirely on your own machine; this platform does not execute Playwright, and no real database credentials are ever used.",
+    difficulty: "advanced",
+    estimatedHours: 11,
+    isCapstone: false,
+    trackSlugs: ["test-automation-framework"],
+    prerequisiteLessonIds: [
+      "tafe-framework-goals-boundaries",
+      "tafe-repo-structure-config",
+      "tafe-test-data-builders",
+      "tafe-fixtures-di",
+      "tafe-page-component-models",
+      "tafe-service-clients",
+      "tafe-assertion-design-dsl",
+      "tafe-tagging-test-selection",
+      "tafe-diagnostics-reporting",
+      "tafe-ci-quality-gates",
+    ],
+    objectives: [
+      "Scaffold a layered TypeScript + Playwright framework (config, fixtures, data, pages, services)",
+      "Implement environment-aware configuration, safe secret handling, and reusable test-data builders",
+      "Design at least one service client and a documented DB-validation adapter interface, without any real database connection or credential",
+      "Write at least one custom domain assertion and apply a consistent tagging scheme",
+      "Wire the framework into a sharded CI pipeline with a genuine quality gate and a framework-health summary in the README",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Layered scaffold and configuration",
+        description:
+          "Scenario: you are building a real, local, reusable automation framework intended to back a growing test suite for a demo web app -- entirely on your own machine. Scaffold a TypeScript + Playwright project with separate src/config, src/fixtures, src/data, src/pages, and src/services folders. Implement environment-aware configuration (reading BASE_URL and TEST_ENV from process.env with sensible defaults) and confirm no secret or credential is hardcoded anywhere in the repository.",
+        checklist: [
+          "The project has the five separate, layer-based folders described above",
+          "Configuration reads from environment variables with working defaults, confirmed by running the suite with two different BASE_URL values",
+          "A repository-wide search confirms no hardcoded secret, password, or API key exists anywhere in the project",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Test-data builders, fixtures, and page/component objects",
+        description:
+          "Implement at least 2 test-data builder functions with sensible defaults and overridable inputs, each generating genuinely unique data per call. Compose at least one fixture that depends on another fixture (for example, an authenticated-page fixture built from a test-user fixture). Implement at least 2 page objects and 1 component object for a UI piece reused across multiple pages.",
+        checklist: [
+          "At least 2 data builders exist, each guaranteeing unique output per call and supporting partial overrides",
+          "At least one fixture composes another fixture (a real dependency chain, not two independent, unrelated fixtures)",
+          "At least 2 page objects and 1 genuinely reused component object exist",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Service clients and a DB-validation adapter interface",
+        description:
+          "Implement at least one service client wrapping related API calls behind business-intent-named methods (not raw HTTP verbs). Design (but do not implement against a real database) a DbValidationAdapter interface -- method signatures, argument types, and return shapes only -- documented with comments explaining what each method would verify in a real deployment, and provide an in-memory mock implementation for use in the framework's own tests. This adapter must never contain a real connection string or credential.",
+        checklist: [
+          "At least one service-client method exists, named for business intent, wrapping a raw request internally",
+          "A DbValidationAdapter interface is fully designed and documented, with an in-memory mock implementation -- no real database connection exists anywhere in the project",
+          "A repository-wide search confirms no real database credential, connection string, or Supabase reference exists anywhere in the project",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Domain assertions, tagging, and reliability policy",
+        description:
+          "Write at least one custom, domain-level assertion function with a purpose-built failure message. Apply a consistent tag scheme (at minimum @smoke and one feature-area tag) across the suite's tests. Configure a deliberate retry count (1-2, documented) and a timeout set with a comfortable margin above observed run times, and confirm the full suite passes reliably in parallel.",
+        checklist: [
+          "At least one custom domain assertion exists, with a failure message naming the actual business condition checked",
+          "Every test carries at least one tag from a documented, consistent tag scheme",
+          "The suite passes reliably, in parallel, with a documented retry count of at most 2",
+        ],
+      },
+      {
+        id: "m5",
+        title: "CI quality gates, sharding, and framework health",
+        description:
+          "Add a GitHub Actions workflow that shards the suite across at least 2 parallel jobs, uploads the HTML report and trace artifacts on failure, and would genuinely block a merge if configured as a required status check (documented in the README, since the branch-protection setting itself lives in repository settings, not this file). Write a README section covering setup, architecture (mirroring the five-layer structure), the tagging scheme, and a framework-health checklist (flaky-rate tracking, CI runtime trend, documentation currency).",
+        checklist: [
+          "The CI workflow shards the suite across at least 2 parallel jobs using Playwright's --shard flag",
+          "The workflow uploads the HTML report as an artifact specifically on failure",
+          "The README documents setup, the five-layer architecture, the tagging scheme, and a framework-health checklist",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "Playwright Docs: Best Practices",
+        url: "https://playwright.dev/docs/best-practices",
+      },
+      { label: "Playwright Docs: Sharding", url: "https://playwright.dev/docs/test-sharding" },
+      { label: "Playwright Docs: Fixtures", url: "https://playwright.dev/docs/test-fixtures" },
+    ],
+  },
 ];

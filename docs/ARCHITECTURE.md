@@ -145,11 +145,12 @@ allow-forms">` — deliberately without `allow-same-origin`, so the frame always
   surface. Type errors render in a `role="status"` (not `role="alert"`) banner, since a type error
   is frequently the exercise's own expected, correct outcome rather than a failure.
 
-## Guided local labs (Phase 5A.2, extended in Phase 5B)
+## Guided local labs (Phase 5A.2, extended in Phase 5B and Phase 5C)
 
 A fourth kind of hands-on activity, deliberately **not** a runner: instructional content for
 environments this platform cannot honestly execute in a browser (React tooling, Node, Express,
-Java, PostgreSQL, and later Playwright, Selenium). `guidedLocalLabSchema` (`lib/content/types.ts`)
+Java, PostgreSQL, Playwright, Selenium, and shell/terminal commands). `guidedLocalLabSchema`
+(`lib/content/types.ts`)
 defines the shape — required tools, setup steps, project structure, starter files, requirements,
 commands, expected behavior, verification steps, troubleshooting, hints, a reference solution, and
 an extension challenge, all schema-enforced non-empty — and is an **optional** field on a lesson,
@@ -171,20 +172,27 @@ roadmap-step derivation, mastery). `scripts/validate-content.ts` additionally ch
 uniqueness, duplicate file paths within a lab's starter/solution files, a reference solution
 suspiciously identical to the starter files, and a deny-list of phrases (`we ran it`, `runs in your
 browser`, `automatically verified`, ...) that would falsely imply the site executed local code.
-Twelve lessons use this type today, three guided local labs each in: React Application Development
-(a form-validation build, a race-condition-safe data-fetching build, and a component refactor),
-Node.js and Express Backend Development (an Express app-structure build, an input-validation and
-error-handling build, and an automated-testing-with-graceful-shutdown build), Java Programming
-Foundations (a compile-and-run multi-class build, an encapsulation/composition/interfaces/
-polymorphism domain model, and an exceptions-plus-JUnit-testing build), and Database Design and
-PostgreSQL (a normalized-schema build, a transactions/constraints/indexes build, and a
-migrations-and-roles build). Data Structures and Algorithms deliberately has none, since every data
-structure and algorithm in that course is equally real in browser-executable JavaScript/TypeScript.
-See PROJECT_STATUS.md's Phase 5A.2 and Phase 5B reports for the full lists — it's covered by
-schema tests, a component test suite (`tests/unit/content-schema.test.ts`,
-`tests/integration/guided-local-lab-panel.test.tsx`), and registry-level tests asserting every
-course that uses this type ships at least 3 labs, all lab ids are globally unique, and no lab's
-reference solution or copy falsely implies local execution.
+Twenty-four lessons use this type today, three guided local labs each in: React Application
+Development (a form-validation build, a race-condition-safe data-fetching build, and a component
+refactor), Node.js and Express Backend Development (an Express app-structure build, an
+input-validation and error-handling build, and an automated-testing-with-graceful-shutdown build),
+Java Programming Foundations (a compile-and-run multi-class build, an encapsulation/composition/
+interfaces/polymorphism domain model, and an exceptions-plus-JUnit-testing build), Database Design
+and PostgreSQL (a normalized-schema build, a transactions/constraints/indexes build, and a
+migrations-and-roles build), Playwright Web Automation (a multi-browser project build, a locators/
+fixtures/auth-state build, and a trace/report/CI-diagnostics exercise), Selenium WebDriver
+Automation (a Java+Selenium+JUnit project build, a multi-page explicit-waits workflow, and a
+maintainable-components-plus-CI refactor), Linux and Shell Fundamentals (a contained sample-
+workspace navigation/transformation exercise, a defensive log-analysis script build, and a
+CI-friendly verification-script build), and Test Automation Framework Engineering (a layered
+TypeScript framework scaffold, a config/fixtures/test-data/diagnostics build, and a CI
+quality-gates/sharding/reporting build). Data Structures and Algorithms deliberately has none,
+since every data structure and algorithm in that course is equally real in browser-executable
+JavaScript/TypeScript. See PROJECT_STATUS.md's Phase 5A.2, Phase 5B, and Phase 5C reports for the
+full lists — it's covered by schema tests, a component test suite
+(`tests/unit/content-schema.test.ts`, `tests/integration/guided-local-lab-panel.test.tsx`), and
+registry-level tests asserting every course that uses this type ships at least 3 labs, all lab ids
+are globally unique, and no lab's reference solution or copy falsely implies local execution.
 
 ## Learning engine and account sync (Phase 4)
 

@@ -63,7 +63,7 @@ export const developerToolsTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "Nearly every server, CI pipeline, and container runs on a Unix-like system where Bash (or a compatible shell) is the default interface.",
     whereItFits:
-      "The foundational skill underneath server administration, Docker, CI/CD pipelines, and most backend deployment workflows.",
+      "The foundational skill underneath server administration, Docker, CI/CD pipelines, and most backend deployment workflows. The Linux and Shell Fundamentals course covers this in depth: pipes and redirection, text processing, environment variables, processes and permissions, and defensive scripting (set -euo pipefail, cleanup traps, useful exit codes) -- entirely commands you run in your own terminal, never executed by this platform.",
     beginnerFriendly: true,
     difficulty: "beginner",
     prerequisiteIds: [],
@@ -85,7 +85,7 @@ export const developerToolsTechnologies: TechnologyInput[] = [
       "Automating repetitive local tasks",
       "Writing CI/CD pipeline scripts",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Linux and Shell Fundamentals course"],
     projectIdeas: ["Write a small shell script that backs up a directory to a timestamped archive"],
     references: [
       {
@@ -93,11 +93,20 @@ export const developerToolsTechnologies: TechnologyInput[] = [
         url: "https://www.gnu.org/software/bash/manual/bash.html",
       },
     ],
-    searchKeywords: ["shell", "command line", "terminal", "cli"],
+    searchKeywords: [
+      "shell",
+      "command line",
+      "terminal",
+      "cli",
+      "shell scripting",
+      "pipes",
+      "exit codes",
+    ],
     status: "current",
     versionPolicy: "evergreen",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "linux-shell-fundamentals",
+    projectIds: ["safe-project-validation-cli"],
     publicVisibility: true,
   },
   {
@@ -114,7 +123,7 @@ export const developerToolsTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "It's free, stable, and the near-universal choice for servers -- most cloud VMs and containers run some Linux distribution.",
     whereItFits:
-      "The operating system underneath servers, Docker containers, and most cloud infrastructure -- Bash is typically the interface to it.",
+      "The operating system underneath servers, Docker containers, and most cloud infrastructure -- Bash is typically the interface to it. The Linux and Shell Fundamentals course covers user-space Linux literacy in depth: the filesystem model, permissions and ownership, processes and signals, and safe, automation-oriented command-line workflows -- explicitly not a system-administration certification course.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["bash"],
@@ -136,16 +145,17 @@ export const developerToolsTechnologies: TechnologyInput[] = [
       "Deploying and debugging containerized applications",
       "General cloud/DevOps work",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Linux and Shell Fundamentals course"],
     projectIdeas: [
       "Set up a small Linux VM (or WSL/container) and practice navigating, setting permissions, and running a simple server",
     ],
     references: [{ label: "The Linux Documentation Project", url: "https://tldp.org/" }],
-    searchKeywords: ["operating system", "servers", "unix"],
+    searchKeywords: ["operating system", "servers", "unix", "permissions", "processes"],
     status: "current",
     versionPolicy: "not-applicable",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "linux-shell-fundamentals",
+    projectIds: ["safe-project-validation-cli"],
     publicVisibility: true,
   },
   {

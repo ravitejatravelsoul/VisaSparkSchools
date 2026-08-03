@@ -193,6 +193,21 @@ types, transactions, indexes/EXPLAIN, roles, migrations) uses JS/TS-modeling exe
 non-executed reference DDL instead of silently running PostgreSQL-flavored SQL against SQLite. See
 `PROJECT_STATUS.md`'s "Phase 5B" section for the full report.
 
+## 14. Phase 5C — web automation, framework engineering, and Linux (complete)
+
+Added four new complete courses, pushing the public catalog to 18 courses across 17 tracks:
+Playwright Web Automation and Selenium WebDriver Automation (each using the guided-local-lab type
+for real, local browser-automation work — three labs each — with every browser exercise still
+genuine, runnable JavaScript modeling the underlying decision; no Playwright runtime and no
+JVM/Selenium runtime were added to the site), Linux and Shell Fundamentals (this platform's
+strictest execution-honesty policy — no shell command is ever executed anywhere, and every one of
+its 28 browser exercises' prompts explicitly discloses that it only models shell behavior), and
+Test Automation Framework Engineering (an advanced integration course built on Playwright
+specifically, teaching framework architecture rather than duplicating Playwright or Selenium; its
+guided project's database-validation adapter is a documented interface plus an in-memory mock only
+— no real database connection or Supabase reference anywhere in the course). See
+`PROJECT_STATUS.md`'s "Phase 5C" section for the full report.
+
 ## 7. Learning engine (transparent, not a black box)
 
 Mastery per skill tag is a documented point formula (lesson completion, guided/independent

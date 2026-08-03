@@ -454,4 +454,139 @@ describe("the real content registry", () => {
       expect(lesson.independentExercise.language).not.toBe("sql");
     }
   });
+
+  it("Phase 5C courses (Playwright, Selenium, Linux/Shell, Test Automation Framework Engineering) each have exactly 14 lessons, 6 modules, 42 quiz questions, and 28 exercises", () => {
+    for (const courseSlug of [
+      "playwright-web-automation",
+      "selenium-webdriver-automation",
+      "linux-shell-fundamentals",
+      "test-automation-framework-engineering",
+    ]) {
+      const course = allCourses.find((c) => c.slug === courseSlug);
+      expect(course).toBeDefined();
+      if (!course) continue;
+      const courseLessons = allLessons.filter((l) => l.courseSlug === courseSlug);
+      expect(courseLessons.length).toBe(14);
+      expect(course.modules.length).toBe(6);
+      const quizCount = courseLessons.reduce((sum, l) => sum + l.quiz.length, 0);
+      expect(quizCount).toBe(42);
+      const exerciseCount =
+        courseLessons.filter((l) => l.guidedExercise).length +
+        courseLessons.filter((l) => l.independentExercise).length;
+      expect(exerciseCount).toBe(28);
+    }
+  });
+
+  it("Playwright, Selenium, Linux/Shell, and Test Automation Framework Engineering each have exactly 3 guided local labs", () => {
+    for (const courseSlug of [
+      "playwright-web-automation",
+      "selenium-webdriver-automation",
+      "linux-shell-fundamentals",
+      "test-automation-framework-engineering",
+    ]) {
+      const labCount = allLessons.filter(
+        (l) => l.courseSlug === courseSlug && l.guidedLocalLab,
+      ).length;
+      expect(labCount).toBe(3);
+    }
+  });
+
+  it("Playwright lessons never claim a real browser was launched or controlled by this platform", () => {
+    const invalidClaims = [
+      /this exercise launched chromium/i,
+      /this ran selenium/i,
+      /this connected to postgresql/i,
+      /this validated a real remote site/i,
+    ];
+    const playwrightLessons = allLessons.filter((l) => l.trackSlug === "playwright");
+    expect(playwrightLessons.length).toBe(14);
+    for (const lesson of playwrightLessons) {
+      const text = JSON.stringify(lesson);
+      for (const pattern of invalidClaims) {
+        expect(pattern.test(text)).toBe(false);
+      }
+    }
+  });
+
+  it("Selenium lessons never claim Java was compiled or a real browser was controlled by this platform", () => {
+    const invalidClaims = [/this compiled java/i, /this ran selenium/i, /this executed bash/i];
+    const seleniumLessons = allLessons.filter((l) => l.trackSlug === "selenium");
+    expect(seleniumLessons.length).toBe(14);
+    for (const lesson of seleniumLessons) {
+      const text = JSON.stringify(lesson);
+      for (const pattern of invalidClaims) {
+        expect(pattern.test(text)).toBe(false);
+      }
+    }
+  });
+
+  it("every Linux/Shell exercise prompt explicitly states it does not execute shell commands", () => {
+    const shellLessons = allLessons.filter((l) => l.trackSlug === "linux-shell");
+    expect(shellLessons.length).toBe(14);
+    for (const lesson of shellLessons) {
+      for (const exercise of [lesson.guidedExercise, lesson.independentExercise]) {
+        expect(exercise.prompt.toLowerCase()).toMatch(
+          /this models .+ -- (no real|no shell|it does not execute)/,
+        );
+      }
+    }
+  });
+
+  it("Linux/Shell lessons never claim a shell command, CI pipeline, or pipeline execution ran on this platform", () => {
+    const invalidClaims = [
+      /this executed bash/i,
+      /this ran a ci pipeline/i,
+      /the browser (ran|executed) (this|your) (script|command)/i,
+    ];
+    const shellLessons = allLessons.filter((l) => l.trackSlug === "linux-shell");
+    for (const lesson of shellLessons) {
+      const text = JSON.stringify(lesson);
+      for (const pattern of invalidClaims) {
+        expect(pattern.test(text)).toBe(false);
+      }
+    }
+  });
+
+  it("Test Automation Framework Engineering never contains a real database credential, connection string, or Supabase reference", () => {
+    const tafeLessons = allLessons.filter((l) => l.trackSlug === "test-automation-framework");
+    expect(tafeLessons.length).toBe(14);
+    const forbiddenPatterns = [
+      /supabase\.co/i,
+      /postgres:\/\/[^\s"'`]*:[^\s"'`]*@/i,
+      /NEXT_PUBLIC_SUPABASE/,
+    ];
+    for (const lesson of tafeLessons) {
+      const text = JSON.stringify(lesson);
+      for (const pattern of forbiddenPatterns) {
+        expect(pattern.test(text)).toBe(false);
+      }
+    }
+  });
+
+  it("Test Automation Framework Engineering's DB-validation adapter is honestly labeled as documented/mock, never a real connection", () => {
+    const lesson = allLessons.find((l) => l.slug === "tafe-service-clients");
+    expect(lesson).toBeDefined();
+    if (!lesson) return;
+    expect(lesson.explanation.toLowerCase()).toContain("no real database connection");
+  });
+
+  it("Phase 5C prerequisite chain is honest: Test Automation Framework Engineering requires only Playwright, not an impossible Selenium+Playwright combination", () => {
+    const tafe = allCourses.find((c) => c.slug === "test-automation-framework-engineering");
+    expect(tafe).toBeDefined();
+    if (!tafe) return;
+    expect(tafe.prerequisiteCourseSlugs).toEqual(["playwright-web-automation"]);
+    expect(tafe.prerequisiteCourseSlugs).not.toContain("selenium-webdriver-automation");
+  });
+
+  it("Selenium's real prerequisite is Java Programming Foundations", () => {
+    const selenium = allCourses.find((c) => c.slug === "selenium-webdriver-automation");
+    expect(selenium).toBeDefined();
+    if (!selenium) return;
+    expect(selenium.prerequisiteCourseSlugs).toContain("java-programming-foundations");
+  });
+
+  it("the platform-wide guided-local-lab total is exactly 21 (12 pre-Phase-5C + 9 new: 3 each for Playwright, Selenium, Linux/Shell) plus Test Automation Framework Engineering's 3, for 24 total", () => {
+    const totalLabs = allLessons.filter((l) => l.guidedLocalLab).length;
+    expect(totalLabs).toBe(24);
+  });
 });
