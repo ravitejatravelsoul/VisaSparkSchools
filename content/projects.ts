@@ -912,4 +912,281 @@ export const projects: Project[] = [
       { label: "OWASP API Security Top 10", url: "https://owasp.org/www-project-api-security/" },
     ],
   },
+  {
+    id: "course-enrollment-progress-manager",
+    slug: "course-enrollment-progress-manager",
+    title: "Course Enrollment and Progress Manager",
+    description:
+      "Build a real, local, console-based Java application modeling courses, learners, enrollments, and lesson-completion progress — using encapsulation, composition, interfaces, polymorphism, structured exceptions, and a real JUnit test suite. Compiled and run entirely on your own machine; this platform does not execute Java.",
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    isCapstone: false,
+    trackSlugs: ["java"],
+    prerequisiteLessonIds: [
+      "java-classes-and-objects",
+      "java-inheritance-and-composition",
+      "java-interfaces-and-polymorphism",
+      "java-exceptions",
+      "java-generics-equality-immutability",
+      "java-collections",
+      "java-lambdas-and-streams",
+      "java-resource-safety-and-testing",
+    ],
+    objectives: [
+      "Model a small domain (courses, learners, enrollments) with encapsulated classes, composition, and at least one interface with multiple implementations",
+      "Validate input and signal failure with a custom, structured exception hierarchy",
+      "Implement equals/hashCode correctly for at least one value-like class",
+      "Compute derived progress data using Streams, and verify all of it with a real JUnit test suite",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Project setup and domain model",
+        description:
+          "Scenario: you are building the backend logic behind a learning platform's enrollment system — entirely as a local, Maven-based Java console application (no database, no network). Set up a Maven project (mvn archetype:generate) organized into packages by feature: com.visaspark.enrollment.model (Course, Learner, Enrollment), com.visaspark.enrollment.exceptions, and com.visaspark.enrollment.app (the Main entry point). Define Course and Learner as encapsulated classes (private final fields, constructors validating their inputs, and only the getters that are actually needed).",
+        checklist: [
+          "The project builds with `mvn compile` and has the three-package structure described above",
+          "Course and Learner have private, final fields with no public setters for identity-like fields (id, title/name)",
+          "Constructors validate their inputs (e.g. reject a blank title or name) and throw a specific, custom exception on invalid input",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Enrollment, composition, and an interface with two implementations",
+        description:
+          "Implement an Enrollment class that composes a Learner and a Course (a field, not inheritance) plus a mutable set of completed lesson IDs and a completion-percentage calculation. Define a Progressable interface (e.g. a method like double completionPercentage()) and implement it on at least two genuinely different classes (Enrollment itself, and a second, distinct type such as a Milestone or Certification that also tracks a percentage a different way) so a single polymorphic method can report progress across both without branching on type.",
+        checklist: [
+          "Enrollment composes a Learner and Course by reference, not by extending either class",
+          "A Progressable interface exists and is implemented by at least two structurally different classes",
+          "A method exists that computes/reports progress across a mixed List<Progressable> using only the interface, with no instanceof checks",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Structured exceptions and validation",
+        description:
+          "Define a small exception hierarchy (e.g. an abstract EnrollmentException extends RuntimeException, with concrete subclasses like DuplicateEnrollmentException and InvalidLessonReferenceException) and use it to reject invalid operations: enrolling the same learner in the same course twice, or marking a lesson complete that doesn't belong to the enrolled course. Every validation failure must throw the specific, correct exception subtype — never a generic RuntimeException or IllegalArgumentException standing in for a case that has its own named type.",
+        checklist: [
+          "At least two distinct, purpose-specific exception subclasses exist, both extending a shared base exception",
+          "Enrolling a learner in a course they're already enrolled in throws the specific DuplicateEnrollmentException",
+          "Marking a lesson complete for a lesson not belonging to the enrolled course throws the specific InvalidLessonReferenceException",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Equality, hashing, and a Stream-based summary",
+        description:
+          "Implement equals() and hashCode() correctly and consistently for Enrollment (two Enrollments should be equal if they reference the same learner and course, regardless of completed-lesson state) — and add at least one HashSet or HashMap operation in the application that depends on this being correct (e.g. deduplicating a list of Enrollments). Then use the Stream API to compute at least one derived summary across a List<Enrollment> — for example, the average completion percentage across all of one learner's enrollments, or the count of fully-completed enrollments.",
+        checklist: [
+          "equals()/hashCode() are both overridden on Enrollment, consistently, based on learner + course identity",
+          "At least one HashSet or HashMap operation in the app demonstrably relies on this equals()/hashCode() pair being correct",
+          "At least one Stream pipeline (filter/map/reduce or a collector) computes a real derived summary from a List<Enrollment>",
+        ],
+      },
+      {
+        id: "m5",
+        title: "JUnit tests and a console entry point",
+        description:
+          "Add a JUnit 5 test suite (src/test/java, mirroring your main package structure) covering: successful enrollment, the duplicate-enrollment rejection, the invalid-lesson-reference rejection, correct completion-percentage computation, and the equals()/hashCode() contract. Finish Main.java as a deterministic console entry point that builds a small, fixed set of courses/learners/enrollments, performs a few operations (including at least one that intentionally triggers and catches a custom exception), and prints a human-readable summary.",
+        checklist: [
+          "At least 6 JUnit tests exist, covering both success and failure/rejection cases",
+          "`mvn test` runs the full suite successfully with zero failures",
+          "Main.java runs deterministically end to end via `mvn exec:java`, printing a real summary and demonstrating at least one caught, handled custom exception",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "Oracle: The Java Tutorials — Custom Exceptions",
+        url: "https://docs.oracle.com/javase/tutorial/essential/exceptions/creating.html",
+      },
+      { label: "JUnit 5 User Guide", url: "https://junit.org/junit5/docs/current/user-guide/" },
+      {
+        label: "Oracle Java SE 21 API — Object.equals",
+        url: "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)",
+      },
+    ],
+  },
+  {
+    id: "learning-path-recommendation-engine",
+    slug: "learning-path-recommendation-engine",
+    title: "Learning Path Recommendation Engine",
+    description:
+      "Build a real, browser-executable TypeScript engine that models courses as a prerequisite graph, validates it, detects cycles, computes a valid learning order, and recommends a priority-ordered path — with deterministic tests for every edge case.",
+    difficulty: "advanced",
+    estimatedHours: 7,
+    isCapstone: false,
+    trackSlugs: ["algorithms"],
+    prerequisiteLessonIds: [
+      "dsa-graphs-and-traversal",
+      "dsa-recursion-and-divide-and-conquer",
+      "dsa-heaps-and-priority-queues",
+      "dsa-complexity-and-big-o",
+    ],
+    objectives: [
+      "Model courses and prerequisites as a directed graph using an adjacency list",
+      "Detect cycles and reject invalid prerequisite data before computing anything from it",
+      "Compute a valid learning order (a topological sort) using either BFS or DFS",
+      "Use a priority queue to break ties in a stated, deliberate way, and justify the approach's complexity",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Graph model and invalid-data validation",
+        description:
+          "Scenario: you're building the algorithm behind a 'what should I learn next' recommendation feature. Model courses as graph nodes and prerequisites as directed edges, using an adjacency list (Map<string, string[]>). Write validateGraph(courses, prerequisites) that rejects (returns a specific error, does not throw an uncaught exception) invalid input: a prerequisite referencing a course ID that doesn't exist in courses, and a course listed as its own prerequisite (a trivial self-cycle).",
+        checklist: [
+          "Courses and prerequisites are modeled as an adjacency-list graph, not an adjacency matrix",
+          "validateGraph correctly rejects a prerequisite referencing an unknown course ID",
+          "validateGraph correctly rejects a course listed as its own direct prerequisite",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Cycle detection",
+        description:
+          "Implement hasCycle(graph) using DFS with a visited set AND an in-progress ('currently on this path') set, correctly distinguishing a genuine cycle from simply revisiting an already-fully-processed node through a different path (which is normal and NOT a cycle in a DAG). Test it against a genuinely cyclic prerequisite chain (A requires B, B requires C, C requires A) and a non-cyclic graph where two different courses share a common prerequisite (which must NOT be flagged as a cycle).",
+        checklist: [
+          "hasCycle correctly detects a genuine multi-step cycle (A -> B -> C -> A)",
+          "hasCycle does NOT falsely flag a diamond-shaped dependency (two courses sharing one common prerequisite) as a cycle",
+          "hasCycle correctly reports false for a graph with no edges at all",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Valid learning order (topological sort)",
+        description:
+          "Implement computeLearningOrder(graph) returning an array of course IDs in an order where every prerequisite appears before the course that depends on it. Use either a BFS-based approach (repeatedly removing nodes with no remaining unmet prerequisites) or a DFS-based approach (postorder, then reverse) — document which you chose and why in a code comment. The function must throw a clear, specific error if the graph contains a cycle (reuse hasCycle from milestone 2), since no valid order exists in that case.",
+        checklist: [
+          "computeLearningOrder returns an order where every prerequisite precedes every course that depends on it, verified across at least 3 different graph shapes",
+          "computeLearningOrder throws a clear, specific error for a cyclic graph rather than returning an incomplete or incorrect order",
+          "A code comment explains and justifies the BFS-or-DFS choice actually made",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Priority-based recommendation",
+        description:
+          "Using a min-heap (or an equivalent priority-queue implementation from this course's heaps lesson), implement recommendNext(graph, completedCourseIds, priorities) returning the single highest-priority course whose prerequisites are ALL already in completedCourseIds — i.e. among every course that's currently eligible to start, pick the one with the best (lowest) priority number. Document this function's time complexity in a comment, in terms of the number of courses and edges.",
+        checklist: [
+          "recommendNext correctly identifies the set of currently-eligible courses (every prerequisite already completed)",
+          "Among eligible courses, recommendNext correctly returns the one with the best priority using a heap-based selection, not a linear scan re-sorted from scratch on every call",
+          "A code comment states the function's time complexity and the reasoning behind it",
+        ],
+      },
+      {
+        id: "m5",
+        title: "Deterministic tests for every required edge case",
+        description:
+          "Write a deterministic test suite (reusing this course's runner-based exercise pattern) covering: a valid multi-course graph, a graph with an invalid prerequisite reference, a self-cycle, a multi-step cycle, a diamond dependency (correctly NOT flagged as a cycle), an empty graph, and at least one recommendNext call where multiple courses are simultaneously eligible (verifying the priority tie-break is genuinely being used, not just the first eligible course found).",
+        checklist: [
+          "At least 8 deterministic test cases exist, covering every scenario listed above",
+          "Every test asserts a specific, exact expected result — not just 'it didn't throw'",
+          "All tests pass when run",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "MDN: Map",
+        url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
+      },
+    ],
+  },
+  {
+    id: "learning-platform-database",
+    slug: "learning-platform-database",
+    title: "Learning Platform Database Layer",
+    description:
+      "Design and build the real PostgreSQL database layer for a learning platform — normalized schema, keys, constraints, indexes, transactions, ordered migrations, least-privileged roles, reporting queries, and a genuine backup/recovery checklist. Built and run entirely on your own local PostgreSQL install.",
+    difficulty: "advanced",
+    estimatedHours: 8,
+    isCapstone: false,
+    trackSlugs: ["databases"],
+    prerequisiteLessonIds: [
+      "pg-schema-implementation",
+      "pg-joins-and-aggregation",
+      "pg-transactions-and-acid",
+      "pg-indexes-and-query-plans",
+      "pg-views-and-roles",
+      "pg-migrations-and-operations",
+    ],
+    objectives: [
+      "Design and implement a normalized, dependency-ordered PostgreSQL schema for a real multi-entity domain",
+      "Write reporting queries using joins, aggregation, and window functions",
+      "Add indexes justified by real query patterns, and verify them with EXPLAIN",
+      "Implement least-privileged roles and a real, ordered migration sequence",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Entity relationships and schema design",
+        description:
+          "Scenario: you are building the real database layer behind a learning platform, covering learners, courses, modules, lessons, enrollments, lesson-level progress, and notes/bookmarks. Model every entity and relationship (including cardinality and optionality) in a short design document before writing DDL, explicitly noting which relationships are one-to-many and which (if any) are many-to-many and need a junction table.",
+        checklist: [
+          "A design document lists every entity, its key attributes, and every relationship's cardinality and optionality",
+          "At least one one-to-many relationship (e.g. course to lessons) and one many-to-many-via-junction relationship (e.g. learner to course, via enrollment) are both correctly identified",
+          "The design is normalized to at least Third Normal Form, with any deliberate denormalization explicitly justified in the document",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Schema implementation, constraints, and seed data",
+        description:
+          "Implement the full schema as ordered migration files (learner, course, module, lesson, enrollment, lesson_progress, note — created in valid dependency order), with appropriate PostgreSQL types, PRIMARY KEY/NOT NULL/UNIQUE/CHECK constraints, and REFERENCES with explicit ON DELETE behavior for every foreign key. Seed the schema with realistic sample data (at least 3 learners, 3 courses with modules and lessons, and a mix of enrollment/progress states) in an order that respects every foreign key.",
+        checklist: [
+          "All tables are created via ordered migration files, applying cleanly with no foreign key errors",
+          "Every foreign key has an explicit, deliberately-chosen ON DELETE behavior (not left to the default without consideration)",
+          "Seed data includes realistic, varied enrollment and lesson-progress states across at least 3 learners and 3 courses",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Reporting queries",
+        description:
+          "Write at least four reporting queries against the schema: (1) each learner's overall completion percentage across all their enrollments, using a join and aggregation; (2) the most-recently-active learners, using a subquery or CTE; (3) each course's popularity ranked using a window function (RANK() or ROW_NUMBER()); (4) a query using a CTE to avoid repeating a non-trivial intermediate calculation used more than once in the same query.",
+        checklist: [
+          "All four reporting queries run successfully and return sensible, verifiable results against the seed data",
+          "At least one query uses a window function (PARTITION BY and/or ORDER BY inside OVER)",
+          "At least one query uses a CTE, with a comment explaining why a CTE was chosen over a plain subquery for that specific case",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Indexes, transactions, and roles",
+        description:
+          "Add at least two indexes justified by the reporting queries from milestone 3 (verify each one changes a query's EXPLAIN output from a Seq Scan to an Index Scan). Write a genuine multi-statement transaction (e.g. enrolling a learner AND creating their initial lesson_progress rows together) that correctly rolls back entirely if any part fails. Create at least two roles with different, deliberately narrow privilege sets (e.g. a read-only reporting role, and an application role limited to exactly the tables/actions it needs).",
+        checklist: [
+          "At least two indexes exist, each with a documented EXPLAIN before/after showing a Seq Scan to Index Scan change",
+          "A multi-statement transaction exists and is verified to roll back completely on a simulated failure partway through",
+          "At least two roles exist with genuinely different, narrowly-scoped privilege sets, verified by attempting (and having rejected) an out-of-scope operation as each role",
+        ],
+      },
+      {
+        id: "m5",
+        title: "Verification and operational checklist",
+        description:
+          "Write a set of verification queries confirming the schema's constraints actually work (attempting and observing the rejection of: a duplicate enrollment, a negative value where a CHECK forbids it, an orphaned foreign key reference). Complete a real backup/recovery checklist for this schema, following this course's operational-safety lesson — with specific, concrete answers, not placeholders.",
+        checklist: [
+          "At least 3 verification queries exist, each demonstrating a specific constraint correctly rejecting invalid data",
+          "The backup/recovery checklist has specific, concrete answers for backup frequency, a tested restore procedure, acceptable data-loss window, and recovery time expectation",
+          "Every migration file applies cleanly, in order, to a completely fresh database",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "PostgreSQL 16 Documentation — Chapter 5: Data Definition",
+        url: "https://www.postgresql.org/docs/16/ddl.html",
+      },
+      {
+        label: "PostgreSQL 16 Documentation — 14.1. Using EXPLAIN",
+        url: "https://www.postgresql.org/docs/16/using-explain.html",
+      },
+      {
+        label: "PostgreSQL 16 Documentation — Chapter 22: Database Roles",
+        url: "https://www.postgresql.org/docs/16/user-manag.html",
+      },
+    ],
+  },
 ];

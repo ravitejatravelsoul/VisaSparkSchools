@@ -10,8 +10,8 @@
 > matrix across all 80 guides, and "Complete-course definition" for what separates a course from a
 > guide.
 
-10 tracks, 11 courses, 118 lessons, 376 knowledge-check questions, 236 exercises (one guided plus
-one independent per lesson), 6 guided local labs, 11 guided projects, and 2 capstones. Every lesson
+13 tracks, 14 courses, 160 lessons, 502 knowledge-check questions, 320 exercises (one guided plus
+one independent per lesson), 12 guided local labs, 14 guided projects, and 2 capstones. Every lesson
 includes: objectives, prerequisites, a plain-language explanation, a working example, an editable
 example (where a runner applies), a guided exercise, an independent exercise, common mistakes, a
 3+ question knowledge check, a takeaway, a summary, and references. See the "Totals" table below
@@ -19,11 +19,13 @@ for exact, live-computed counts.
 
 Track order (each chains into the next via `nextLessonSlug` within a track, and
 `prerequisiteCourseSlugs`/`nextCourseSlugs` across tracks):
-Foundations → HTML & CSS → JavaScript → TypeScript → React → Node.js & Express → Python →
-Git, APIs & SQL → AI, LLMs, RAG & Agents → Software Testing & QA. (TypeScript and Python both build
-on JavaScript/Foundations independently — see the per-course prerequisite graph in "Master
-curriculum architecture" below; TypeScript is not required before Python, and Software Testing
-Foundations requires neither.)
+Foundations → HTML & CSS → JavaScript → TypeScript → React → Node.js & Express → Java →
+Data Structures & Algorithms → Python → Git, APIs & SQL → Database Design & PostgreSQL →
+AI, LLMs, RAG & Agents → Software Testing & QA. (Java, Data Structures & Algorithms, Python,
+Database Design & PostgreSQL, and Software Testing & QA each build on an earlier JavaScript-chain
+course independently — see the per-course prerequisite graph in "Master curriculum architecture"
+below; none of them requires TypeScript, React, or Node.js/Express specifically, except Database
+Design and PostgreSQL, which requires Git, APIs & SQL for its SQL foundation.)
 
 ## Track 1 — Digital & Coding Foundations (3 lessons)
 
@@ -146,7 +148,63 @@ commands), which this platform's browser sandbox cannot and does not execute.
 
 **Guided project:** Validated Learning-Progress REST API
 
-## Track 7 — Python (8 lessons)
+## Track 7 — Java (14 lessons)
+
+Added in Phase 5B. This platform has no JVM and no in-browser or server-side Java execution.
+Browser exercises are genuine JavaScript/TypeScript that model the underlying Java concept
+(overload resolution, an equals/hashCode contract check, a Stream-style filter/map/reduce
+pipeline that's a direct conceptual analogue of Java's Stream API); three lessons additionally
+carry a guided local lab for real, local `javac`/`java`/JUnit work. Version assumption: Java 21
+(LTS).
+
+| Lesson                                                                  | Difficulty   | Skills                         |
+| ----------------------------------------------------------------------- | ------------ | ------------------------------ |
+| The JVM, the JDK, and How a Java Program Runs (Guided Local Lab)        | beginner     | java, jvm                      |
+| Variables, Primitive Types, and Reference Types                         | beginner     | java, types                    |
+| Operators, Expressions, and Working with Strings                        | beginner     | java, strings, operators       |
+| Control Flow: Conditions, Loops, and Modern Switch                      | beginner     | java, control-flow             |
+| Methods: Parameters, Return Values, and Overloading                     | beginner     | java, methods                  |
+| Arrays: Fixed-Size, Typed, and Zero-Indexed                             | beginner     | java, arrays                   |
+| Collections: List, Set, and Map                                         | beginner     | java, collections              |
+| Classes, Objects, Constructors, and Encapsulation                       | intermediate | java, oop, encapsulation       |
+| Inheritance vs. Composition, Packages, and Access Control               | intermediate | java, inheritance, composition |
+| Interfaces, Abstract Classes, and Polymorphism (Guided Local Lab)       | intermediate | java, interfaces, polymorphism |
+| Exceptions: Checked, Unchecked, and Handling Them Well                  | intermediate | java, exceptions               |
+| Generics, Equality, hashCode, and Immutability                          | intermediate | java, generics, equality       |
+| Lambdas and the Stream API                                              | intermediate | java, lambdas, streams         |
+| Resource Safety, Unit Testing, and Maintainable Project Structure (GLL) | intermediate | java, testing, junit           |
+
+**Guided project:** Course Enrollment and Progress Manager
+
+## Track 8 — Data Structures & Algorithms (14 lessons)
+
+Added in Phase 5B. Every exercise is genuine, browser-executable JavaScript — unlike Java or
+Node.js/Express, this course needs no local runtime at all, so it has zero guided local labs.
+Three lessons carry a substantially larger "lab-scale" exercise (a reusable linked-list structure
+with edge-case tests, a same-tree/BST-validity check with edge-case tests, and a justified
+insertion-sort-vs-merge-sort recommendation under stated constraints) to satisfy this course's lab
+requirement inside the existing exercise schema.
+
+| Lesson                                                         | Difficulty   | Skills                          |
+| -------------------------------------------------------------- | ------------ | ------------------------------- |
+| Problem Decomposition, Correctness, and Testing Algorithms     | beginner     | algorithms, problem-solving     |
+| Time and Space Complexity: Big O, Ω, and Θ                     | beginner     | algorithms, complexity          |
+| Arrays, Dynamic Arrays, and Strings as Sequential Data         | beginner     | algorithms, arrays              |
+| Linked Lists: Nodes, Pointers, and When They Beat Arrays       | beginner     | algorithms, linked-lists        |
+| Stacks, Queues, and Deques                                     | beginner     | algorithms, stacks, queues      |
+| Hash Tables, Sets, and Maps: Average O(1) Lookup               | intermediate | algorithms, hash-tables         |
+| Binary Trees and the Three Depth-First Traversals              | intermediate | algorithms, trees, traversal    |
+| Binary Search Trees: Ordered Structure, O(log n) When Balanced | intermediate | algorithms, bst                 |
+| Heaps and Priority Queues                                      | intermediate | algorithms, heaps               |
+| Recursion and Divide-and-Conquer                               | intermediate | algorithms, recursion           |
+| Linear Search and Binary Search                                | intermediate | algorithms, searching           |
+| Sorting: Insertion Sort, Merge Sort, and Choosing Between Them | intermediate | algorithms, sorting             |
+| Graphs: Representations, BFS, and DFS                          | advanced     | algorithms, graphs, bfs, dfs    |
+| Backtracking, Greedy Reasoning, and Dynamic Programming        | advanced     | algorithms, dynamic-programming |
+
+**Guided project:** Learning Path Recommendation Engine
+
+## Track 9 — Python (8 lessons)
 
 | Lesson                                      | Difficulty | Skills                           |
 | ------------------------------------------- | ---------- | -------------------------------- |
@@ -161,7 +219,7 @@ commands), which this platform's browser sandbox cannot and does not execute.
 
 **Guided project:** Expense Tracker
 
-## Track 8 — Git, APIs & SQL (8 lessons)
+## Track 10 — Git, APIs & SQL (8 lessons)
 
 | Lesson                                            | Difficulty | Skills                                       |
 | ------------------------------------------------- | ---------- | -------------------------------------------- |
@@ -180,7 +238,39 @@ books, orders) so learners build on one consistent schema instead of a new one p
 **Guided projects:** Git Branching & Collaboration Workflow; API-Powered Lookup App (spans
 JavaScript + this track)
 
-## Track 9 — AI, LLMs, RAG & Agents (14 lessons)
+## Track 11 — Database Design & PostgreSQL (14 lessons)
+
+Added in Phase 5B. Builds on this document's Git, APIs & SQL track, which already teaches
+SELECT/JOIN/INSERT/UPDATE/DELETE/GROUP BY against this platform's browser SQL runner — SQLite
+(sql.js), **not** PostgreSQL. Three lessons whose SQL is genuinely dialect-compatible with SQLite
+(joins/aggregation, subqueries/CTEs, window functions) use that real runner, with an explicit,
+in-lesson disclosure that the sandbox is SQLite, not PostgreSQL. Every lesson covering
+PostgreSQL-specific behavior (data types, transactions, isolation, indexes/EXPLAIN, roles,
+migrations) uses genuine browser-executable JS/TS-modeling exercises and static, non-executed
+reference DDL instead — never silently running PostgreSQL-flavored SQL against SQLite. Three
+lessons additionally carry a guided local lab for real, local PostgreSQL work. Version assumption:
+PostgreSQL 16 (examples remain valid on 17+).
+
+| Lesson                                                                  | Difficulty   | Skills                               |
+| ----------------------------------------------------------------------- | ------------ | ------------------------------------ |
+| Relational Modeling: Entities, Attributes, and Relationships            | intermediate | database-design, relational-modeling |
+| Primary Keys, Foreign Keys, and Constraints                             | intermediate | database-design, keys                |
+| Normalization: First and Second Normal Form                             | intermediate | database-design, normalization       |
+| Third Normal Form and Denormalization Tradeoffs                         | intermediate | database-design, normalization       |
+| PostgreSQL Data Types and DDL                                           | intermediate | postgresql, data-types               |
+| Implementing a Normalized Schema in PostgreSQL (Guided Local Lab)       | intermediate | postgresql, ddl                      |
+| Joins and Aggregation, Beyond the Basics                                | intermediate | postgresql, sql, joins               |
+| Subqueries and Common Table Expressions                                 | intermediate | postgresql, sql, ctes                |
+| Window Functions: Calculations Across Rows Without Collapsing Them      | advanced     | postgresql, sql, window-functions    |
+| Transactions and ACID Guarantees                                        | advanced     | postgresql, transactions             |
+| Concurrent-Update Problems and Isolation Levels (Guided Local Lab)      | advanced     | postgresql, concurrency              |
+| Indexes, Composite Indexes, and Reading EXPLAIN                         | advanced     | postgresql, indexes                  |
+| Views, Roles, and the Principle of Least Privilege                      | advanced     | postgresql, roles, security          |
+| Migrations, Schema Evolution, and Operational Safety (Guided Local Lab) | advanced     | postgresql, migrations               |
+
+**Guided project:** Learning Platform Database Layer
+
+## Track 12 — AI, LLMs, RAG & Agents (14 lessons)
 
 | Lesson                                                           | Difficulty   | Skills                           |
 | ---------------------------------------------------------------- | ------------ | -------------------------------- |
@@ -208,7 +298,7 @@ explicitly, so learners understand the underlying mechanics before ever touching
 **Capstones:** Document Q&A RAG Capstone (with citations, spans this track + SQL); AI Support Agent
 Capstone (tool-calling agent with guardrails)
 
-## Track 10 — Software Testing & QA (28 lessons, 2 courses)
+## Track 13 — Software Testing & QA (28 lessons, 2 courses)
 
 Two courses (Phase 5A.2). Both reuse the existing HTML/JS runner exclusively — no new runner was
 added. Every exercise represents a testing _decision_ (which equivalence classes, which boundary
@@ -235,13 +325,13 @@ and structuring a maintainable, isolated automation suite with useful CI reporti
 
 | Metric                           | Count |
 | -------------------------------- | ----- |
-| Tracks                           | 10    |
-| Courses                          | 11    |
-| Lessons                          | 118   |
-| Knowledge-check questions        | 376   |
-| Exercises (guided + independent) | 236   |
-| Guided local labs                | 6     |
-| Guided projects                  | 11    |
+| Tracks                           | 13    |
+| Courses                          | 14    |
+| Lessons                          | 160   |
+| Knowledge-check questions        | 502   |
+| Exercises (guided + independent) | 320   |
+| Guided local labs                | 12    |
+| Guided projects                  | 14    |
 | Capstones                        | 2     |
 
 All counts above are computed from the live registry (query the registry's `allTracks`/
@@ -287,19 +377,19 @@ against the real registries rather than an independently-authored boolean.
 ## Master curriculum architecture (Phase 5A+)
 
 The long-term curriculum is organized into 8 tracks, each an ordered sequence of courses. Only
-courses that are actually implemented (this document's Tracks 1–10 above) are public; every other
+courses that are actually implemented (this document's Tracks 1–13 above) are public; every other
 course named below is a documented plan, not a claim of availability — none of them appear in
 `content/courses.ts`, the public catalog, search, or any roadmap's required steps.
 
 1. **Web Development** — HTML & CSS ✅ → JavaScript ✅ → TypeScript ✅ → React ✅ → Node.js and
    Express ✅
-2. **Backend and Programming** — Node.js and Express ✅ (shared with track 1) → Java (5B) → Data
-   Structures and Algorithms (5B) → Backend Architecture Fundamentals (5C) → Spring Boot (5C)
-3. **Databases and Data** — SQL ✅ (part of Track 6) → Database Design and PostgreSQL (5B) → Data
+2. **Backend and Programming** — Node.js and Express ✅ (shared with track 1) → Java ✅ → Data
+   Structures and Algorithms ✅ → Backend Architecture Fundamentals (5C) → Spring Boot (5C)
+3. **Databases and Data** — SQL ✅ (part of Track 6) → Database Design and PostgreSQL ✅ → Data
    Analysis with Python and Pandas (5C) → Machine Learning Foundations (5C, distinct from the
    existing AI/LLM/RAG track's ML lesson, which teaches ML _concepts_, not applied model-building)
 4. **Software Testing and QA Automation** — Software Testing Foundations ✅ → API Testing and
-   Automation ✅ → Playwright Web Automation (5B) or Selenium Web Automation (5B) → Test
+   Automation ✅ → Playwright Web Automation (5C) or Selenium Web Automation (5C) → Test
    Automation Framework Engineering (5C) → Performance and Security Testing Foundations (5C)
 5. **DevOps and Cloud** — Git ✅ (part of Track 6) → Linux and Shell Fundamentals (5C) → Docker
    (5C) → Continuous Integration and Delivery (5C) → Cloud Fundamentals (5C) → Kubernetes
@@ -347,21 +437,36 @@ local lab for the real component/server work — six guided local labs total acr
 new runner or execution surface added. See `PROJECT_STATUS.md`'s Phase 5A.2 report for the full
 build, verification, and QA results.
 
-**Phase 5B (documented plan, not built):** Java, Data Structures and Algorithms, Database Design
-and PostgreSQL, Playwright Web Automation, Selenium Web Automation. Java and PostgreSQL now have a
-concrete implementation path via the guided-local-lab content type built in Phase 5A.2 (setup
-steps, expected behavior, verification commands, no fake execution); Playwright/Selenium are
-largely guided-exercise and code-tracing courses that don't need a new runner or the guided-local-lab
-type at all.
+**Phase 5B (implemented): Java Programming Foundations, Data Structures and Algorithms, Database
+Design and PostgreSQL — all three courses complete.** Java and PostgreSQL each use the
+guided-local-lab content type built in Phase 5A.2 for their real compile/run and real-database
+work (three labs each: setup steps, expected behavior, verification commands, no fake execution),
+with every browser exercise still genuine, runnable JavaScript/TypeScript modeling the underlying
+mechanism (Java's overload resolution, an equals/hashCode contract, a Stream-style pipeline;
+PostgreSQL's relational-modeling and normalization reasoning, a transaction/isolation model, an
+index/EXPLAIN classifier) — no JVM and no PostgreSQL server were added to the site. Data Structures
+and Algorithms needs no guided local labs at all, since arrays, linked lists, trees, graphs, and
+every algorithm in that course are equally real in browser-executable JavaScript/TypeScript;
+three of its lessons instead carry a substantially larger, "lab-scale" exercise to satisfy this
+course's lab requirement inside the existing exercise schema. Three PostgreSQL lessons
+(joins/aggregation, subqueries/CTEs, window functions) use the real, existing browser SQL runner
+— SQLite, not PostgreSQL — specifically because that subset of syntax is genuinely
+dialect-compatible, with an explicit, in-lesson disclosure every time; every genuinely
+PostgreSQL-specific lesson uses JS/TS-modeling exercises and static, non-executed reference DDL
+instead. See `PROJECT_STATUS.md`'s Phase 5B report for the full build, verification, and QA
+results.
 
 **Phase 5C (documented plan, not built):** TypeScript Compiler React (deferred further), Backend
 Architecture Fundamentals, Spring Boot, Data Analysis with Python and Pandas, Machine Learning
-Foundations, Test Automation Framework Engineering, Performance and Security Testing Foundations,
-Linux and Shell Fundamentals, Docker, Continuous Integration and Delivery, Cloud Fundamentals,
-Kubernetes Fundamentals, Prompt Engineering (dedicated course), Advanced RAG, Generative AI
-Application Engineering, LLM Evaluation/Safety/Observability, and the full Placement and Career
-Preparation track (Quantitative Aptitude, Logical Reasoning, Verbal Ability, Interview/GD
-Preparation, Timed Placement Mock Tests).
+Foundations, Playwright Web Automation, Selenium Web Automation, Test Automation Framework
+Engineering, Performance and Security Testing Foundations, Linux and Shell Fundamentals, Docker,
+Continuous Integration and Delivery, Cloud Fundamentals, Kubernetes Fundamentals, Prompt
+Engineering (dedicated course), Advanced RAG, Generative AI Application Engineering, LLM
+Evaluation/Safety/Observability, and the full Placement and Career Preparation track (Quantitative
+Aptitude, Logical Reasoning, Verbal Ability, Interview/GD Preparation, Timed Placement Mock
+Tests). The recommended next four-course batch to reach 18 total is Playwright Web Automation,
+Selenium Web Automation, Test Automation Framework Engineering, and Linux and Shell Fundamentals —
+none of these are published in this batch.
 
 ## Complete guide-to-course coverage matrix
 
@@ -412,18 +517,18 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 
 ### Programming Languages (10)
 
-| Technology | Difficulty   | Course                  | Runner     | Project(s)           | Batch / reason                                                                                                         |
-| ---------- | ------------ | ----------------------- | ---------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| C          | intermediate | —                       | —          | —                    | Reference-only: no browser-executable runtime available; would need a guided-local-lab treatment not scoped this phase |
-| C#         | intermediate | —                       | —          | —                    | 5C or later (after .NET)                                                                                               |
-| C++        | advanced     | —                       | —          | —                    | Reference-only: same runtime constraint as C                                                                           |
-| Go         | intermediate | —                       | —          | —                    | 5C or later (not yet scheduled)                                                                                        |
-| Java       | intermediate | —                       | —          | —                    | 5B                                                                                                                     |
-| JavaScript | beginner     | javascript-fundamentals | javascript | interactive-quiz-app | ✅ available                                                                                                           |
-| PHP        | beginner     | —                       | —          | —                    | 5C or later (not yet scheduled)                                                                                        |
-| Python     | beginner     | python-fundamentals     | python     | expense-tracker-cli  | ✅ available                                                                                                           |
-| Rust       | advanced     | —                       | —          | —                    | 5C or later (not yet scheduled)                                                                                        |
-| TypeScript | intermediate | typescript-foundations  | typescript | typed-study-tracker  | ✅ available (Phase 5A)                                                                                                |
+| Technology | Difficulty   | Course                       | Runner               | Project(s)                         | Batch / reason                                                                                                         |
+| ---------- | ------------ | ---------------------------- | -------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| C          | intermediate | —                            | —                    | —                                  | Reference-only: no browser-executable runtime available; would need a guided-local-lab treatment not scoped this phase |
+| C#         | intermediate | —                            | —                    | —                                  | 5C or later (after .NET)                                                                                               |
+| C++        | advanced     | —                            | —                    | —                                  | Reference-only: same runtime constraint as C                                                                           |
+| Go         | intermediate | —                            | —                    | —                                  | 5C or later (not yet scheduled)                                                                                        |
+| Java       | intermediate | java-programming-foundations | — (guided local lab) | course-enrollment-progress-manager | ✅ available (Phase 5B)                                                                                                |
+| JavaScript | beginner     | javascript-fundamentals      | javascript           | interactive-quiz-app               | ✅ available                                                                                                           |
+| PHP        | beginner     | —                            | —                    | —                                  | 5C or later (not yet scheduled)                                                                                        |
+| Python     | beginner     | python-fundamentals          | python               | expense-tracker-cli                | ✅ available                                                                                                           |
+| Rust       | advanced     | —                            | —                    | —                                  | 5C or later (not yet scheduled)                                                                                        |
+| TypeScript | intermediate | typescript-foundations       | typescript           | typed-study-tracker                | ✅ available (Phase 5A)                                                                                                |
 
 ### Mobile Development (4)
 
@@ -436,13 +541,13 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 
 ### Databases (5)
 
-| Technology | Difficulty   | Course       | Runner | Project(s) | Batch / reason                                                                                                                                                                                      |
-| ---------- | ------------ | ------------ | ------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MongoDB    | beginner     | —            | —      | —          | 5C or later (a document-database course, distinct from the SQL/relational track)                                                                                                                    |
-| MySQL      | beginner     | —            | —      | —          | Reference-only: SQL Tables/Filtering/Aggregation lessons in Git, APIs & SQL teach transferable relational-SQL skills; sql.js (SQLite dialect) is this platform's one browser-executable SQL runtime |
-| PostgreSQL | beginner     | —            | —      | —          | 5B (Database Design and PostgreSQL) — needs a guided-local-lab treatment, since sql.js cannot execute Postgres-specific syntax                                                                      |
-| Redis      | intermediate | —            | —      | —          | 5C or later (not yet scheduled)                                                                                                                                                                     |
-| SQL        | beginner     | git-apis-sql | sql    | —          | ✅ available                                                                                                                                                                                        |
+| Technology | Difficulty   | Course                         | Runner                                                   | Project(s)                 | Batch / reason                                                                                                                                                                                      |
+| ---------- | ------------ | ------------------------------ | -------------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MongoDB    | beginner     | —                              | —                                                        | —                          | 5C or later (a document-database course, distinct from the SQL/relational track)                                                                                                                    |
+| MySQL      | beginner     | —                              | —                                                        | —                          | Reference-only: SQL Tables/Filtering/Aggregation lessons in Git, APIs & SQL teach transferable relational-SQL skills; sql.js (SQLite dialect) is this platform's one browser-executable SQL runtime |
+| PostgreSQL | beginner     | database-design-and-postgresql | sql (dialect-compatible lessons only) + guided local lab | learning-platform-database | ✅ available (Phase 5B) — sql.js/SQLite runs only the genuinely dialect-compatible lessons, always disclosed; PostgreSQL-specific behavior uses guided local labs                                   |
+| Redis      | intermediate | —                              | —                                                        | —                          | 5C or later (not yet scheduled)                                                                                                                                                                     |
+| SQL        | beginner     | git-apis-sql                   | sql                                                      | —                          | ✅ available                                                                                                                                                                                        |
 
 ### Data Science and Analytics (7)
 
@@ -503,9 +608,9 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 
 ### Data Structures and Algorithms (1)
 
-| Technology                     | Difficulty   | Course | Runner | Project(s) | Batch / reason                                                                                                |
-| ------------------------------ | ------------ | ------ | ------ | ---------- | ------------------------------------------------------------------------------------------------------------- |
-| Data Structures and Algorithms | intermediate | —      | —      | —          | 5B — genuinely executable today (JavaScript or Python runner, algorithm exercises need no new infrastructure) |
+| Technology                     | Difficulty   | Course                         | Runner                | Project(s)                          | Batch / reason                                                                         |
+| ------------------------------ | ------------ | ------------------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------- |
+| Data Structures and Algorithms | intermediate | data-structures-and-algorithms | javascript/typescript | learning-path-recommendation-engine | ✅ available (Phase 5B) — genuinely executable, no new runner or infrastructure needed |
 
 ### Developer Tools (4)
 
@@ -516,8 +621,8 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 | Git             | beginner     | git-apis-sql | —      | git-collaboration-workflow | ✅ available                                                                                                       |
 | Linux           | intermediate | —            | —      | —                          | 5C (Linux and Shell Fundamentals)                                                                                  |
 
-**Summary:** 80 public technologies; 23 map to a real course (17 pre-Phase-5A + TypeScript +
-Software Testing Fundamentals + API Testing + React + Node.js + Express); 7 more map to a runner or
-project without a full course (unchanged from Phase 3/4); 8 have an explicit, documented
-reference-only reason (not a course candidate at all); the remaining ~42 are genuinely planned for
-Phase 5B/5C, listed above with their batch.
+**Summary:** 80 public technologies; 26 map to a real course (17 pre-Phase-5A + TypeScript +
+Software Testing Fundamentals + API Testing + React + Node.js + Express + Java + Data Structures
+and Algorithms + PostgreSQL); 7 more map to a runner or project without a full course (unchanged
+from Phase 3/4); 8 have an explicit, documented reference-only reason (not a course candidate at
+all); the remaining ~39 are genuinely planned for Phase 5C, listed above with their batch.

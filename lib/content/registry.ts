@@ -12,6 +12,9 @@ import { softwareTestingLessons } from "@/content/lessons/software-testing";
 import { apiTestingLessons } from "@/content/lessons/api-testing";
 import { reactLessons } from "@/content/lessons/react";
 import { nodeExpressLessons } from "@/content/lessons/node-express";
+import { javaLessons } from "@/content/lessons/java";
+import { dsaLessons } from "@/content/lessons/dsa";
+import { postgresqlLessons } from "@/content/lessons/postgresql";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -33,6 +36,9 @@ export const allLessons: Lesson[] = [
   ...apiTestingLessons,
   ...reactLessons,
   ...nodeExpressLessons,
+  ...javaLessons,
+  ...dsaLessons,
+  ...postgresqlLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);

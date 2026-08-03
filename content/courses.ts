@@ -257,11 +257,11 @@ export const courses: CourseInput[] = [
       "Query, modify, aggregate, and join relational data with SQL",
     ],
     prerequisiteCourseSlugs: ["javascript-fundamentals"],
-    // No natural "next course" in the current catalog builds directly on
-    // Git/APIs/SQL specifically -- API Testing and Automation uses REST/HTTP
-    // concepts but doesn't require Git or SQL, so it isn't listed as a
-    // continuation here. See docs/CURRICULUM.md's coverage matrix.
-    nextCourseSlugs: [],
+    // Database Design and PostgreSQL (Phase 5B) builds directly on this
+    // course's SQL module and is its natural continuation. API Testing and
+    // Automation uses REST/HTTP concepts but doesn't require Git or SQL, so
+    // it isn't listed here. See docs/CURRICULUM.md's coverage matrix.
+    nextCourseSlugs: ["database-design-and-postgresql"],
     relatedTechnologySlugs: ["git", "rest-apis", "sql"],
     modules: [
       {
@@ -580,7 +580,11 @@ export const courses: CourseInput[] = [
       "Separate business logic into testable services and add a real automated test suite",
     ],
     prerequisiteCourseSlugs: ["react-application-development"],
-    nextCourseSlugs: [],
+    // Java Programming Foundations (Phase 5B) continues the "Programming and
+    // Backend" direction as a recommended next step -- it does not require
+    // Node/Express knowledge itself (its own prerequisite is JavaScript
+    // Fundamentals), so this is a suggested continuation, not a strict gate.
+    nextCourseSlugs: ["java-programming-foundations"],
     relatedTechnologySlugs: ["nodejs", "express"],
     modules: [
       {
@@ -626,6 +630,215 @@ export const courses: CourseInput[] = [
         summary:
           "Graceful shutdown and health checks — what it takes to run a service, not just write one.",
         lessonSlugs: ["node-operational-readiness"],
+      },
+    ],
+  },
+  {
+    id: "java-programming-foundations",
+    trackSlug: "java",
+    slug: "java-programming-foundations",
+    title: "Java Programming Foundations",
+    description:
+      "The JVM execution model, core language syntax, object-oriented design, exceptions, generics, modern streams, and real automated testing with JUnit.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    audience:
+      "Developers who already know one programming language's fundamentals (variables, functions, conditionals, loops, basic collections) and want a statically-typed, object-oriented language behind much of the enterprise and Android world.",
+    learningOutcomes: [
+      "Explain the JDK/JVM/bytecode model and compile and run a real multi-class Java program",
+      "Use Java's primitive and reference types, control flow, and methods correctly, including overload resolution",
+      "Design a small domain using encapsulation, composition, interfaces, and polymorphism",
+      "Handle failure with checked and unchecked exceptions, and implement equals/hashCode correctly",
+      "Use lambdas and the Stream API to express filter/map/reduce pipelines",
+      "Add JUnit tests and use try-with-resources for guaranteed resource cleanup",
+    ],
+    prerequisiteCourseSlugs: ["javascript-fundamentals"],
+    nextCourseSlugs: ["data-structures-and-algorithms"],
+    relatedTechnologySlugs: ["java"],
+    modules: [
+      {
+        id: "java-execution-fundamentals-module",
+        title: "Java execution and language fundamentals",
+        summary:
+          "The JDK/JVM/bytecode mental model, program structure, types, operators, and strings.",
+        lessonSlugs: [
+          "java-jvm-and-execution",
+          "java-variables-and-types",
+          "java-operators-and-strings",
+        ],
+      },
+      {
+        id: "java-control-and-methods-module",
+        title: "Decisions, repetition, and methods",
+        summary: "Conditions and loops, then method design, parameters, returns, and overloading.",
+        lessonSlugs: ["java-control-flow", "java-methods-and-overloading"],
+      },
+      {
+        id: "java-data-and-collections-module",
+        title: "Data and collections",
+        summary: "Fixed-size arrays, then List, Set, and Map — and when to reach for each.",
+        lessonSlugs: ["java-arrays", "java-collections"],
+      },
+      {
+        id: "java-oop-module",
+        title: "Object-oriented design",
+        summary:
+          "Classes, constructors, encapsulation, inheritance vs. composition, interfaces, and polymorphism.",
+        lessonSlugs: [
+          "java-classes-and-objects",
+          "java-inheritance-and-composition",
+          "java-interfaces-and-polymorphism",
+        ],
+      },
+      {
+        id: "java-reliability-module",
+        title: "Reliable Java programs",
+        summary:
+          "Checked and unchecked exceptions, generics, and the equals/hashCode/immutability contract.",
+        lessonSlugs: ["java-exceptions", "java-generics-equality-immutability"],
+      },
+      {
+        id: "java-modern-and-testing-module",
+        title: "Modern Java and testing",
+        summary:
+          "Lambdas and Streams, then try-with-resources, JUnit, debugging, and project structure.",
+        lessonSlugs: ["java-lambdas-and-streams", "java-resource-safety-and-testing"],
+      },
+    ],
+  },
+  {
+    id: "data-structures-and-algorithms",
+    trackSlug: "algorithms",
+    slug: "data-structures-and-algorithms",
+    title: "Data Structures and Algorithms",
+    description:
+      "How to reason about correctness and complexity, the core data structures every efficient program relies on, and the algorithmic strategies (search, sort, recursion, graphs, dynamic programming) built from them.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 9,
+    audience:
+      "Developers comfortable with variables, functions, conditionals, loops, and basic collections in JavaScript or TypeScript who want to reason rigorously about performance and choose the right structure deliberately, not by habit.",
+    learningOutcomes: [
+      "Analyze an algorithm's time and space complexity using Big O, and distinguish best/average/worst case",
+      "Implement and choose between arrays, linked lists, stacks, queues, hash tables, trees, and heaps based on actual access patterns",
+      "Implement binary search, insertion sort, and merge sort, and justify which sort fits given constraints",
+      "Implement BFS and DFS over a graph, including cycle detection with a visited set",
+      "Implement a memoized recursive solution, and explain when backtracking, greedy, or dynamic programming actually applies",
+    ],
+    prerequisiteCourseSlugs: ["javascript-fundamentals"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["data-structures-and-algorithms"],
+    modules: [
+      {
+        id: "dsa-analysis-module",
+        title: "Algorithm analysis and problem solving",
+        summary: "Decomposition, correctness, testing, and the language of time/space complexity.",
+        lessonSlugs: ["dsa-problem-solving-and-correctness", "dsa-complexity-and-big-o"],
+      },
+      {
+        id: "dsa-sequential-module",
+        title: "Sequential structures",
+        summary: "Arrays, dynamic arrays, strings, and linked lists — and their real tradeoffs.",
+        lessonSlugs: ["dsa-arrays-and-dynamic-arrays", "dsa-linked-lists"],
+      },
+      {
+        id: "dsa-access-module",
+        title: "Access and lookup structures",
+        summary: "Stacks, queues, deques, and hash-table-backed Sets and Maps.",
+        lessonSlugs: ["dsa-stacks-queues-deques", "dsa-hash-tables-sets-maps"],
+      },
+      {
+        id: "dsa-hierarchical-module",
+        title: "Hierarchical structures",
+        summary: "Binary trees and traversals, binary search trees, heaps, and priority queues.",
+        lessonSlugs: [
+          "dsa-binary-trees-and-traversals",
+          "dsa-binary-search-trees",
+          "dsa-heaps-and-priority-queues",
+        ],
+      },
+      {
+        id: "dsa-search-order-module",
+        title: "Recursion, search, and ordering",
+        summary: "Divide-and-conquer, linear and binary search, insertion sort, and merge sort.",
+        lessonSlugs: ["dsa-recursion-and-divide-and-conquer", "dsa-searching", "dsa-sorting"],
+      },
+      {
+        id: "dsa-graphs-strategies-module",
+        title: "Graphs and algorithmic strategies",
+        summary:
+          "Graph representations, BFS/DFS, backtracking, greedy reasoning, and dynamic programming.",
+        lessonSlugs: ["dsa-graphs-and-traversal", "dsa-backtracking-greedy-dynamic-programming"],
+      },
+    ],
+  },
+  {
+    id: "database-design-and-postgresql",
+    trackSlug: "databases",
+    slug: "database-design-and-postgresql",
+    title: "Database Design and PostgreSQL",
+    description:
+      "Beyond basic SELECT: relational modeling, normalization, real PostgreSQL data types and schema implementation, advanced querying, transactions and concurrency, indexing, and operational safety.",
+    order: 0,
+    difficulty: "advanced",
+    estimatedHours: 9,
+    audience:
+      "Developers who already know basic SQL (SELECT, JOIN, INSERT/UPDATE/DELETE, GROUP BY) and want to design real schemas, understand PostgreSQL-specific behavior, and operate a production database safely.",
+    learningOutcomes: [
+      "Model a domain into entities, relationships, cardinality, and optionality before writing any SQL",
+      "Normalize a schema to Third Normal Form, and justify a deliberate denormalization tradeoff",
+      "Implement a normalized PostgreSQL schema with correct types, constraints, and dependency-ordered DDL",
+      "Write joins, subqueries, CTEs, and window functions, and explain PostgreSQL's transaction and isolation guarantees",
+      "Add useful indexes, read EXPLAIN output, and design least-privileged roles",
+      "Write ordered, safe schema migrations and describe a real backup/recovery plan",
+    ],
+    prerequisiteCourseSlugs: ["git-apis-sql"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["postgresql"],
+    modules: [
+      {
+        id: "pg-relational-modeling-module",
+        title: "Relational modeling",
+        summary: "Entities, attributes, relationships, keys, and constraints.",
+        lessonSlugs: ["pg-relational-modeling", "pg-keys-and-constraints"],
+      },
+      {
+        id: "pg-normalization-module",
+        title: "Normalized schema design",
+        summary:
+          "Functional dependencies, First through Third Normal Form, and denormalization tradeoffs.",
+        lessonSlugs: ["pg-normalization-1nf-2nf", "pg-normalization-3nf-and-denormalization"],
+      },
+      {
+        id: "pg-implementation-module",
+        title: "PostgreSQL schema implementation",
+        summary:
+          "Real PostgreSQL data types, DDL, and dependency-ordered table creation and seed data.",
+        lessonSlugs: ["pg-data-types-and-tables", "pg-schema-implementation"],
+      },
+      {
+        id: "pg-advanced-querying-module",
+        title: "Advanced querying",
+        summary: "Multi-table joins and aggregation, subqueries and CTEs, and window functions.",
+        lessonSlugs: ["pg-joins-and-aggregation", "pg-subqueries-and-ctes", "pg-window-functions"],
+      },
+      {
+        id: "pg-transactions-performance-module",
+        title: "Transactions and performance",
+        summary:
+          "ACID guarantees, concurrent-update anomalies and isolation levels, and indexes and query plans.",
+        lessonSlugs: [
+          "pg-transactions-and-acid",
+          "pg-concurrency-and-isolation",
+          "pg-indexes-and-query-plans",
+        ],
+      },
+      {
+        id: "pg-security-evolution-module",
+        title: "Security and evolution",
+        summary: "Views, roles and least privilege, and safe, ordered schema migrations.",
+        lessonSlugs: ["pg-views-and-roles", "pg-migrations-and-operations"],
       },
     ],
   },

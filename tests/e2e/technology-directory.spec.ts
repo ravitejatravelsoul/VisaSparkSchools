@@ -102,6 +102,26 @@ test("a technology with a real course shows a real, working 'Start course' actio
   await expect(page).toHaveURL(/\/courses\/python-fundamentals$/);
 });
 
+test("the Java technology guide (previously guide-only) now shows a real, working 'Start course' action (Phase 5B)", async ({
+  page,
+}) => {
+  await page.goto("/technologies/java");
+  const startCourse = page.getByRole("link", { name: /start course/i });
+  await expect(startCourse).toBeVisible();
+  await startCourse.click();
+  await expect(page).toHaveURL(/\/courses\/java-programming-foundations$/);
+});
+
+test("the PostgreSQL technology guide (previously guide-only) now shows a real, working 'Start course' action (Phase 5B)", async ({
+  page,
+}) => {
+  await page.goto("/technologies/postgresql");
+  const startCourse = page.getByRole("link", { name: /start course/i });
+  await expect(startCourse).toBeVisible();
+  await startCourse.click();
+  await expect(page).toHaveURL(/\/courses\/database-design-and-postgresql$/);
+});
+
 test("a technology with runner support shows a working 'Open playground' action", async ({
   page,
 }) => {

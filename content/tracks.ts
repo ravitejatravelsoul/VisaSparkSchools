@@ -48,18 +48,42 @@ export const tracks: Track[] = [
     order: 5,
   },
   {
+    id: "java",
+    slug: "java",
+    title: "Java",
+    description:
+      "A statically-typed, object-oriented language behind much of the enterprise and Android world — from the JVM's execution model through modern streams and real automated testing.",
+    order: 6,
+  },
+  {
+    id: "algorithms",
+    slug: "algorithms",
+    title: "Data Structures & Algorithms",
+    description:
+      "How to reason about time and space, and the structures — arrays, trees, graphs, hash tables — every efficient program is built from.",
+    order: 7,
+  },
+  {
     id: "python",
     slug: "python",
     title: "Python",
     description: "A general-purpose language for scripting, data, and the backend of AI apps.",
-    order: 6,
+    order: 8,
   },
   {
     id: "git-api-sql",
     slug: "git-api-sql",
     title: "Git, APIs & SQL",
     description: "Version your work, talk to servers over HTTP, and query real databases.",
-    order: 7,
+    order: 9,
+  },
+  {
+    id: "databases",
+    slug: "databases",
+    title: "Database Design & PostgreSQL",
+    description:
+      "Beyond basic SQL: relational modeling, normalization, transactions, indexing, and the operational discipline a real production database needs.",
+    order: 10,
   },
   {
     id: "ai-llm-rag",
@@ -67,7 +91,7 @@ export const tracks: Track[] = [
     title: "AI, LLMs, RAG & Agents",
     description:
       "From how language models work to building grounded, cited retrieval-augmented AI applications.",
-    order: 8,
+    order: 11,
   },
   {
     id: "software-testing",
@@ -75,6 +99,6 @@ export const tracks: Track[] = [
     title: "Software Testing & QA",
     description:
       "Think like a tester: design techniques, risk-based planning, and clear defect reporting — plus automated API validation.",
-    order: 9,
+    order: 12,
   },
 ];

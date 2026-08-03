@@ -116,7 +116,7 @@ export const databaseTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "For its correctness, advanced feature set (JSONB columns, window functions, extensions), and strong reputation for reliability.",
     whereItFits:
-      "One of several concrete SQL database engines; this platform's own Supabase integration (when configured) is built on PostgreSQL.",
+      "One of several concrete SQL database engines; this platform's own Supabase integration (when configured) is built on PostgreSQL. This platform's Database Design and PostgreSQL course goes beyond basic SQL into relational modeling, normalization, real PostgreSQL types, transactions, indexing, and operational safety.",
     beginnerFriendly: true,
     difficulty: "beginner",
     prerequisiteIds: ["sql"],
@@ -137,19 +137,29 @@ export const databaseTechnologies: TechnologyInput[] = [
       "Production application databases",
       "Analytical workloads needing advanced SQL features",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Database Design and PostgreSQL course"],
     projectIdeas: [
       "Recreate the bookstore schema from this platform's SQL lessons in a local PostgreSQL instance",
     ],
     references: [
       { label: "PostgreSQL official documentation", url: "https://www.postgresql.org/docs/" },
     ],
-    searchKeywords: ["relational database", "rdbms", "postgres"],
+    searchKeywords: [
+      "relational database",
+      "rdbms",
+      "postgres",
+      "database design",
+      "normalization",
+      "transactions",
+      "indexes",
+      "query plans",
+    ],
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "16.x",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "database-design-and-postgresql",
+    projectIds: ["learning-platform-database"],
     publicVisibility: true,
   },
   {

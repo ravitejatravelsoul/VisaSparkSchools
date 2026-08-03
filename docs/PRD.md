@@ -139,12 +139,14 @@ Added on top of Phases 1-3, without duplicating any existing state:
 
 ## 6. Curriculum shape
 
-Ten tracks: Digital & Coding Foundations → HTML & CSS → JavaScript → TypeScript → React →
-Node.js & Express → Python → Git, APIs & SQL → AI, LLMs, RAG & Agents → Software Testing & QA
-(Python and Software Testing & QA are independent branches, not sequential prerequisites of the
-web-development chain or of one another). See [`CURRICULUM.md`](./CURRICULUM.md) for the full
-lesson-by-lesson matrix, the complete-course definition, the 10-track long-term curriculum
-architecture, and the full guide-to-course coverage matrix across all 80 technology guides.
+Thirteen tracks: Digital & Coding Foundations → HTML & CSS → JavaScript → TypeScript → React →
+Node.js & Express → Java → Data Structures & Algorithms → Python → Git, APIs & SQL → Database
+Design & PostgreSQL → AI, LLMs, RAG & Agents → Software Testing & QA (Java, Data Structures &
+Algorithms, Python, Database Design & PostgreSQL, and Software Testing & QA are independent
+branches with their own specific prerequisites, not strictly sequential links in the
+web-development chain). See [`CURRICULUM.md`](./CURRICULUM.md) for the full lesson-by-lesson
+matrix, the complete-course definition, the 13-track long-term curriculum architecture, and the
+full guide-to-course coverage matrix across all 80 technology guides.
 
 ## 11. Phase 5A — interactive curriculum foundation
 
@@ -174,6 +176,22 @@ every browser exercise still genuine runnable JS/TS modeling the real underlying
 React or Node runtime was added to the browser sandbox). All four courses, two new tracks (React,
 Node.js & Express), and reciprocal prerequisite/next-course links are live in the public catalog,
 search, and navigation. See `PROJECT_STATUS.md`'s "Phase 5A.2" section for the full report.
+
+## 13. Phase 5B — programming, algorithms, and database engineering (complete)
+
+Added three new complete courses, pushing the public catalog to 14 courses across 13 tracks. Java
+Programming Foundations and Database Design and PostgreSQL both use the guided-local-lab type for
+their real compile/run and real-database work (three labs each), with every browser exercise still
+genuine, runnable JavaScript/TypeScript modeling the underlying mechanism — no JVM and no
+PostgreSQL server were added to the site. Data Structures and Algorithms needs no guided local labs
+at all, since every data structure and algorithm in that course is equally real when implemented in
+browser-executable JavaScript/TypeScript. Three PostgreSQL lessons (joins/aggregation,
+subqueries/CTEs, window functions) use the real, existing browser SQL runner — which is SQLite, not
+PostgreSQL — specifically because that subset of syntax is genuinely dialect-compatible; every
+lesson using it discloses this honestly, and every genuinely PostgreSQL-specific lesson (data
+types, transactions, indexes/EXPLAIN, roles, migrations) uses JS/TS-modeling exercises and static,
+non-executed reference DDL instead of silently running PostgreSQL-flavored SQL against SQLite. See
+`PROJECT_STATUS.md`'s "Phase 5B" section for the full report.
 
 ## 7. Learning engine (transparent, not a black box)
 

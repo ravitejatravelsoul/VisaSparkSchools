@@ -86,15 +86,18 @@ describe("TypeScript compiler stays out of unrelated bundles", () => {
   });
 });
 
-describe("Guided local labs (React/Node.js courses) add no new execution surface", () => {
-  // React Application Development and Node.js and Express Backend Development
-  // (Phase 5A.2) deliberately have no browser runner of their own -- every
-  // "real" component/server exercise is a guided local lab (static
-  // instructional text), never executed by this site. These tests assert
-  // that architectural boundary at the source level.
-  it("lib/runners/ contains no React or Node-specific runner implementation", () => {
+describe("Guided local labs (React/Node.js/Java/PostgreSQL courses) add no new execution surface", () => {
+  // React Application Development, Node.js and Express Backend Development
+  // (Phase 5A.2), and Java Programming Foundations plus Database Design and
+  // PostgreSQL (Phase 5B) deliberately have no browser runner of their own --
+  // every "real" component/server/compile/database exercise is a guided
+  // local lab (static instructional text), never executed by this site.
+  // These tests assert that architectural boundary at the source level.
+  it("lib/runners/ contains no React, Node, Java, or PostgreSQL-server-specific runner implementation", () => {
     const runnerFiles = readdirSync(join(ROOT, "lib", "runners"));
-    const forbidden = runnerFiles.filter((f) => /react|node-?server|express/i.test(f));
+    const forbidden = runnerFiles.filter((f) =>
+      /react|node-?server|express|java|jvm|postgres|pg-server/i.test(f),
+    );
     expect(forbidden).toEqual([]);
   });
 
@@ -115,5 +118,25 @@ describe("Guided local labs (React/Node.js courses) add no new execution surface
     // so neither should ever appear here.
     expect(allDeps["vm2"]).toBeUndefined();
     expect(allDeps["isolated-vm"]).toBeUndefined();
+  });
+
+  it("no JVM, Java compiler, or PostgreSQL server/client dependency was added to package.json", () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+    const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+    // A genuine Java or PostgreSQL runner would need one of these kinds of
+    // packages -- Phase 5B's Java and PostgreSQL courses use guided local
+    // labs and JS/TS-modeling exercises specifically so none of these are
+    // ever needed.
+    const forbiddenPackageNamePatterns = [
+      /java/i,
+      /jvm/i,
+      /^pg$/i,
+      /^node-postgres$/i,
+      /^postgres$/i,
+    ];
+    const depNames = Object.keys(allDeps);
+    for (const pattern of forbiddenPackageNamePatterns) {
+      expect(depNames.filter((name) => pattern.test(name))).toEqual([]);
+    }
   });
 });

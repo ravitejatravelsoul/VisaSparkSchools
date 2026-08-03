@@ -344,16 +344,25 @@ describe("the real content registry", () => {
     expect(next!.order).toBeGreaterThan(lesson.order);
   });
 
-  it("React Application Development and Node.js/Express Backend Development each have at least 3 guided local labs", () => {
+  it("React, Node.js/Express, Java, and PostgreSQL each have at least 3 guided local labs", () => {
     for (const courseSlug of [
       "react-application-development",
       "nodejs-express-backend-development",
+      "java-programming-foundations",
+      "database-design-and-postgresql",
     ]) {
       const labCount = allLessons.filter(
         (l) => l.courseSlug === courseSlug && l.guidedLocalLab,
       ).length;
       expect(labCount).toBeGreaterThanOrEqual(3);
     }
+  });
+
+  it("Data Structures and Algorithms has no guided local labs (every exercise genuinely runs in the browser)", () => {
+    const labCount = allLessons.filter(
+      (l) => l.courseSlug === "data-structures-and-algorithms" && l.guidedLocalLab,
+    ).length;
+    expect(labCount).toBe(0);
   });
 
   it("every guided local lab has a globally unique id", () => {
@@ -387,6 +396,62 @@ describe("the real content registry", () => {
       for (const pattern of falseExecutionPatterns) {
         expect(pattern.test(text)).toBe(false);
       }
+    }
+  });
+
+  it("Phase 5B courses (Java, DSA, PostgreSQL) each have exactly 14 lessons, 6 modules, 42 quiz questions, and 28 exercises", () => {
+    for (const courseSlug of [
+      "java-programming-foundations",
+      "data-structures-and-algorithms",
+      "database-design-and-postgresql",
+    ]) {
+      const course = allCourses.find((c) => c.slug === courseSlug);
+      expect(course).toBeDefined();
+      if (!course) continue;
+      const courseLessons = allLessons.filter((l) => l.courseSlug === courseSlug);
+      expect(courseLessons.length).toBe(14);
+      expect(course.modules.length).toBe(6);
+      const quizCount = courseLessons.reduce((sum, l) => sum + l.quiz.length, 0);
+      expect(quizCount).toBe(42);
+      const exerciseCount =
+        courseLessons.filter((l) => l.guidedExercise).length +
+        courseLessons.filter((l) => l.independentExercise).length;
+      expect(exerciseCount).toBe(28);
+    }
+  });
+
+  it("Phase 5B PostgreSQL SQL-runner lessons are honestly labeled about the SQLite sandbox", () => {
+    const sqlLessonSlugs = [
+      "pg-joins-and-aggregation",
+      "pg-subqueries-and-ctes",
+      "pg-window-functions",
+    ];
+    for (const slug of sqlLessonSlugs) {
+      const lesson = allLessons.find((l) => l.slug === slug);
+      expect(lesson).toBeDefined();
+      if (!lesson) continue;
+      expect(lesson.guidedExercise.language).toBe("sql");
+      expect(lesson.explanation.toLowerCase()).toContain("sqlite");
+    }
+  });
+
+  it("Phase 5B PostgreSQL-specific lessons never falsely claim PostgreSQL-only behavior runs in this sandbox", () => {
+    const pgSpecificSlugs = [
+      "pg-data-types-and-tables",
+      "pg-transactions-and-acid",
+      "pg-concurrency-and-isolation",
+      "pg-indexes-and-query-plans",
+      "pg-views-and-roles",
+      "pg-migrations-and-operations",
+    ];
+    for (const slug of pgSpecificSlugs) {
+      const lesson = allLessons.find((l) => l.slug === slug);
+      expect(lesson).toBeDefined();
+      if (!lesson) continue;
+      // These lessons must not attach a real "sql" runner exercise, since SQLite
+      // cannot honestly demonstrate PostgreSQL-specific behavior.
+      expect(lesson.guidedExercise.language).not.toBe("sql");
+      expect(lesson.independentExercise.language).not.toBe("sql");
     }
   });
 });

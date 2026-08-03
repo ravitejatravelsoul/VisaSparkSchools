@@ -172,7 +172,7 @@ export const languageTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "For its strong typing, mature tooling, backward compatibility, and the JVM's performance and portability ('write once, run anywhere').",
     whereItFits:
-      "A common choice for large backend systems (often via Spring Boot) and historically for native Android development.",
+      "A common choice for large backend systems (often via Spring Boot) and historically for native Android development. This platform's Java Programming Foundations course teaches the language itself, from the JVM execution model through generics, streams, and JUnit testing.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["intro-to-programming"],
@@ -195,21 +195,22 @@ export const languageTechnologies: TechnologyInput[] = [
       "Android apps (alongside Kotlin)",
       "Large-scale distributed systems",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Java Programming Foundations course"],
     projectIdeas: [
       "A simple class hierarchy modeling a real-world domain (e.g. shapes, employees) using interfaces",
     ],
     references: [
       { label: "Java official documentation (Oracle)", url: "https://docs.oracle.com/en/java/" },
     ],
-    searchKeywords: ["jvm", "object-oriented programming", "enterprise"],
+    searchKeywords: ["jvm", "object-oriented programming", "enterprise", "oop", "jdk"],
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "21 LTS",
     versionNotes:
       "Java uses Long-Term Support (LTS) releases (e.g. 17, 21) for production stability, with faster non-LTS releases in between.",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "java-programming-foundations",
+    projectIds: ["course-enrollment-progress-manager"],
     publicVisibility: true,
   },
   {

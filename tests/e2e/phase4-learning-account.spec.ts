@@ -131,6 +131,76 @@ test("a React lesson's guided local lab shows the honest 'Runs on your computer'
   await expect(page.getByRole("button", { name: /^run$/i }).first()).toBeVisible();
 });
 
+test("enrolling in Java Programming Foundations, Data Structures and Algorithms, and Database Design and PostgreSQL (Phase 5B) tracks progress independently", async ({
+  page,
+}) => {
+  await page.goto("/courses/java-programming-foundations");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(/\/courses\/java-programming-foundations\/java-jvm-and-execution$/);
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/data-structures-and-algorithms");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/data-structures-and-algorithms\/dsa-problem-solving-and-correctness$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/database-design-and-postgresql");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/database-design-and-postgresql\/pg-relational-modeling$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  // All three courses have 14 lessons -- one completed lesson each is 1/14 ≈ 7%.
+  await page.goto("/courses/java-programming-foundations");
+  await expect(page.getByText("7% complete")).toBeVisible();
+  await page.goto("/courses/data-structures-and-algorithms");
+  await expect(page.getByText("7% complete")).toBeVisible();
+  await page.goto("/courses/database-design-and-postgresql");
+  await expect(page.getByText("7% complete")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("7% complete")).toBeVisible();
+});
+
+test("a Java lesson's guided local lab and a PostgreSQL lesson's guided local lab both show honest 'Runs on your computer' labeling and never a browser Run button for the lab itself", async ({
+  page,
+}) => {
+  await page.goto("/courses/java-programming-foundations/java-jvm-and-execution");
+  await expect(page.getByText("Runs on your computer").first()).toBeVisible();
+  const javaLabSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "Guided local lab" }) });
+  await expect(javaLabSection.getByRole("button", { name: /^run$/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^run$/i }).first()).toBeVisible();
+
+  await page.goto("/courses/database-design-and-postgresql/pg-schema-implementation");
+  await expect(page.getByText("Runs on your computer").first()).toBeVisible();
+  const pgLabSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "Guided local lab" }) });
+  await expect(pgLabSection.getByRole("button", { name: /^run$/i })).toHaveCount(0);
+});
+
+test("PostgreSQL-specific lesson code (a real PostgreSQL type/EXPLAIN/role example) never shows a browser Run button, unlike a genuinely dialect-compatible SQL lesson", async ({
+  page,
+}) => {
+  // pg-data-types-and-tables uses language "none" for its PostgreSQL-specific
+  // example -- no Run button should appear anywhere on the page for it.
+  await page.goto("/courses/database-design-and-postgresql/pg-data-types-and-tables");
+  await expect(page.getByRole("button", { name: /^run this example$/i })).toHaveCount(0);
+
+  // pg-joins-and-aggregation genuinely uses the real (SQLite-backed) SQL runner,
+  // and its own explanation honestly discloses that fact.
+  await page.goto("/courses/database-design-and-postgresql/pg-joins-and-aggregation");
+  await expect(page.getByText(/sqlite, not postgresql/i).first()).toBeVisible();
+});
+
 test("starting a roadmap and marking a self-reported guide step complete persists across a refresh", async ({
   page,
 }) => {

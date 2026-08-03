@@ -7,7 +7,7 @@ planned features as though they're implemented.
 
 ## The two content systems, and how they relate
 
-- **`content/` + `lib/content/`** — the course curriculum: 10 tracks, 11 courses, 118 lessons,
+- **`content/` + `lib/content/`** — the course curriculum: 13 tracks, 14 courses, 160 lessons,
   quizzes, exercises, projects (see `docs/CURRICULUM.md` for exact, live-computed counts).
   Unchanged by Phase 3; extended by Phase 5A and 5A.2 (see "How to add a full course" below).
 - **`lib/directory/`** — the Phase 3 technology directory: categories, technologies, and learning

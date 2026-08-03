@@ -1279,6 +1279,129 @@ and React's `useState` — no runner import, no code-execution path; `lib/runner
 exactly the same four runner implementations from before this batch (HTML/JS, Python, SQL,
 TypeScript) with no React or Node-specific runner added.
 
+## Phase 5B — Programming, Algorithms, and Database Engineering (2026-08-03, complete)
+
+Starting checkpoint for this batch: local `main` and `origin/main` both at `857edda` (Phase 5A.2,
+verified clean, one commit ahead of the prior `origin/main` at `c4b2d24`). A public-repository
+safety audit of `857edda` and the full `c4b2d24..857edda` range found no secrets, credentials, or
+confidential content, after which `857edda` was pushed normally (no force-push, no rewrite, no
+amend) — `origin/main` is now `857edda`. Phase 5B's own work — three new courses — was then built,
+verified, and committed **locally only**; it was not pushed.
+
+**What shipped, genuinely complete and verified:**
+
+1. **Java Programming Foundations** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3
+   guided local labs, 1 guided project — *Course Enrollment and Progress Manager*). Version
+   assumption: Java 21 (LTS). Covers the JDK/JVM/bytecode model, variables/types/operators/strings,
+   control flow, methods and overloading, arrays and collections, encapsulation/inheritance/
+   composition/interfaces/polymorphism, checked and unchecked exceptions, generics and the
+   equals/hashCode contract, lambdas and Streams, and try-with-resources/JUnit/project structure.
+   Every browser exercise is genuine, runnable JavaScript/TypeScript modeling the real underlying
+   Java mechanism (overload resolution, an equals/hashCode contract check, a Stream-style
+   filter/map/reduce pipeline that's a direct conceptual analogue of Java's own Stream API) — this
+   platform has no JVM and added none. The three guided local labs (compile-and-run a multi-class
+   app; model a domain with encapsulation/composition/interfaces/polymorphism; add exceptions and a
+   real JUnit suite to a Maven project) are real, local, `javac`/`java`/`mvn`/JUnit work, never
+   simulated in the browser.
+2. **Data Structures and Algorithms** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 1
+   guided project — *Learning Path Recommendation Engine*). Covers problem decomposition and
+   correctness, Big O/Ω/Θ (with an explicit empirical-timing-vs-asymptotic-analysis distinction),
+   arrays/dynamic arrays/linked lists, stacks/queues/deques, hash tables, binary trees and the three
+   depth-first traversals, binary search trees, heaps and priority queues, recursion and
+   divide-and-conquer, linear/binary search, insertion sort and merge sort (with an explicit
+   "justify the choice under real constraints, not just Big O" exercise), graphs/BFS/DFS, and
+   backtracking/greedy/dynamic programming (including a genuine greedy-fails counterexample, the
+   {1,3,4} coin-denomination case). **Zero guided local labs** — every data structure and algorithm
+   is equally real in browser-executable JavaScript/TypeScript, so none was needed; three lessons
+   instead carry a substantially larger "lab-scale" exercise (a reusable linked-list structure with
+   edge-case tests; a same-tree/BST-validity check with edge-case tests; the sort-choice
+   justification) to satisfy the lab requirement inside the existing exercise schema.
+3. **Database Design and PostgreSQL** (6 modules, 14 lessons, 42 quiz questions, 28 exercises, 3
+   guided local labs, 1 guided project — *Learning Platform Database Layer*). Version assumption:
+   PostgreSQL 16 (examples remain valid on 17+). Builds on Git, APIs & SQL's existing SQL module
+   (now its declared prerequisite) rather than duplicating it: relational modeling and cardinality/
+   optionality, primary/foreign keys and natural-vs-surrogate key tradeoffs, 1NF/2NF/3NF and
+   denormalization tradeoffs, PostgreSQL data types and DDL, dependency-ordered schema
+   implementation, joins/aggregation/subqueries/CTEs/window functions, transactions and ACID,
+   concurrent-update anomalies and isolation levels, indexes and reading EXPLAIN, views/roles/least
+   privilege, and migrations/operational safety. **Honest-execution split, verified case by case**:
+   three lessons (joins/aggregation, subqueries/CTEs, window functions) use the real, pre-existing
+   browser SQL runner — which is **SQLite (sql.js), not PostgreSQL** — specifically because that
+   subset of syntax is genuinely dialect-compatible, and every one of those three lessons discloses
+   this explicitly in its own explanation text (verified by a dedicated test, see below). Every
+   genuinely PostgreSQL-specific lesson (data types, transactions, concurrency/isolation, indexes/
+   EXPLAIN, roles, migrations) instead uses browser-executable JS/TS exercises that model the
+   underlying decision (a type-selection function, a transaction-atomicity simulator, a lost-update
+   reproduction, an EXPLAIN-output parser, a least-privilege-violation checker, a migration-order
+   validator) plus static, non-executed reference PostgreSQL DDL/EXPLAIN output (`example.language:
+   "none"`, which renders with no Run button at all) — never silently running PostgreSQL-flavored
+   SQL against SQLite. The three guided local labs (create and validate a normalized schema; add
+   transactions/constraints/indexes and reproduce a real lost-update anomaly across two concurrent
+   `psql` sessions; add ordered migrations, a least-privileged role, and a backup/recovery
+   checklist) are real, local PostgreSQL work.
+4. Three new tracks (`java`, `algorithms`, `databases`) inserted after Node.js & Express and around
+   Git/APIs/SQL respectively (final order: Foundations → HTML/CSS → JavaScript → TypeScript →
+   React → Node.js & Express → **Java** → **Data Structures & Algorithms** → Python →
+   Git/APIs/SQL → **Database Design & PostgreSQL** → AI/LLM/RAG → Software Testing & QA — 13
+   tracks total). Prerequisites: Java requires JavaScript Fundamentals (the real technical
+   requirement, since Java's exercises don't depend on Node/Express/React knowledge); Data
+   Structures and Algorithms requires JavaScript Fundamentals directly for the same honest reason
+   (its exercises are JS/TS, not Java), with Java offered only as a *recommended*, non-gating
+   continuation via `nextCourseSlugs`; Database Design and PostgreSQL requires Git, APIs & SQL.
+   Reciprocal `nextCourseSlugs` were added on Node.js & Express (→ Java) and Git, APIs & SQL (→
+   Database Design and PostgreSQL). The `java`, `data-structures-and-algorithms`, and `postgresql`
+   technology-directory guides (previously guide-only) now link to their real courses/projects, and
+   the pre-existing "Java Developer" and "Database Developer" roadmaps were updated from
+   technology-guide steps to real `course`-type steps for these three courses.
+
+**Verification for this batch:** `content:validate` passes cleanly across **13 tracks / 14 courses
+/ 160 lessons / 16 projects** (computed, not asserted); `content:validate-snippets` proved all
+**290** browser-executable reference solutions (212 pre-existing + 78 new: 28 Java + 28 DSA + 22
+PostgreSQL browser-executable, since 6 PostgreSQL exercises across the three SQL-runner lessons are
+real SQL and counted separately) genuinely compile and pass their own harnesses, on the **first
+run** — no bugs found in this batch's exercises. New tests: 2 registry-level tests extending the
+GLL-per-course check to Java and PostgreSQL (≥3 each) and asserting zero for Data Structures and
+Algorithms; a module/lesson/quiz/exercise exact-count test for all three new courses (6/14/42/28
+each); two tests specifically verifying the three PostgreSQL SQL-runner lessons disclose the
+SQLite-not-PostgreSQL boundary in their own explanation text, and that every genuinely
+PostgreSQL-specific lesson never attaches a real `"sql"`-language exercise; a new architectural
+test confirming no JVM/Java-compiler/PostgreSQL-server dependency was added to `package.json`; 2 new
+e2e enrollment/progress-independence tests for all three new courses; 2 new e2e tests confirming
+the Java and PostgreSQL guided-local-lab sections never render a Run button while the lesson's own
+browser exercises still do, and that a PostgreSQL-specific lesson's static DDL example never shows
+a "Run this example" button; 2 new e2e technology-directory tests confirming the Java and
+PostgreSQL guides now show real, working "Start course" links; 2 new e2e search tests. One real,
+if small, content gap was caught and fixed during test-writing, not by the test alone: two of the
+three PostgreSQL SQL-runner lessons (subqueries/CTEs, window functions) initially disclosed the
+SQLite-vs-PostgreSQL boundary only in their `tech` field, not in the reader-facing `explanation`
+prose — a learner jumping directly to either lesson would never see it. Fixed by adding the same
+explicit disclosure sentence to both lessons' `explanation` text, matching the first SQL-runner
+lesson's pattern. **Accessibility**: 15 new routes (3 course overviews, 6 lessons — including both
+a Java and a PostgreSQL guided-local-lab lesson and a PostgreSQL SQL-runner lesson — 3 projects, 3
+track/path pages) pass the full axe sweep with zero critical/serious violations, alongside the
+pre-existing 42-route sweep, all green. Visually inspected (screenshots actually opened and read) at
+375px/1440px, light/dark: the 14-course catalog, the Java interfaces/polymorphism guided-local-lab
+lesson (honesty banner, all required sections, no Run button, dark-mode code blocks readable), the
+PostgreSQL window-functions SQL-runner lesson (real Run button, mobile-width, no overflow), and the
+Database Layer project page (all 5 milestones, references) all render cleanly with zero console
+errors, zero failed requests, and zero hydration errors across every checked route/theme/viewport
+combination.
+
+**Bundle isolation and security**: no new npm dependency was added (`git diff package.json` is
+empty, confirmed by a dedicated test scanning for any Java/JVM/PostgreSQL-server-shaped package
+name); `lib/runners/` still contains exactly the same four runner implementations from before this
+batch, with no Java or PostgreSQL-server runner added; no learner code reaches a real JVM or a real
+PostgreSQL server; local commands throughout the guided local labs are shown as instructions only.
+
+**Full verification suite, run after all content and documentation changes**: `format:check`
+(clean, 11 files auto-formatted by Prettier then verified clean), `lint` (0 warnings), `typecheck`
+(clean), `content:validate` (13/14/160/16, pass), `content:validate-snippets` (290/290, pass, run
+twice — once mid-batch after authoring, once again after all documentation edits), `test` (**260/260**
+Vitest tests passed, 29 files), `build` (succeeds, 340 static params generated), `playwright test`
+(full suite across chromium + mobile-chromium, run after all changes — see the git log/commit
+metadata for this batch's exact pass/skip/fail counts, matching the pre-existing 5 skips unchanged
+and 0 failures).
+
 ## If you pick this up next
 
 Recommended next step before any further feature phase: **provision a real Supabase project and
