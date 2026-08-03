@@ -32,18 +32,34 @@ export const tracks: Track[] = [
     order: 3,
   },
   {
+    id: "react",
+    slug: "react",
+    title: "React",
+    description:
+      "Build real, componentized user interfaces — from JSX fundamentals to data fetching, custom hooks, and production-ready structure.",
+    order: 4,
+  },
+  {
+    id: "node-express",
+    slug: "node-express",
+    title: "Node.js & Express",
+    description:
+      "Build and operate a real backend REST API: routing, middleware, validation, error handling, and testing.",
+    order: 5,
+  },
+  {
     id: "python",
     slug: "python",
     title: "Python",
     description: "A general-purpose language for scripting, data, and the backend of AI apps.",
-    order: 4,
+    order: 6,
   },
   {
     id: "git-api-sql",
     slug: "git-api-sql",
     title: "Git, APIs & SQL",
     description: "Version your work, talk to servers over HTTP, and query real databases.",
-    order: 5,
+    order: 7,
   },
   {
     id: "ai-llm-rag",
@@ -51,6 +67,14 @@ export const tracks: Track[] = [
     title: "AI, LLMs, RAG & Agents",
     description:
       "From how language models work to building grounded, cited retrieval-augmented AI applications.",
-    order: 6,
+    order: 8,
+  },
+  {
+    id: "software-testing",
+    slug: "software-testing",
+    title: "Software Testing & QA",
+    description:
+      "Think like a tester: design techniques, risk-based planning, and clear defect reporting — plus automated API validation.",
+    order: 9,
   },
 ];

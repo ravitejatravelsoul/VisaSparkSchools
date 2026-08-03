@@ -14,7 +14,7 @@ export const backendTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "It lets a team use one language (JavaScript/TypeScript) across frontend and backend, with a huge package ecosystem (npm).",
     whereItFits:
-      "After JavaScript fundamentals -- Node.js is JavaScript plus server-side APIs, not a separate language.",
+      "After JavaScript fundamentals -- Node.js is JavaScript plus server-side APIs, not a separate language. The Node.js and Express Backend Development course covers this in depth: the event loop, modules, async patterns, and building a real, tested, operationally-ready API, with guided local labs for the real server work this platform's browser sandbox can't execute.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["javascript"],
@@ -44,8 +44,9 @@ export const backendTechnologies: TechnologyInput[] = [
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "22.x LTS",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "nodejs-express-backend-development",
+    projectIds: ["validated-learning-progress-api"],
     publicVisibility: true,
   },
   {
@@ -61,7 +62,7 @@ export const backendTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "For its simplicity, huge middleware ecosystem, and flexibility -- a good fit when you want control over structure rather than a full framework's conventions.",
     whereItFits:
-      "Built on top of Node.js; often the first backend framework a JavaScript developer learns.",
+      "Built on top of Node.js; often the first backend framework a JavaScript developer learns. The Node.js and Express Backend Development course covers this in depth: routing, middleware, validation, structured errors, security boundaries, and testing.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["nodejs"],
@@ -91,8 +92,9 @@ export const backendTechnologies: TechnologyInput[] = [
     status: "current",
     versionPolicy: "pinned",
     currentVersion: "5.x",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-03",
+    courseId: "nodejs-express-backend-development",
+    projectIds: ["validated-learning-progress-api"],
     publicVisibility: true,
   },
   {

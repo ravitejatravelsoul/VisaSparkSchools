@@ -62,6 +62,50 @@ export type Exercise = z.infer<typeof exerciseSchema>;
 /** Authoring shape: defaulted fields (e.g. sqlOrderSensitive) may be omitted. */
 export type ExerciseInput = z.input<typeof exerciseSchema>;
 
+/**
+ * A guided local lab: instructional content for an environment this
+ * platform's browser runners cannot honestly execute (React tooling, Node,
+ * Express, local test/automation tools, ...). It is never rendered with a
+ * Run button and never implies the site executed or verified anything --
+ * `components/lesson/guided-local-lab-panel.tsx` renders a fixed, non-
+ * author-editable "Runs on your computer" banner on every lab for exactly
+ * that reason (so the honest label can't be forgotten or softened by a
+ * specific lesson's authoring). See docs/ARCHITECTURE.md's guided local lab
+ * section.
+ */
+export const guidedLocalLabFileSchema = z.object({
+  path: z.string().min(1),
+  content: z.string().min(1),
+});
+export type GuidedLocalLabFile = z.infer<typeof guidedLocalLabFileSchema>;
+
+export const guidedLocalLabSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  scenario: z.string().min(1),
+  requiredTools: z.array(z.object({ name: z.string().min(1), version: z.string().min(1) })).min(1),
+  setupSteps: z.array(z.string().min(1)).min(1),
+  projectStructure: z.string().min(1),
+  starterFiles: z.array(guidedLocalLabFileSchema).min(1),
+  requirements: z.array(z.string().min(1)).min(1),
+  commands: z
+    .array(z.object({ description: z.string().min(1), command: z.string().min(1) }))
+    .min(1),
+  expectedBehavior: z.string().min(1),
+  verificationSteps: z
+    .array(z.object({ command: z.string().min(1), expectedResult: z.string().min(1) }))
+    .min(1),
+  troubleshooting: z.array(z.object({ issue: z.string().min(1), fix: z.string().min(1) })).min(1),
+  hints: z.array(z.string().min(1)).min(2),
+  referenceSolution: z.object({
+    summary: z.string().min(1),
+    files: z.array(guidedLocalLabFileSchema).min(1),
+  }),
+  extensionChallenge: z.string().min(1),
+});
+export type GuidedLocalLab = z.infer<typeof guidedLocalLabSchema>;
+export type GuidedLocalLabInput = z.input<typeof guidedLocalLabSchema>;
+
 export const codeExampleSchema = z.object({
   language: runnerLanguageSchema,
   code: z.string().min(1),
@@ -100,6 +144,16 @@ export const lessonSchema = z.object({
   editableExample: codeExampleSchema.optional(),
   guidedExercise: exerciseSchema,
   independentExercise: exerciseSchema,
+  /**
+   * Optional: for lessons whose real work happens outside the browser (a
+   * React component, an Express route, ...). Additive to, never a
+   * replacement for, guidedExercise/independentExercise -- every lesson
+   * still has a real, browser-executable exercise reinforcing the
+   * underlying JS/TS concepts, so lib/learning/store.ts's mastery/
+   * completion logic (which reads guidedExercise.id/independentExercise.id
+   * unconditionally) needed no changes for this feature.
+   */
+  guidedLocalLab: guidedLocalLabSchema.optional(),
   commonMistakes: z.array(z.string().min(1)).min(1),
   quiz: z.array(quizQuestionSchema).min(3),
   takeaway: z.string().min(1),

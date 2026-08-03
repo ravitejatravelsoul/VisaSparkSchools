@@ -7,9 +7,9 @@ planned features as though they're implemented.
 
 ## The two content systems, and how they relate
 
-- **`content/` + `lib/content/`** — the course curriculum: 7 tracks, 7 courses, 62 lessons,
+- **`content/` + `lib/content/`** — the course curriculum: 10 tracks, 11 courses, 118 lessons,
   quizzes, exercises, projects (see `docs/CURRICULUM.md` for exact, live-computed counts).
-  Unchanged by Phase 3; extended by Phase 5A (see "How to add a full course" below).
+  Unchanged by Phase 3; extended by Phase 5A and 5A.2 (see "How to add a full course" below).
 - **`lib/directory/`** — the Phase 3 technology directory: categories, technologies, and learning
   roadmaps. This system **references** the course/project system (a technology can point at a real
   `courseId`/`projectIds`) but never duplicates or modifies it. If you're adding a full new course
@@ -112,6 +112,23 @@ Never add a course to `content/courses.ts` in a state that wouldn't pass `conten
 to reserve the slug" — an unfinished course must not exist in the content system at all until it's
 genuinely complete; track it as a documented plan in `docs/CURRICULUM.md` instead (see that file's
 "Master curriculum architecture" section for the Phase 5B/5C course list format to follow).
+
+### How to author a guided local lab (for courses that can't execute in the browser)
+
+For a lesson whose real work is an environment this platform's runners can't honestly execute
+(React, Node, Express, Java, PostgreSQL, Playwright, Selenium, ...), add a `guidedLocalLab` object
+to the lesson (see `guidedLocalLabSchema` in `lib/content/types.ts`) — this is **in addition to**,
+never a replacement for, the lesson's normal `guidedExercise`/`independentExercise` (which should
+still be a real, browser-executable exercise reinforcing the underlying language concepts). Every
+field is required and schema-enforced non-empty: `requiredTools`, `setupSteps`,
+`projectStructure`, `starterFiles`, `requirements`, `commands`, `expectedBehavior`,
+`verificationSteps`, `troubleshooting`, `hints` (2+), `referenceSolution` (with its own files, not
+identical to the starter files — `content:validate` rejects a solution that's byte-identical to the
+starter), and `extensionChallenge`. Do not write copy claiming the site ran, executed, or verified
+anything locally — `content:validate` scans lab text for a deny-list of exactly these phrases and
+fails the build if one appears; `components/lesson/guided-local-lab-panel.tsx` already renders a
+fixed "Runs on your computer" banner you don't need to (and shouldn't try to) reproduce in your own
+copy. See `docs/ARCHITECTURE.md`'s "Guided local labs" section for the full design.
 
 ## How to create and publish a learning path (roadmap)
 

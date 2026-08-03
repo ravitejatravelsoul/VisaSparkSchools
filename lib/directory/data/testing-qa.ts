@@ -14,7 +14,7 @@ export const testingQaTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "Manual re-testing doesn't scale; automated tests catch regressions immediately and let you change code with confidence.",
     whereItFits:
-      "Woven throughout development, not a separate phase at the end. There's no dedicated testing course on this platform yet, but the Python Fundamentals course includes one lesson on it in context.",
+      "Woven throughout development, not a separate phase at the end. The Software Testing Foundations course covers this in depth (test levels/types, structured test design techniques, risk-based planning, defect reporting); the Python Fundamentals course also includes one lesson on it in context.",
     beginnerFriendly: true,
     difficulty: "beginner",
     prerequisiteIds: [],
@@ -37,7 +37,7 @@ export const testingQaTechnologies: TechnologyInput[] = [
       "Documenting expected behavior through executable examples",
       "Enabling confident refactoring",
     ],
-    practiceOptions: ["Take the Python Fundamentals course's Testing Fundamentals lesson"],
+    practiceOptions: ["Take the Software Testing Foundations course"],
     projectIdeas: [
       "Write unit tests for a small function you've already written, covering typical and edge-case inputs",
     ],
@@ -50,8 +50,9 @@ export const testingQaTechnologies: TechnologyInput[] = [
     searchKeywords: ["qa", "unit testing", "test automation"],
     status: "current",
     versionPolicy: "not-applicable",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-02",
+    courseId: "software-testing-foundations",
+    projectIds: ["learning-app-test-strategy"],
     publicVisibility: true,
   },
   {
@@ -66,7 +67,7 @@ export const testingQaTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "It's faster and less brittle than testing the same logic through a UI, and catches backend bugs closer to their source.",
     whereItFits:
-      "Complements UI-level testing (Selenium/Playwright); often the majority of a backend team's automated test suite.",
+      "Complements UI-level testing (Selenium/Playwright); often the majority of a backend team's automated test suite. The API Testing and Automation course covers this in depth: schema validation, positive/negative testing, chained workflows, security basics, and automation structure.",
     beginnerFriendly: true,
     difficulty: "beginner",
     prerequisiteIds: ["rest-apis"],
@@ -87,7 +88,7 @@ export const testingQaTechnologies: TechnologyInput[] = [
       "Verifying backend behavior independent of any frontend",
       "Catching regressions in API contracts",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the API Testing and Automation course"],
     projectIdeas: [
       "Write a handful of assertions against a small REST API's endpoints, covering both success and error cases",
     ],
@@ -100,8 +101,9 @@ export const testingQaTechnologies: TechnologyInput[] = [
     searchKeywords: ["api testing", "backend testing", "integration testing"],
     status: "current",
     versionPolicy: "not-applicable",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+    lastReviewed: "2026-08-02",
+    courseId: "api-testing-and-automation",
+    projectIds: ["sample-api-validation-suite"],
     publicVisibility: true,
   },
   {

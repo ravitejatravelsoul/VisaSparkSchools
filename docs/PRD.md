@@ -139,10 +139,11 @@ Added on top of Phases 1-3, without duplicating any existing state:
 
 ## 6. Curriculum shape
 
-Seven tracks: Digital & Coding Foundations → HTML & CSS → JavaScript → TypeScript → Python →
-Git, APIs & SQL → AI, LLMs, RAG & Agents (TypeScript and Python are independent branches, not
-sequential prerequisites of each other). See [`CURRICULUM.md`](./CURRICULUM.md) for the full
-lesson-by-lesson matrix, the complete-course definition, the 8-track long-term curriculum
+Ten tracks: Digital & Coding Foundations → HTML & CSS → JavaScript → TypeScript → React →
+Node.js & Express → Python → Git, APIs & SQL → AI, LLMs, RAG & Agents → Software Testing & QA
+(Python and Software Testing & QA are independent branches, not sequential prerequisites of the
+web-development chain or of one another). See [`CURRICULUM.md`](./CURRICULUM.md) for the full
+lesson-by-lesson matrix, the complete-course definition, the 10-track long-term curriculum
 architecture, and the full guide-to-course coverage matrix across all 80 technology guides.
 
 ## 11. Phase 5A — interactive curriculum foundation
@@ -158,6 +159,21 @@ public catalog — enforced by `scripts/validate-content.ts`, with a narrow, doc
 for 5 pre-existing courses that predate this bar. See `PROJECT_STATUS.md`'s "Phase 5A" section for
 the full report, including which of the originally-scoped courses could not be built this batch
 (and why) and remain a documented Phase 5B/5C plan rather than a public claim.
+
+## 12. Phase 5A.2 — application development and testing core (complete)
+
+Added a **guided local lab** activity type for lessons whose real work can't execute in a browser
+(React, Node, Express, and later Java, PostgreSQL, Playwright, Selenium) — static, read-only
+instructional content (setup steps, starter files, verification commands, a reference solution),
+never a fake Run button, never implying the site executed anything, additive to a lesson's
+existing browser-executable exercises rather than a replacement. Added four new complete courses:
+Software Testing Foundations and API Testing and Automation (reusing the existing HTML/JS runner
+with no new execution surface), and React Application Development and Node.js and Express Backend
+Development (using the new guided-local-lab type for their hands-on component/server work, with
+every browser exercise still genuine runnable JS/TS modeling the real underlying mechanism — no
+React or Node runtime was added to the browser sandbox). All four courses, two new tracks (React,
+Node.js & Express), and reciprocal prerequisite/next-course links are live in the public catalog,
+search, and navigation. See `PROJECT_STATUS.md`'s "Phase 5A.2" section for the full report.
 
 ## 7. Learning engine (transparent, not a black box)
 

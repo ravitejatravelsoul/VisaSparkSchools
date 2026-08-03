@@ -1169,6 +1169,116 @@ being strengthened. Test Automation Framework Engineering is Phase 5C, since it 
 Phase 5B testing courses exist first. No "coming soon" card, empty filter state, or placeholder
 course exists for any of these anywhere in the shipped UI.
 
+## Phase 5A.2 — Application Development and Testing Core (2026-08-03, complete)
+
+A follow-on batch, after Phase 5A's checkpoint (`c4b2d24`) was pushed to `origin/main`
+(`https://github.com/ravitejatravelsoul/VisaSparkSchools.git`, first push of this repository's
+history — a public-repository safety audit across the full commit history found no secrets,
+credentials, or confidential content beforehand). The brief requested four new complete courses
+(React Application Development, Node.js and Express Backend Development, Software Testing
+Foundations, API Testing and Automation) and explicitly authorized a new **guided local lab**
+content type for environments this platform's runners can't honestly execute in the browser. **All
+four courses are complete, verified, and registered in this checkpoint.**
+
+The batch was split across two sessions: Software Testing Foundations and API Testing and
+Automation shipped first (see the initial partial report this section replaces), followed by React
+Application Development and Node.js and Express Backend Development in this session, using the
+same guided-local-lab infrastructure built for the first two.
+
+**What shipped, genuinely complete and verified:**
+
+1. **A reusable guided-local-lab content type** — `guidedLocalLabSchema` in
+   `lib/content/types.ts` (id, title, scenario, required tools, setup steps, project structure,
+   starter files, requirements, commands, expected behavior, verification steps, troubleshooting,
+   hints, a reference solution, an extension challenge — all schema-enforced, non-empty) and
+   `components/lesson/guided-local-lab-panel.tsx`, which renders a **fixed, non-author-editable**
+   "Runs on your computer" banner (so no lesson's authoring can ever omit or soften the honest
+   label), never renders a Run button, and never claims the site executed anything. Added as an
+   optional field on lessons — additive only, so `lib/learning/store.ts`'s mastery/completion
+   logic (which reads every lesson's `guidedExercise`/`independentExercise` unconditionally)
+   needed zero changes. `scripts/validate-content.ts` extended with guided-local-lab checks:
+   global id uniqueness, duplicate file-path detection, a reference solution that's suspiciously
+   identical to the starter files, and a deny-list of phrases that would falsely claim the site
+   ran/executed/verified local code. Now used by 6 lessons across React and Node.js/Express (3
+   each), still unused by any other course.
+2. **Software Testing Foundations** (14 lessons, 6 modules, no prerequisites): quality vs.
+   testing, requirements analysis, test levels/types, the four structured test design techniques
+   (each its own hands-on lab: equivalence partitioning, boundary-value analysis, decision
+   tables, state transition testing), exploratory testing, risk-based testing, defect reporting,
+   traceability/regression strategy, agile testing and accessibility/security awareness. Guided
+   project: Test Strategy for a Learning Application.
+3. **API Testing and Automation** (14 lessons, 6 modules, requires Software Testing
+   Foundations): HTTP fundamentals, REST conventions, headers/auth, JSON schema validation (lab),
+   positive/negative testing, API-specific boundary cases (lab), contract testing, data-driven
+   testing, chained workflows (lab), error-response validation, idempotency/rate limiting, API
+   security basics, and structuring a maintainable automation suite with CI reporting. Guided
+   project: Validation Suite for a Sample Learning-Progress API. Both testing courses reuse the
+   existing HTML/JS runner exclusively — every exercise represents a testing decision (which
+   equivalence class, which boundary value, which decision-table row, a simulated API response
+   fixture) as a small, deterministic JavaScript value the harness checks against the real
+   technique's rules; no real HTTP request is ever made, and every API-testing lesson says so
+   explicitly.
+4. **React Application Development** (14 lessons, 6 modules, requires TypeScript Foundations):
+   component thinking, JSX (via a real hand-written `createElement`), props, events, state (via a
+   real closure-based `useState` re-implementation), conditional rendering and keys, controlled
+   forms and validation (guided local lab), loading/error/empty/success states, effects and
+   cleanup, race-condition-safe data fetching (guided local lab), composition and custom hooks,
+   Context and state ownership, accessibility and testing, and performance/error
+   boundaries/architecture (guided local lab). Every browser exercise is genuine, runnable
+   JavaScript/TypeScript modeling the real underlying mechanism (several, like the dependency-array
+   comparison and the request-token guard, are literally React's real algorithm, not a
+   simplification) — no React runtime, JSX transform, or bundler was added to the browser sandbox.
+   Guided project: Accessible Learning Dashboard.
+5. **Node.js and Express Backend Development** (14 lessons, 6 modules, requires React
+   Application Development): the event-loop model, CommonJS vs. ES modules and npm, async/await,
+   Express routing and structure (guided local lab), middleware, request data, input validation and
+   centralized error handling (guided local lab), REST resource design, structured/operational vs.
+   programmer errors, safe configuration and logging, startup validation, authentication
+   boundaries (without a hand-rolled, unsafe credential system), automated testing with graceful
+   shutdown (guided local lab), and operational readiness. Guided project: Validated
+   Learning-Progress REST API.
+6. Two new tracks — `react` and `node-express` — inserted into the Web Development sequence
+   (HTML/CSS → JavaScript → TypeScript → React → Node.js/Express), reciprocal prerequisite/next-
+   course links set on both sides, and both technology guides (`react`, `nodejs`, `express`)
+   updated to point at their real courses/projects.
+
+**Verification for the full four-course batch:** `content:validate` passes cleanly across 10
+tracks / 11 courses / 118 lessons / 13 projects; `content:validate-snippets` proved all 212
+browser-executable reference solutions (156 pre-existing + 28 React + 28 Node.js/Express) genuinely
+compile and pass their own harnesses. This run caught and fixed real authoring bugs before they
+shipped: (a) an un-escaped inline-code backtick inside a template-literal `explanation` field that
+silently truncated lesson content at build time, caught by `npm run typecheck`; (b) a test harness
+fixture containing a literal `</script>` sequence that prematurely closed the runner's injected
+`<script>` tag, caught only by actually running it in Chromium via `content:validate-snippets`; (c)
+two harnesses using top-level `await` outside an async context, a real `SyntaxError` only the
+snippet validator caught; (d) a keyword-mismatch in one exercise's own test data (a solution and
+its test fixture disagreeing on what counted as "I/O-bound" phrasing). New tests: 8 schema tests
+for `guidedLocalLabSchema`, 5 integration tests proving `GuidedLocalLabPanel` always shows the
+fixed honesty banner, never renders a Run button, and reveals hints/solution progressively, plus 4
+new registry-level tests (each new course has ≥3 guided local labs, every lab id is globally
+unique, no lab's solution is byte-identical to its starter files, no lab text implies local
+execution); 3 new e2e tests (independent enrollment for the testing courses, independent enrollment
+for React/Node, and a dedicated check that the guided-local-lab section itself never renders a Run
+button while the lesson's own browser exercises still do); 3 new architectural tests confirming no
+React/Node-specific runner file exists and no server-side code-execution sandbox dependency was
+added. **Accessibility**: this session's full sweep initially caught a real, previously-unknown
+WCAG 2.1.1/2.1.3 violation — the guided-local-lab panel's scrollable `<pre>` code blocks
+(horizontally overflowing on narrow content) were not keyboard-focusable, meaning a keyboard-only
+user had no way to scroll them; fixed by adding `tabIndex={0}` and an accessible `role="region"`
+label to both the "Project structure" block and every starter/solution file block. After the fix,
+all 42 routes in the accessibility sweep (14 new: 2 course overviews, 4 lessons, 2 new-course
+projects, plus the pre-existing 34) pass with zero critical/serious violations. Visually inspected
+(screenshots actually opened and read, not just generated) at 375px/1440px, light/dark: the
+11-course catalog, both new course overviews, a React lesson with its guided local lab (zoomed in
+and read in full — honesty banner, all required sections, no Run button, code blocks readable), and
+the Node.js overview all render cleanly with no horizontal overflow.
+
+**Bundle isolation and security**: no new npm dependency was added (`git diff package.json` is
+empty); `GuidedLocalLabPanel` imports only pre-existing UI primitives (`Alert`, `Badge`, `Button`)
+and React's `useState` — no runner import, no code-execution path; `lib/runners/` still contains
+exactly the same four runner implementations from before this batch (HTML/JS, Python, SQL,
+TypeScript) with no React or Node-specific runner added.
+
 ## If you pick this up next
 
 Recommended next step before any further feature phase: **provision a real Supabase project and

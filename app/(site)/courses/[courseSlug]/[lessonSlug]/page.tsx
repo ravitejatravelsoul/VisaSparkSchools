@@ -16,6 +16,7 @@ import { difficultyTone } from "@/lib/ui/difficulty";
 import { Markdown } from "@/components/lesson/markdown";
 import { ExampleBlock } from "@/components/lesson/example-block";
 import { ExercisePanel } from "@/components/lesson/exercise-panel";
+import { GuidedLocalLabPanel } from "@/components/lesson/guided-local-lab-panel";
 import { Quiz } from "@/components/lesson/quiz";
 import { CourseNavDesktop, CourseNavMobile } from "@/components/lesson/course-nav";
 import { BookmarkButton } from "@/components/lesson/bookmark-button";
@@ -149,6 +150,12 @@ export default async function LessonPage({ params }: { params: Params }) {
           <Section title="Independent exercise" narrow={false}>
             <ExercisePanel exercise={lesson.independentExercise} />
           </Section>
+
+          {lesson.guidedLocalLab && (
+            <Section title="Guided local lab" narrow={false}>
+              <GuidedLocalLabPanel lab={lesson.guidedLocalLab} />
+            </Section>
+          )}
 
           <Section title="Common mistakes">
             <ul className="ml-5 list-disc space-y-1 text-sm">

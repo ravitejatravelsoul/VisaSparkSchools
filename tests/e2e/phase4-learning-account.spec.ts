@@ -58,6 +58,79 @@ test("enrolling in the new TypeScript Foundations course (Phase 5A) tracks progr
   await expect(page.getByText("8% complete")).toBeVisible();
 });
 
+test("enrolling in Software Testing Foundations and API Testing and Automation (Phase 5A.2) tracks progress independently", async ({
+  page,
+}) => {
+  await page.goto("/courses/software-testing-foundations");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(/\/courses\/software-testing-foundations\/st-quality-vs-testing$/);
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/api-testing-and-automation");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(/\/courses\/api-testing-and-automation\/at-http-fundamentals$/);
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  // Both courses have 14 lessons -- one completed lesson each is 1/14 ≈ 7%.
+  await page.goto("/courses/software-testing-foundations");
+  await expect(page.getByText("7% complete")).toBeVisible();
+  await page.goto("/courses/api-testing-and-automation");
+  await expect(page.getByText("7% complete")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("7% complete")).toBeVisible();
+});
+
+test("enrolling in React Application Development and Node.js/Express Backend Development (Phase 5A.2) tracks progress independently", async ({
+  page,
+}) => {
+  await page.goto("/courses/react-application-development");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/react-application-development\/react-component-thinking$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  await page.goto("/courses/nodejs-express-backend-development");
+  await page.getByRole("link", { name: "Start this course" }).click();
+  await expect(page).toHaveURL(
+    /\/courses\/nodejs-express-backend-development\/node-runtime-model$/,
+  );
+  await page.getByRole("button", { name: "Mark lesson complete" }).click();
+  await expect(page.getByText("Lesson completed")).toBeVisible();
+
+  // Both courses have 14 lessons -- one completed lesson each is 1/14 ≈ 7%.
+  await page.goto("/courses/react-application-development");
+  await expect(page.getByText("7% complete")).toBeVisible();
+  await page.goto("/courses/nodejs-express-backend-development");
+  await expect(page.getByText("7% complete")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("7% complete")).toBeVisible();
+});
+
+test("a React lesson's guided local lab shows the honest 'Runs on your computer' labeling and never a browser Run button for the lab itself", async ({
+  page,
+}) => {
+  await page.goto("/courses/react-application-development/react-forms-validation");
+  await expect(page.getByText("Runs on your computer").first()).toBeVisible();
+  await expect(
+    page.getByText(/does not execute, run, or verify these commands for you/i),
+  ).toBeVisible();
+
+  // The lesson's own browser exercises (elsewhere on the page) DO have real
+  // Run buttons -- only the guided-local-lab SECTION itself must never offer
+  // one, since it is static instructional content, not a browser runner.
+  const labSection = page
+    .locator("section")
+    .filter({ has: page.getByRole("heading", { name: "Guided local lab" }) });
+  await expect(labSection.getByRole("button", { name: /^run$/i })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^run$/i }).first()).toBeVisible();
+});
+
 test("starting a roadmap and marking a self-reported guide step complete persists across a refresh", async ({
   page,
 }) => {

@@ -305,7 +305,7 @@ export const frontendTechnologies: TechnologyInput[] = [
     whyItsUsed:
       "It scales well from a small widget to a large application, has a huge ecosystem, and its component model matches how designers already think about interfaces.",
     whereItFits:
-      "After solid JavaScript fundamentals (especially functions, arrays/objects, and the DOM) -- React is JavaScript, not a replacement for it.",
+      "After solid JavaScript fundamentals (especially functions, arrays/objects, and the DOM) -- React is JavaScript, not a replacement for it. The React Application Development course covers this in depth: JSX, state, effects, data fetching, custom hooks, accessibility, and testing, with guided local labs for the real component work this platform's browser sandbox can't execute.",
     beginnerFriendly: false,
     difficulty: "intermediate",
     prerequisiteIds: ["javascript"],
@@ -328,7 +328,7 @@ export const frontendTechnologies: TechnologyInput[] = [
       "Interactive dashboards",
       "Any UI with significant client-side state",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the React Application Development course"],
     projectIdeas: [
       "A todo list with add/remove/complete, using only useState",
       "A component that fetches and displays data from an API",
@@ -339,9 +339,10 @@ export const frontendTechnologies: TechnologyInput[] = [
     versionPolicy: "pinned",
     currentVersion: "19.x",
     versionNotes:
-      "React 16.8+ introduced Hooks (useState, useEffect); modern React code is almost entirely function components, not the older class-component style.",
-    lastReviewed: "2026-08-01",
-    projectIds: [],
+      "React 16.8+ introduced Hooks (useState, useEffect); modern React code is almost entirely function components, not the older class-component style. The course's lessons and guided local labs target React 18.x/19.x, which share the same hook APIs used throughout.",
+    lastReviewed: "2026-08-03",
+    courseId: "react-application-development",
+    projectIds: ["accessible-learning-dashboard"],
     publicVisibility: true,
   },
   {

@@ -162,7 +162,7 @@ export const courses: CourseInput[] = [
       "Write reusable generic functions and apply built-in utility types",
     ],
     prerequisiteCourseSlugs: ["javascript-fundamentals"],
-    nextCourseSlugs: [],
+    nextCourseSlugs: ["react-application-development"],
     relatedTechnologySlugs: ["typescript"],
     modules: [
       {
@@ -257,10 +257,10 @@ export const courses: CourseInput[] = [
       "Query, modify, aggregate, and join relational data with SQL",
     ],
     prerequisiteCourseSlugs: ["javascript-fundamentals"],
-    // Software Testing Foundations is a documented Phase 5B plan
-    // (docs/CURRICULUM.md), not yet built -- no forward reference to an
-    // unavailable course. See docs/CURRICULUM.md's coverage matrix for the
-    // intended sequencing once it exists.
+    // No natural "next course" in the current catalog builds directly on
+    // Git/APIs/SQL specifically -- API Testing and Automation uses REST/HTTP
+    // concepts but doesn't require Git or SQL, so it isn't listed as a
+    // continuation here. See docs/CURRICULUM.md's coverage matrix.
     nextCourseSlugs: [],
     relatedTechnologySlugs: ["git", "rest-apis", "sql"],
     modules: [
@@ -354,6 +354,278 @@ export const courses: CourseInput[] = [
           "ai-agents-workflows",
           "ai-production-safeguards",
         ],
+      },
+    ],
+  },
+  {
+    id: "software-testing-foundations",
+    trackSlug: "software-testing",
+    slug: "software-testing-foundations",
+    title: "Software Testing Foundations",
+    description:
+      "Think like a tester: structured test design techniques, risk-based planning, and defect reports engineers actually trust.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 5,
+    audience:
+      "Anyone starting in QA or software testing, and developers who want to design better test cases for their own code. No programming experience required, though the exercises use small JavaScript snippets to check your testing decisions.",
+    learningOutcomes: [
+      "Distinguish software quality from software testing, and testing's real limits",
+      "Turn an ambiguous requirement into a precise, testable statement",
+      "Apply equivalence partitioning, boundary-value analysis, decision tables, and state transition testing to design a small, defensible set of test cases",
+      "Prioritize testing effort using risk (likelihood × impact) under real time constraints",
+      "Write a defect report a developer can act on without asking follow-up questions",
+      "Build a traceability matrix and choose what to automate versus test manually",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: ["api-testing-and-automation"],
+    relatedTechnologySlugs: ["software-testing-fundamentals"],
+    modules: [
+      {
+        id: "st-foundations-module",
+        title: "Foundations of quality",
+        summary: "What quality actually means, and why untestable requirements are a hidden cost.",
+        lessonSlugs: ["st-quality-vs-testing", "st-requirements-analysis"],
+      },
+      {
+        id: "st-levels-types-module",
+        title: "Test levels and types",
+        summary: "The vocabulary every real test plan uses: scope (levels) and question (types).",
+        lessonSlugs: ["st-test-levels", "st-test-types"],
+      },
+      {
+        id: "st-design-module",
+        title: "Test design techniques",
+        summary: "Four systematic techniques for choosing a small, defensible set of test cases.",
+        lessonSlugs: [
+          "st-test-design-overview",
+          "st-equivalence-partitioning",
+          "st-boundary-value-analysis",
+          "st-decision-tables",
+          "st-state-transition-testing",
+        ],
+      },
+      {
+        id: "st-exploration-risk-module",
+        title: "Exploration and risk",
+        summary: "Finding what a plan couldn't anticipate, and prioritizing finite testing time.",
+        lessonSlugs: ["st-exploratory-testing", "st-risk-based-testing"],
+      },
+      {
+        id: "st-reporting-module",
+        title: "Reporting and process",
+        summary: "Communicating defects clearly, and keeping coverage and regression sustainable.",
+        lessonSlugs: ["st-defect-reporting", "st-traceability-regression"],
+      },
+      {
+        id: "st-practice-module",
+        title: "Testing in practice",
+        summary: "How testing fits an agile team, and quality checks every tester can perform.",
+        lessonSlugs: ["st-agile-a11y-security"],
+      },
+    ],
+  },
+  {
+    id: "api-testing-and-automation",
+    trackSlug: "software-testing",
+    slug: "api-testing-and-automation",
+    title: "API Testing and Automation",
+    description:
+      "Test REST APIs like a professional: HTTP fundamentals, schema and boundary validation, chained workflows, security basics, and a maintainable automation structure.",
+    order: 1,
+    difficulty: "intermediate",
+    estimatedHours: 5,
+    audience:
+      "Testers who've completed Software Testing Foundations (or already know its core techniques) and want to apply them specifically to REST APIs, plus developers who want to test their own APIs more rigorously.",
+    learningOutcomes: [
+      "Explain HTTP status codes, REST conventions, and the difference between authentication and authorization",
+      "Validate a JSON response's schema and design both positive and negative test cases",
+      "Apply boundary-value analysis to API-specific shapes: field limits, empty collections, and pagination",
+      "Test chained, multi-step workflows and validate error responses rigorously",
+      "Check for baseline API security issues like broken object-level authorization and unsafe input handling",
+      "Structure an isolated, maintainable test automation suite with useful CI reporting",
+    ],
+    prerequisiteCourseSlugs: ["software-testing-foundations"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["api-testing", "postman", "rest-apis"],
+    modules: [
+      {
+        id: "at-http-rest-module",
+        title: "HTTP and REST foundations",
+        summary: "The shape of every request and response, and the conventions real APIs follow.",
+        lessonSlugs: ["at-http-fundamentals", "at-rest-conventions"],
+      },
+      {
+        id: "at-auth-validation-module",
+        title: "Requests, auth, and validation",
+        summary: "Headers, authentication vs. authorization, and checking a response's full shape.",
+        lessonSlugs: ["at-headers-auth", "at-json-schema-validation"],
+      },
+      {
+        id: "at-designing-cases-module",
+        title: "Designing test cases",
+        summary:
+          "Positive and negative testing, API-specific boundaries, and contract compatibility.",
+        lessonSlugs: [
+          "at-positive-negative-testing",
+          "at-boundary-cases-apis",
+          "at-contract-testing",
+        ],
+      },
+      {
+        id: "at-advanced-patterns-module",
+        title: "Advanced testing patterns",
+        summary:
+          "Scaling test cases, testing multi-step workflows, and validating errors rigorously.",
+        lessonSlugs: ["at-data-driven-testing", "at-chained-requests", "at-error-validation"],
+      },
+      {
+        id: "at-reliability-security-module",
+        title: "Reliability and security",
+        summary: "Safe retries, rate limiting, and the security checks every tester can perform.",
+        lessonSlugs: ["at-idempotency-rate-limits", "at-security-basics"],
+      },
+      {
+        id: "at-automation-practice-module",
+        title: "Automation in practice",
+        summary: "Structuring a maintainable suite and making CI failures actually actionable.",
+        lessonSlugs: ["at-automation-structure", "at-ci-reporting"],
+      },
+    ],
+  },
+  {
+    id: "react-application-development",
+    trackSlug: "react",
+    slug: "react-application-development",
+    title: "React Application Development",
+    description:
+      "Build real, componentized user interfaces with React: state, effects, data fetching, custom hooks, accessibility, and a maintainable project structure.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    audience:
+      "Developers comfortable with JavaScript (and ideally TypeScript) who want to build real, interactive user interfaces rather than static pages, and understand what React is actually doing underneath its syntax.",
+    learningOutcomes: [
+      "Decompose a UI into well-scoped, reusable components and explain what JSX compiles to",
+      "Manage interactive state correctly, including the functional-update form and stable list keys",
+      "Build controlled, validated forms and handle loading/error/empty/success states explicitly",
+      "Synchronize with external systems using effects, including cleanup and race-condition guards for data fetching",
+      "Extract reusable logic into custom hooks and make deliberate state-ownership and Context decisions",
+      "Apply accessibility, testing, memoization, and error-boundary practices to ship a maintainable component",
+    ],
+    prerequisiteCourseSlugs: ["typescript-foundations"],
+    nextCourseSlugs: ["nodejs-express-backend-development"],
+    relatedTechnologySlugs: ["react"],
+    modules: [
+      {
+        id: "react-foundations-module",
+        title: "React foundations",
+        summary:
+          "Component thinking, what JSX actually compiles to, and one-way data flow through props.",
+        lessonSlugs: ["react-component-thinking", "react-jsx-rendering", "react-props"],
+      },
+      {
+        id: "react-interaction-state-module",
+        title: "Interaction and state",
+        summary: "Giving components memory, responding to events, and rendering lists safely.",
+        lessonSlugs: ["react-events", "react-state", "react-conditional-lists"],
+      },
+      {
+        id: "react-forms-states-module",
+        title: "Forms and UI states",
+        summary:
+          "Controlled, validated forms, and the four states real data-driven UI must handle.",
+        lessonSlugs: ["react-forms-validation", "react-ui-states"],
+      },
+      {
+        id: "react-effects-data-module",
+        title: "Effects and data loading",
+        summary: "Synchronizing with the outside world, and fetching data without race conditions.",
+        lessonSlugs: ["react-effects-lifecycle", "react-data-fetching"],
+      },
+      {
+        id: "react-reuse-module",
+        title: "Reuse and maintainability",
+        summary:
+          "Composition versus custom hooks, and deciding where state and Context genuinely belong.",
+        lessonSlugs: ["react-composition-hooks", "react-context-organization"],
+      },
+      {
+        id: "react-production-module",
+        title: "Production fundamentals",
+        summary:
+          "Accessibility, testing, memoization, error boundaries, and refactoring for maintainability.",
+        lessonSlugs: ["react-accessibility-testing", "react-performance-error-architecture"],
+      },
+    ],
+  },
+  {
+    id: "nodejs-express-backend-development",
+    trackSlug: "node-express",
+    slug: "nodejs-express-backend-development",
+    title: "Node.js and Express Backend Development",
+    description:
+      "Build and operate a real backend REST API: the Node runtime model, Express routing and middleware, validation, structured error handling, security fundamentals, and automated testing.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    audience:
+      "Developers comfortable with JavaScript (and ideally React) who want to build and operate a real backend API, not just consume one, and understand what actually happens between a request arriving and a response leaving.",
+    learningOutcomes: [
+      "Explain Node's event-loop model and convert between callback, Promise, and async/await styles safely",
+      "Structure a real Express application with modular routing and a correct middleware pipeline",
+      "Validate untrusted input and implement centralized, structured error handling",
+      "Design REST resources and status codes, and manage configuration and logging safely",
+      "Implement correct authorization boundaries without building an unsafe auth system from scratch",
+      "Separate business logic into testable services and add a real automated test suite",
+    ],
+    prerequisiteCourseSlugs: ["react-application-development"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["nodejs", "express"],
+    modules: [
+      {
+        id: "node-runtime-module",
+        title: "Node.js runtime foundations",
+        summary:
+          "The event loop, module systems, and the three faces of asynchronous JavaScript in Node.",
+        lessonSlugs: ["node-runtime-model", "node-modules-npm", "node-async-programming"],
+      },
+      {
+        id: "express-app-module",
+        title: "Building an Express app",
+        summary: "Route matching, the middleware pipeline, and the three sources of request data.",
+        lessonSlugs: ["express-app-structure", "express-middleware", "express-request-data"],
+      },
+      {
+        id: "api-design-module",
+        title: "Designing a real API",
+        summary:
+          "Validating untrusted input and designing REST resources and status codes deliberately.",
+        lessonSlugs: ["express-input-validation", "rest-resource-design"],
+      },
+      {
+        id: "errors-config-module",
+        title: "Errors, logging, and configuration",
+        summary:
+          "Structured errors, safe logging, and failing fast on broken configuration at startup.",
+        lessonSlugs: [
+          "express-error-handling",
+          "node-config-logging",
+          "node-config-validation-startup",
+        ],
+      },
+      {
+        id: "security-testing-module",
+        title: "Security and testing",
+        summary: "Correct authorization boundaries and a real, isolated automated test suite.",
+        lessonSlugs: ["express-security-auth-boundaries", "express-automated-testing"],
+      },
+      {
+        id: "operational-readiness-module",
+        title: "Operational readiness",
+        summary:
+          "Graceful shutdown and health checks — what it takes to run a service, not just write one.",
+        lessonSlugs: ["node-operational-readiness"],
       },
     ],
   },

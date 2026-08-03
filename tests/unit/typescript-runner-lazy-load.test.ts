@@ -85,3 +85,35 @@ describe("TypeScript compiler stays out of unrelated bundles", () => {
     }
   });
 });
+
+describe("Guided local labs (React/Node.js courses) add no new execution surface", () => {
+  // React Application Development and Node.js and Express Backend Development
+  // (Phase 5A.2) deliberately have no browser runner of their own -- every
+  // "real" component/server exercise is a guided local lab (static
+  // instructional text), never executed by this site. These tests assert
+  // that architectural boundary at the source level.
+  it("lib/runners/ contains no React or Node-specific runner implementation", () => {
+    const runnerFiles = readdirSync(join(ROOT, "lib", "runners"));
+    const forbidden = runnerFiles.filter((f) => /react|node-?server|express/i.test(f));
+    expect(forbidden).toEqual([]);
+  });
+
+  it("GuidedLocalLabPanel imports only existing UI primitives and React's useState, no runner code", () => {
+    const text = readFileSync(
+      join(ROOT, "components", "lesson", "guided-local-lab-panel.tsx"),
+      "utf8",
+    );
+    expect(text).not.toMatch(/from ["']@\/lib\/runners/);
+    expect(text).not.toMatch(/from ["']@\/components\/runners/);
+  });
+
+  it("no server-side code-execution sandbox (e.g. vm2) was added for guided local labs", () => {
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+    const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+    // vm2/isolated-vm are the packages a project would reach for to run
+    // arbitrary user code server-side -- guided local labs are static text,
+    // so neither should ever appear here.
+    expect(allDeps["vm2"]).toBeUndefined();
+    expect(allDeps["isolated-vm"]).toBeUndefined();
+  });
+});

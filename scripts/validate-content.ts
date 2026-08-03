@@ -298,6 +298,63 @@ for (const lesson of allLessons) {
   }
 }
 
+// --- Guided local labs (Phase 5A.2): most "required X" minimums are already
+// enforced structurally by guidedLocalLabSchema's min(1)/min(2) constraints
+// at parse time (lib/content/registry.ts) -- a lab with zero setup steps or
+// zero verification steps never reaches this script at all. What's left here
+// is what a single-object schema can't express: global id uniqueness, file-
+// relationship sanity, and the "never claim the browser ran this" rule. ---
+{
+  const labIds = new Map<string, string>();
+  const FALSE_EXECUTION_PHRASES = [
+    /\bwe (ran|ran it|executed|verified|tested) (it|this|your code)\b/i,
+    /\bautomatically verified\b/i,
+    /\bclick run\b/i,
+    /\bruns? in your browser\b/i,
+    /\bthe browser (ran|executed)\b/i,
+    /\bvisasparkschools (ran|executed|verified)\b/i,
+  ];
+  for (const lesson of allLessons) {
+    const lab = lesson.guidedLocalLab;
+    if (!lab) continue;
+
+    const existing = labIds.get(lab.id);
+    if (existing) {
+      fail(`Guided local lab id "${lab.id}" is used by both "${existing}" and "${lesson.slug}".`);
+    }
+    labIds.set(lab.id, lesson.slug);
+
+    const starterPaths = lab.starterFiles.map((f) => f.path);
+    if (new Set(starterPaths).size !== starterPaths.length) {
+      fail(`Lesson "${lesson.slug}" guided local lab has duplicate starter file paths.`);
+    }
+    const solutionPaths = lab.referenceSolution.files.map((f) => f.path);
+    if (new Set(solutionPaths).size !== solutionPaths.length) {
+      fail(`Lesson "${lesson.slug}" guided local lab has duplicate reference-solution file paths.`);
+    }
+    // A solution that is byte-identical to the starter teaches nothing --
+    // catches a copy-pasted placeholder rather than a real worked answer.
+    const starterByPath = new Map(lab.starterFiles.map((f) => [f.path, f.content]));
+    const identicalToStarter = lab.referenceSolution.files.every(
+      (f) => starterByPath.get(f.path) === f.content,
+    );
+    if (identicalToStarter && lab.starterFiles.length === lab.referenceSolution.files.length) {
+      fail(
+        `Lesson "${lesson.slug}" guided local lab's reference solution is identical to its starter files.`,
+      );
+    }
+
+    const labText = JSON.stringify(lab);
+    for (const pattern of FALSE_EXECUTION_PHRASES) {
+      if (pattern.test(labText)) {
+        fail(
+          `Lesson "${lesson.slug}" guided local lab text matches a false-execution-claim pattern (${pattern}) -- a guided local lab must never imply VisaSparkSchools ran, executed, or verified local code.`,
+        );
+      }
+    }
+  }
+}
+
 // --- Quiz integrity: valid answer indexes, no duplicate questions within a
 // lesson, and no two quiz questions across the same course that are
 // identical apart from a renamed variable/value (a shallow-rewrite check). ---

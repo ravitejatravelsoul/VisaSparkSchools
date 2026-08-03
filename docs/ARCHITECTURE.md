@@ -145,6 +145,42 @@ allow-forms">` — deliberately without `allow-same-origin`, so the frame always
   surface. Type errors render in a `role="status"` (not `role="alert"`) banner, since a type error
   is frequently the exercise's own expected, correct outcome rather than a failure.
 
+## Guided local labs (Phase 5A.2)
+
+A fourth kind of hands-on activity, deliberately **not** a runner: instructional content for
+environments this platform cannot honestly execute in a browser (React tooling, Node, Express, and
+later Java, PostgreSQL, Playwright, Selenium). `guidedLocalLabSchema` (`lib/content/types.ts`)
+defines the shape — required tools, setup steps, project structure, starter files, requirements,
+commands, expected behavior, verification steps, troubleshooting, hints, a reference solution, and
+an extension challenge, all schema-enforced non-empty — and is an **optional** field on a lesson,
+additive to (never a replacement for) its normal `guidedExercise`/`independentExercise`. That
+additivity is a deliberate safety choice: `lib/learning/store.ts`'s mastery/completion logic reads
+every lesson's `guidedExercise.id`/`independentExercise.id` unconditionally, so making a guided
+local lab optional-and-additional rather than replacing those fields meant the entire progress/
+mastery/completion system needed zero changes to support it.
+
+`components/lesson/guided-local-lab-panel.tsx` renders the lab with a **fixed, non-author-editable**
+"Runs on your computer" banner — hard-coded in the component, not sourced from the lab's own
+content — plus every required section (tools, setup, starter files as read-only `<pre>` blocks, no
+Monaco editor, no Run button), with hints and the reference solution revealed progressively via
+local component state, matching `ExercisePanel`'s existing hint-reveal UX. The lesson page renders
+this alongside the lesson's normal exercises when `lesson.guidedLocalLab` is present; completion is
+via the lesson's existing "Mark lesson complete" action — no separate completion signal was added,
+since the existing action is already fully compatible with every downstream system (dashboard,
+roadmap-step derivation, mastery). `scripts/validate-content.ts` additionally checks global lab-id
+uniqueness, duplicate file paths within a lab's starter/solution files, a reference solution
+suspiciously identical to the starter files, and a deny-list of phrases (`we ran it`, `runs in your
+browser`, `automatically verified`, ...) that would falsely imply the site executed local code. Six
+lessons use this type today — the three guided local labs each in React Application Development
+(a form-validation build, a race-condition-safe data-fetching build, and a component refactor) and
+Node.js and Express Backend Development (an Express app-structure build, an input-validation and
+error-handling build, and an automated-testing-with-graceful-shutdown build); see
+PROJECT_STATUS.md's Phase 5A.2 report for the full list — it's covered by
+schema tests, a component test suite (`tests/unit/content-schema.test.ts`,
+`tests/integration/guided-local-lab-panel.test.tsx`), and registry-level tests asserting every
+course that uses this type ships at least 3 labs, all lab ids are globally unique, and no lab's
+reference solution or copy falsely implies local execution.
+
 ## Learning engine and account sync (Phase 4)
 
 `lib/learning/store.ts` is a Zustand store wrapping a single `ProgressState` object

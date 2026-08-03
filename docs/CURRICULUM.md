@@ -10,19 +10,20 @@
 > matrix across all 80 guides, and "Complete-course definition" for what separates a course from a
 > guide.
 
-One connected path, 7 tracks, 62 lessons, 208 knowledge-check questions, 124 exercises (one guided
-
-- one independent per lesson), 9 guided projects, and 2 capstones. Every lesson includes:
-  objectives, prerequisites, a plain-language explanation, a working example, an editable example
-  (where a runner applies), a guided exercise, an independent exercise, common mistakes, a 3+
-  question knowledge check, a takeaway, a summary, and references.
+10 tracks, 11 courses, 118 lessons, 376 knowledge-check questions, 236 exercises (one guided plus
+one independent per lesson), 6 guided local labs, 11 guided projects, and 2 capstones. Every lesson
+includes: objectives, prerequisites, a plain-language explanation, a working example, an editable
+example (where a runner applies), a guided exercise, an independent exercise, common mistakes, a
+3+ question knowledge check, a takeaway, a summary, and references. See the "Totals" table below
+for exact, live-computed counts.
 
 Track order (each chains into the next via `nextLessonSlug` within a track, and
 `prerequisiteCourseSlugs`/`nextCourseSlugs` across tracks):
-Foundations → HTML & CSS → JavaScript → TypeScript → Python → Git, APIs & SQL →
-AI, LLMs, RAG & Agents. (TypeScript and Python both build on JavaScript/Foundations independently —
-see the per-course prerequisite graph in "Master curriculum architecture" below; TypeScript is not
-required before Python.)
+Foundations → HTML & CSS → JavaScript → TypeScript → React → Node.js & Express → Python →
+Git, APIs & SQL → AI, LLMs, RAG & Agents → Software Testing & QA. (TypeScript and Python both build
+on JavaScript/Foundations independently — see the per-course prerequisite graph in "Master
+curriculum architecture" below; TypeScript is not required before Python, and Software Testing
+Foundations requires neither.)
 
 ## Track 1 — Digital & Coding Foundations (3 lessons)
 
@@ -87,7 +88,65 @@ uses.
 
 **Guided project:** Typed Study Tracker
 
-## Track 5 — Python (8 lessons)
+## Track 5 — React (14 lessons)
+
+Added in Phase 5A.2. This platform has no React runner (no bundler, no JSX transform) in its
+browser sandbox, and deliberately did not add one. Every lesson's browser exercises are genuine,
+runnable plain JavaScript/TypeScript that model the underlying mechanism a React concept is built
+on (a hand-written `createElement`, a closure-based `useState`, a dependency-array comparison, a
+request-token race-condition guard) — several of these are not simplifications but literally the
+real algorithm React itself uses. Three lessons additionally carry a **guided local lab** for the
+real component work, which runs on the learner's own machine with a real Vite + React project —
+never simulated in this browser sandbox. See "Guided local labs" below.
+
+| Lesson                                                                        | Difficulty   | Skills                                |
+| ----------------------------------------------------------------------------- | ------------ | ------------------------------------- |
+| Component Thinking: Breaking a UI into Pieces                                 | beginner     | react, component-design               |
+| JSX and Rendering: UI as an Expression                                        | beginner     | react, jsx                            |
+| Props: Passing Data Down, One Way                                             | beginner     | react, props                          |
+| Handling Events in React                                                      | beginner     | react, events                         |
+| State: Giving Components Memory                                               | beginner     | react, state, usestate                |
+| Conditional Rendering, Lists, and Stable Keys                                 | beginner     | react, conditional-rendering, lists   |
+| Controlled Forms and Validation (Guided Local Lab)                            | intermediate | react, forms, validation              |
+| Loading, Empty, Error, and Success States                                     | intermediate | react, ui-states                      |
+| Effects: Synchronizing with the Outside World                                 | intermediate | react, effects, useeffect             |
+| Fetching Data: Races, Stale Responses, and Cleanup (Guided Local Lab)         | advanced     | react, data-fetching, race-conditions |
+| Composition and Custom Hooks                                                  | intermediate | react, composition, custom-hooks      |
+| Context, State Ownership, and Project Organization                            | intermediate | react, context, state-ownership       |
+| Accessibility and Testing React Components                                    | intermediate | react, accessibility, testing         |
+| Performance, Error Handling, and Maintainable Architecture (Guided Local Lab) | advanced     | react, performance, error-boundaries  |
+
+**Guided project:** Accessible Learning Dashboard
+
+## Track 6 — Node.js & Express (14 lessons)
+
+Added in Phase 5A.2. Same guided-local-lab pattern as React: browser exercises are genuine
+JavaScript that model the underlying algorithm (an event-loop ordering predictor, a promisify
+wrapper, a route-matcher, a middleware-pipeline runner, a redaction function, a graceful-shutdown
+state machine) without depending on any Node or Express API; three lessons additionally carry a
+guided local lab for the real server work (a genuine Express process, a real port, real npm
+commands), which this platform's browser sandbox cannot and does not execute.
+
+| Lesson                                                         | Difficulty   | Skills                             |
+| -------------------------------------------------------------- | ------------ | ---------------------------------- |
+| The Node.js Runtime Model: Event Loop and Non-Blocking I/O     | beginner     | nodejs, event-loop                 |
+| CommonJS vs ES Modules, npm, and Dependency Management         | beginner     | nodejs, npm, modules               |
+| Asynchronous Programming: Callbacks, Promises, and Async/Await | intermediate | nodejs, promises, async-await      |
+| Express Application Structure and Routing (Guided Local Lab)   | intermediate | nodejs, express, routing           |
+| Middleware: The Request Pipeline                               | intermediate | nodejs, express, middleware        |
+| Request Parameters, Query Strings, and Bodies                  | intermediate | nodejs, express, request-data      |
+| Input Validation and Rejecting Bad Requests (Guided Local Lab) | advanced     | nodejs, express, validation        |
+| REST Resource Design and HTTP Status Behavior                  | intermediate | nodejs, express, rest-design       |
+| Structured Errors: Operational vs. Programmer Errors           | advanced     | nodejs, express, structured-errors |
+| Environment Configuration and Safe Logging                     | intermediate | nodejs, configuration, logging     |
+| Configuration Validation and Startup Failures                  | intermediate | nodejs, startup-validation         |
+| Security Fundamentals and Authentication Boundaries            | advanced     | nodejs, express, security          |
+| Automated Testing for Routes and Services (Guided Local Lab)   | advanced     | nodejs, express, testing           |
+| Graceful Shutdown and Operational Readiness                    | advanced     | nodejs, graceful-shutdown          |
+
+**Guided project:** Validated Learning-Progress REST API
+
+## Track 7 — Python (8 lessons)
 
 | Lesson                                      | Difficulty | Skills                           |
 | ------------------------------------------- | ---------- | -------------------------------- |
@@ -102,7 +161,7 @@ uses.
 
 **Guided project:** Expense Tracker
 
-## Track 6 — Git, APIs & SQL (8 lessons)
+## Track 8 — Git, APIs & SQL (8 lessons)
 
 | Lesson                                            | Difficulty | Skills                                       |
 | ------------------------------------------------- | ---------- | -------------------------------------------- |
@@ -121,7 +180,7 @@ books, orders) so learners build on one consistent schema instead of a new one p
 **Guided projects:** Git Branching & Collaboration Workflow; API-Powered Lookup App (spans
 JavaScript + this track)
 
-## Track 7 — AI, LLMs, RAG & Agents (14 lessons)
+## Track 9 — AI, LLMs, RAG & Agents (14 lessons)
 
 | Lesson                                                           | Difficulty   | Skills                           |
 | ---------------------------------------------------------------- | ------------ | -------------------------------- |
@@ -149,21 +208,46 @@ explicitly, so learners understand the underlying mechanics before ever touching
 **Capstones:** Document Q&A RAG Capstone (with citations, spans this track + SQL); AI Support Agent
 Capstone (tool-calling agent with guardrails)
 
+## Track 10 — Software Testing & QA (28 lessons, 2 courses)
+
+Two courses (Phase 5A.2). Both reuse the existing HTML/JS runner exclusively — no new runner was
+added. Every exercise represents a testing _decision_ (which equivalence classes, which boundary
+values, which combination from a decision table) as a small, deterministic JavaScript value the
+harness checks against the real technique's rules — never a claim that real HTTP requests or a
+real test-automation tool ran.
+
+**Software Testing Foundations** (14 lessons, beginner, no prerequisites): quality vs. testing,
+requirements analysis, test levels and types, the four structured test design techniques
+(equivalence partitioning, boundary-value analysis, decision tables, state transition testing —
+each its own hands-on lab), exploratory testing, risk-based testing, defect reporting,
+traceability and regression strategy, and agile testing/accessibility/security awareness.
+**Guided project:** Test Strategy for a Learning Application.
+
+**API Testing and Automation** (14 lessons, intermediate, requires Software Testing Foundations):
+HTTP fundamentals, REST conventions, headers/auth (401 vs. 403), JSON schema validation (lab),
+positive/negative testing, API-specific boundary cases (lab), contract testing, data-driven
+testing, chained/stateful workflows (lab), error-response validation, idempotency and rate
+limiting, API security basics (broken object-level authorization, input sanitization),
+and structuring a maintainable, isolated automation suite with useful CI reporting.
+**Guided project:** Validation Suite for a Sample Learning-Progress API.
+
 ## Totals
 
 | Metric                           | Count |
 | -------------------------------- | ----- |
-| Tracks                           | 7     |
-| Courses                          | 7     |
-| Lessons                          | 62    |
-| Knowledge-check questions        | 208   |
-| Exercises (guided + independent) | 124   |
-| Guided projects                  | 7     |
+| Tracks                           | 10    |
+| Courses                          | 11    |
+| Lessons                          | 118   |
+| Knowledge-check questions        | 376   |
+| Exercises (guided + independent) | 236   |
+| Guided local labs                | 6     |
+| Guided projects                  | 11    |
 | Capstones                        | 2     |
 
-All counts above are computed from the live registry by `npm run content:validate`'s summary line
-(`Schema-checked N tracks, N courses, N lessons, N projects`) — not hand-maintained, so this table
-cannot silently drift from the real content the way a purely hand-typed count could.
+All counts above are computed from the live registry (query the registry's `allTracks`/
+`allCourses`/`allLessons`/`allProjects` exports directly, or cross-check the lesson/course/project
+totals in `npm run content:validate`'s summary line) — not hand-maintained, so this table cannot
+silently drift from the real content the way a purely hand-typed count could.
 
 ## Content-authoring notes
 
@@ -203,19 +287,19 @@ against the real registries rather than an independently-authored boolean.
 ## Master curriculum architecture (Phase 5A+)
 
 The long-term curriculum is organized into 8 tracks, each an ordered sequence of courses. Only
-courses that are actually implemented (this document's Tracks 1–7 above) are public; every other
+courses that are actually implemented (this document's Tracks 1–10 above) are public; every other
 course named below is a documented plan, not a claim of availability — none of them appear in
 `content/courses.ts`, the public catalog, search, or any roadmap's required steps.
 
-1. **Web Development** — HTML & CSS ✅ → JavaScript ✅ → TypeScript ✅ → React (5B) → Node.js and
-   Express (5B)
-2. **Backend and Programming** — Java (5B) → Data Structures and Algorithms (5B) → Backend
-   Architecture Fundamentals (5C) → Spring Boot (5C)
+1. **Web Development** — HTML & CSS ✅ → JavaScript ✅ → TypeScript ✅ → React ✅ → Node.js and
+   Express ✅
+2. **Backend and Programming** — Node.js and Express ✅ (shared with track 1) → Java (5B) → Data
+   Structures and Algorithms (5B) → Backend Architecture Fundamentals (5C) → Spring Boot (5C)
 3. **Databases and Data** — SQL ✅ (part of Track 6) → Database Design and PostgreSQL (5B) → Data
    Analysis with Python and Pandas (5C) → Machine Learning Foundations (5C, distinct from the
    existing AI/LLM/RAG track's ML lesson, which teaches ML _concepts_, not applied model-building)
-4. **Software Testing and QA Automation** — Software Testing Foundations (5B) → API Testing and
-   Automation (5B) → Playwright Web Automation (5B) or Selenium Web Automation (5B) → Test
+4. **Software Testing and QA Automation** — Software Testing Foundations ✅ → API Testing and
+   Automation ✅ → Playwright Web Automation (5B) or Selenium Web Automation (5B) → Test
    Automation Framework Engineering (5C) → Performance and Security Testing Foundations (5C)
 5. **DevOps and Cloud** — Git ✅ (part of Track 6) → Linux and Shell Fundamentals (5C) → Docker
    (5C) → Continuous Integration and Delivery (5C) → Cloud Fundamentals (5C) → Kubernetes
@@ -233,27 +317,42 @@ course named below is a documented plan, not a claim of availability — none of
 8. **Programming and Computer Science foundations** — Digital & Coding Foundations ✅ → the
    Data Structures and Algorithms course above (shared with track 2).
 
-**Phase 5A (implemented, this batch): TypeScript Foundations.** The original brief for this batch
+**Phase 5A (implemented): TypeScript Foundations.** The original brief for this batch
 named 12 candidate courses; after auditing the runner architecture (see
 `docs/ARCHITECTURE.md`'s runner matrix) 8 of the 12 — React, Node.js/Express, Java, PostgreSQL,
 Playwright, Selenium, and Test Automation Framework Engineering — cannot execute in this
 project's three-runner browser sandbox (HTML/CSS/JS, Python via Pyodide, SQL via sql.js) without
 either a fake "Run" button or a new server-side execution capability, both explicitly
-out of scope for this phase. Rather than publish those 8 as shallow, non-interactive
-"courses" to hit a count, this batch scoped down to what could be built completely, end-to-end,
+out of scope for that phase. Rather than publish those 8 as shallow, non-interactive
+"courses" to hit a count, that batch scoped down to what could be built completely, end-to-end,
 and verified: one new genuinely interactive course (TypeScript, via a new lazily-loaded real
-compiler — see `docs/ARCHITECTURE.md`) plus the schema/tooling/documentation foundation the
-remaining 11 need. See `PROJECT_STATUS.md`'s Phase 5A report for the full reasoning and what was
+compiler — see `docs/ARCHITECTURE.md`) plus the schema/tooling/documentation foundation later
+courses need. See `PROJECT_STATUS.md`'s Phase 5A report for the full reasoning and what was
 verified.
 
-**Phase 5B (documented plan, not built):** React, Node.js and Express, Java, Data Structures and
-Algorithms, Database Design and PostgreSQL, Software Testing Foundations, API Testing and
-Automation, Playwright Web Automation, Selenium Web Automation. These are the courses closest to
-buildable today — React/Node need either a guided-local-lab presentation (setup steps, expected
-behavior, verification commands, no fake execution) or a real bundler-based in-browser sandbox
-(a larger infrastructure decision, not made in this phase); Java needs the same guided-local-lab
-treatment; the testing/QA courses are largely guided-exercise and code-tracing courses that don't
-need a new runner at all.
+**Phase 5A.2 (implemented): Software Testing Foundations, API Testing and Automation, React
+Application Development, Node.js and Express Backend Development — all four courses complete.**
+This batch added a reusable **guided local lab** content type (`guidedLocalLabSchema` in
+`lib/content/types.ts`, `components/lesson/guided-local-lab-panel.tsx`) for courses whose real work
+genuinely cannot execute in a browser — instructional content with setup steps, starter files,
+verification commands, and a reference solution, explicitly labeled "Runs on your computer" and
+never rendered with a Run button. The two testing courses reuse the existing HTML/JS runner
+exclusively (test-design decisions and API-behavior simulations represented as small, deterministic
+JavaScript values) and needed no guided local labs at all. React and Node.js/Express each combine
+both approaches: every lesson's browser exercises are genuine, runnable JavaScript/TypeScript
+modeling the underlying mechanism of a React/Node concept (a hand-written `createElement`, a
+closure-based `useState`, a route-matcher, a middleware-pipeline runner — several of these are the
+real algorithm, not a simplification), and three lessons per course additionally carry a guided
+local lab for the real component/server work — six guided local labs total across both courses, no
+new runner or execution surface added. See `PROJECT_STATUS.md`'s Phase 5A.2 report for the full
+build, verification, and QA results.
+
+**Phase 5B (documented plan, not built):** Java, Data Structures and Algorithms, Database Design
+and PostgreSQL, Playwright Web Automation, Selenium Web Automation. Java and PostgreSQL now have a
+concrete implementation path via the guided-local-lab content type built in Phase 5A.2 (setup
+steps, expected behavior, verification commands, no fake execution); Playwright/Selenium are
+largely guided-exercise and code-tracing courses that don't need a new runner or the guided-local-lab
+type at all.
 
 **Phase 5C (documented plan, not built):** TypeScript Compiler React (deferred further), Backend
 Architecture Fundamentals, Spring Boot, Data Analysis with Python and Pandas, Machine Learning
@@ -282,34 +381,34 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 
 ### Frontend Development (11)
 
-| Technology | Difficulty   | Course                | Runner | Project(s)              | Batch / reason                                                                                             |
-| ---------- | ------------ | --------------------- | ------ | ----------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Angular    | advanced     | —                     | —      | —                       | 5C (framework tier, after React)                                                                           |
-| AngularJS  | intermediate | —                     | —      | —                       | Reference-only: legacy, `legacyNote` explains current status; no course planned                            |
-| Bootstrap  | beginner     | —                     | —      | —                       | Reference-only: a CSS library, taught in context within HTML & CSS Fundamentals rather than its own course |
-| CSS        | beginner     | html-css-fundamentals | html   | personal-portfolio-page | ✅ available                                                                                               |
-| HTML       | beginner     | html-css-fundamentals | html   | personal-portfolio-page | ✅ available                                                                                               |
-| jQuery     | beginner     | —                     | —      | —                       | Reference-only: legacy pattern, superseded by native DOM APIs taught in JavaScript Fundamentals            |
-| Next.js    | intermediate | —                     | —      | —                       | 5C (after React)                                                                                           |
-| React      | intermediate | —                     | —      | —                       | 5B                                                                                                         |
-| Sass       | intermediate | —                     | —      | —                       | Reference-only: a CSS preprocessor; core concepts already covered by CSS Fundamentals                      |
-| Vue        | intermediate | —                     | —      | —                       | 5C (framework tier, after React)                                                                           |
-| W3.CSS     | beginner     | —                     | —      | —                       | Reference-only: attributed to its creator (W3Schools), not a course candidate                              |
+| Technology | Difficulty   | Course                        | Runner | Project(s)                    | Batch / reason                                                                                             |
+| ---------- | ------------ | ----------------------------- | ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Angular    | advanced     | —                             | —      | —                             | 5C (framework tier, after React)                                                                           |
+| AngularJS  | intermediate | —                             | —      | —                             | Reference-only: legacy, `legacyNote` explains current status; no course planned                            |
+| Bootstrap  | beginner     | —                             | —      | —                             | Reference-only: a CSS library, taught in context within HTML & CSS Fundamentals rather than its own course |
+| CSS        | beginner     | html-css-fundamentals         | html   | personal-portfolio-page       | ✅ available                                                                                               |
+| HTML       | beginner     | html-css-fundamentals         | html   | personal-portfolio-page       | ✅ available                                                                                               |
+| jQuery     | beginner     | —                             | —      | —                             | Reference-only: legacy pattern, superseded by native DOM APIs taught in JavaScript Fundamentals            |
+| Next.js    | intermediate | —                             | —      | —                             | 5C (after React)                                                                                           |
+| React      | intermediate | react-application-development | —      | accessible-learning-dashboard | ✅ available (Phase 5A.2)                                                                                  |
+| Sass       | intermediate | —                             | —      | —                             | Reference-only: a CSS preprocessor; core concepts already covered by CSS Fundamentals                      |
+| Vue        | intermediate | —                             | —      | —                             | 5C (framework tier, after React)                                                                           |
+| W3.CSS     | beginner     | —                             | —      | —                             | Reference-only: attributed to its creator (W3Schools), not a course candidate                              |
 
 ### Backend Development (10)
 
-| Technology    | Difficulty   | Course       | Runner | Project(s)              | Batch / reason                               |
-| ------------- | ------------ | ------------ | ------ | ----------------------- | -------------------------------------------- |
-| .NET          | intermediate | —            | —      | —                       | 5C or later (not yet scheduled)              |
-| ASP.NET       | intermediate | —            | —      | —                       | 5C or later (after .NET)                     |
-| Django        | intermediate | —            | —      | —                       | 5C or later (after a Python backend course)  |
-| Express       | intermediate | —            | —      | —                       | 5B (with Node.js)                            |
-| GraphQL       | intermediate | —            | —      | —                       | 5C (after REST APIs)                         |
-| Microservices | advanced     | —            | —      | —                       | 5C (after Backend Architecture Fundamentals) |
-| Node.js       | intermediate | —            | —      | —                       | 5B                                           |
-| REST APIs     | beginner     | git-apis-sql | —      | api-powered-weather-app | ✅ available                                 |
-| Spring Boot   | advanced     | —            | —      | —                       | 5C (after Java)                              |
-| System Design | advanced     | —            | —      | —                       | 5C (after Backend Architecture Fundamentals) |
+| Technology    | Difficulty   | Course                             | Runner | Project(s)                      | Batch / reason                               |
+| ------------- | ------------ | ---------------------------------- | ------ | ------------------------------- | -------------------------------------------- |
+| .NET          | intermediate | —                                  | —      | —                               | 5C or later (not yet scheduled)              |
+| ASP.NET       | intermediate | —                                  | —      | —                               | 5C or later (after .NET)                     |
+| Django        | intermediate | —                                  | —      | —                               | 5C or later (after a Python backend course)  |
+| Express       | intermediate | nodejs-express-backend-development | —      | validated-learning-progress-api | ✅ available (Phase 5A.2)                    |
+| GraphQL       | intermediate | —                                  | —      | —                               | 5C (after REST APIs)                         |
+| Microservices | advanced     | —                                  | —      | —                               | 5C (after Backend Architecture Fundamentals) |
+| Node.js       | intermediate | nodejs-express-backend-development | —      | validated-learning-progress-api | ✅ available (Phase 5A.2)                    |
+| REST APIs     | beginner     | git-apis-sql                       | —      | api-powered-weather-app         | ✅ available                                 |
+| Spring Boot   | advanced     | —                                  | —      | —                               | 5C (after Java)                              |
+| System Design | advanced     | —                                  | —      | —                               | 5C (after Backend Architecture Fundamentals) |
 
 ### Programming Languages (10)
 
@@ -394,13 +493,13 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 
 ### Software Testing and QA (5)
 
-| Technology                    | Difficulty   | Course | Runner | Project(s) | Batch / reason                                                                             |
-| ----------------------------- | ------------ | ------ | ------ | ---------- | ------------------------------------------------------------------------------------------ |
-| API Testing                   | beginner     | —      | —      | —          | 5B (API Testing and Automation)                                                            |
-| Playwright                    | intermediate | —      | —      | —          | 5B (Playwright Web Automation) — guided-exercise/code-tracing format, no new runner needed |
-| Postman                       | beginner     | —      | —      | —          | 5B (with API Testing and Automation)                                                       |
-| Selenium                      | intermediate | —      | —      | —          | 5B (Selenium Web Automation)                                                               |
-| Software Testing Fundamentals | beginner     | —      | —      | —          | 5B (Software Testing Foundations)                                                          |
+| Technology                    | Difficulty   | Course                       | Runner | Project(s)                  | Batch / reason                                                                             |
+| ----------------------------- | ------------ | ---------------------------- | ------ | --------------------------- | ------------------------------------------------------------------------------------------ |
+| API Testing                   | beginner     | api-testing-and-automation   | —      | sample-api-validation-suite | ✅ available (Phase 5A.2)                                                                  |
+| Playwright                    | intermediate | —                            | —      | —                           | 5B (Playwright Web Automation) — guided-exercise/code-tracing format, no new runner needed |
+| Postman                       | beginner     | —                            | —      | —                           | 5B (with API Testing and Automation)                                                       |
+| Selenium                      | intermediate | —                            | —      | —                           | 5B (Selenium Web Automation)                                                               |
+| Software Testing Fundamentals | beginner     | software-testing-foundations | —      | learning-app-test-strategy  | ✅ available (Phase 5A.2)                                                                  |
 
 ### Data Structures and Algorithms (1)
 
@@ -417,7 +516,8 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 | Git             | beginner     | git-apis-sql | —      | git-collaboration-workflow | ✅ available                                                                                                       |
 | Linux           | intermediate | —            | —      | —                          | 5C (Linux and Shell Fundamentals)                                                                                  |
 
-**Summary:** 80 public technologies; 18 map to a real course (17 pre-Phase-5A + TypeScript);
-7 more map to a runner or project without a full course (unchanged from Phase 3/4); 8 have an
-explicit, documented reference-only reason (not a course candidate at all); the remaining ~47 are
-genuinely planned for Phase 5B/5C, listed above with their batch.
+**Summary:** 80 public technologies; 23 map to a real course (17 pre-Phase-5A + TypeScript +
+Software Testing Fundamentals + API Testing + React + Node.js + Express); 7 more map to a runner or
+project without a full course (unchanged from Phase 3/4); 8 have an explicit, documented
+reference-only reason (not a course candidate at all); the remaining ~42 are genuinely planned for
+Phase 5B/5C, listed above with their batch.

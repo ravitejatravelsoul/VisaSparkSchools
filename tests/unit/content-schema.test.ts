@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { lessonSchema, courseSchema } from "@/lib/content/types";
+import { lessonSchema, courseSchema, guidedLocalLabSchema } from "@/lib/content/types";
 import {
   allLessons,
   allTracks,
@@ -166,6 +166,85 @@ describe("courseSchema", () => {
   });
 });
 
+function validGuidedLocalLabInput() {
+  return {
+    id: "test-lab",
+    title: "Test Lab",
+    scenario: "Set up a small project and verify it locally.",
+    requiredTools: [{ name: "Node.js", version: "20.x" }],
+    setupSteps: ["Run npm install", "Run npm start"],
+    projectStructure: "src/\n  index.js",
+    starterFiles: [{ path: "src/index.js", content: "console.log('hi');" }],
+    requirements: ["The app should log 'hi' to the console"],
+    commands: [{ description: "Start the app", command: "npm start" }],
+    expectedBehavior: "The console prints 'hi'.",
+    verificationSteps: [{ command: "npm start", expectedResult: "'hi' appears in the terminal" }],
+    troubleshooting: [{ issue: "Command not found", fix: "Reinstall Node.js" }],
+    hints: ["Check package.json", "Check the console output"],
+    referenceSolution: {
+      summary: "The starter file already satisfies the requirement.",
+      files: [{ path: "src/index.js", content: "console.log('hi');" }],
+    },
+    extensionChallenge: "Log the current date alongside the greeting.",
+  };
+}
+
+describe("guidedLocalLabSchema", () => {
+  it("accepts a minimal, well-formed guided local lab", () => {
+    const result = guidedLocalLabSchema.safeParse(validGuidedLocalLabInput());
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a lab with fewer than 2 hints", () => {
+    const input = validGuidedLocalLabInput();
+    input.hints = ["only one hint"];
+    const result = guidedLocalLabSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a lab with no required tools", () => {
+    const input = validGuidedLocalLabInput();
+    input.requiredTools = [];
+    const result = guidedLocalLabSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a lab with no verification steps", () => {
+    const input = validGuidedLocalLabInput();
+    input.verificationSteps = [];
+    const result = guidedLocalLabSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a lab with no starter files", () => {
+    const input = validGuidedLocalLabInput();
+    input.starterFiles = [];
+    const result = guidedLocalLabSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a lab with no reference solution files", () => {
+    const input = validGuidedLocalLabInput();
+    input.referenceSolution.files = [];
+    const result = guidedLocalLabSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a lab missing troubleshooting entries", () => {
+    const input = validGuidedLocalLabInput();
+    input.troubleshooting = [];
+    const result = guidedLocalLabSchema.safeParse(input);
+    expect(result.success).toBe(false);
+  });
+
+  it("is accepted as an optional field on a lesson, and omitted lessons remain valid without it", () => {
+    const lessonWithLab = { ...validLessonInput(), guidedLocalLab: validGuidedLocalLabInput() };
+    expect(lessonSchema.safeParse(lessonWithLab).success).toBe(true);
+    const lessonWithoutLab = validLessonInput();
+    expect(lessonSchema.safeParse(lessonWithoutLab).success).toBe(true);
+  });
+});
+
 describe("the real content registry", () => {
   it("has no duplicate lesson ids or slugs", () => {
     const ids = allLessons.map((l) => l.id);
@@ -263,5 +342,51 @@ describe("the real content registry", () => {
     expect(next?.courseSlug).toBe(lesson.courseSlug);
     expect(prev!.order).toBeLessThan(lesson.order);
     expect(next!.order).toBeGreaterThan(lesson.order);
+  });
+
+  it("React Application Development and Node.js/Express Backend Development each have at least 3 guided local labs", () => {
+    for (const courseSlug of [
+      "react-application-development",
+      "nodejs-express-backend-development",
+    ]) {
+      const labCount = allLessons.filter(
+        (l) => l.courseSlug === courseSlug && l.guidedLocalLab,
+      ).length;
+      expect(labCount).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("every guided local lab has a globally unique id", () => {
+    const labIds = allLessons.filter((l) => l.guidedLocalLab).map((l) => l.guidedLocalLab!.id);
+    expect(new Set(labIds).size).toBe(labIds.length);
+  });
+
+  it("no guided local lab's reference solution is byte-identical to its starter files", () => {
+    for (const lesson of allLessons) {
+      const lab = lesson.guidedLocalLab;
+      if (!lab) continue;
+      const starterByPath = new Map(lab.starterFiles.map((f) => [f.path, f.content]));
+      const identical =
+        lab.referenceSolution.files.length === lab.starterFiles.length &&
+        lab.referenceSolution.files.every((f) => starterByPath.get(f.path) === f.content);
+      expect(identical).toBe(false);
+    }
+  });
+
+  it("no guided local lab's text implies the site executed, ran, or verified local code", () => {
+    const falseExecutionPatterns = [
+      /\bwe (ran|executed|verified) (it|this|your code)\b/i,
+      /\bautomatically verified\b/i,
+      /\bclick run\b/i,
+      /\bruns? in your browser\b/i,
+    ];
+    for (const lesson of allLessons) {
+      const lab = lesson.guidedLocalLab;
+      if (!lab) continue;
+      const text = JSON.stringify(lab);
+      for (const pattern of falseExecutionPatterns) {
+        expect(pattern.test(text)).toBe(false);
+      }
+    }
   });
 });

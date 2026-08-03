@@ -8,6 +8,10 @@ import { typescriptLessons } from "@/content/lessons/typescript";
 import { pythonLessons } from "@/content/lessons/python";
 import { gitApiSqlLessons } from "@/content/lessons/git-api-sql";
 import { aiLessons } from "@/content/lessons/ai-llm-rag";
+import { softwareTestingLessons } from "@/content/lessons/software-testing";
+import { apiTestingLessons } from "@/content/lessons/api-testing";
+import { reactLessons } from "@/content/lessons/react";
+import { nodeExpressLessons } from "@/content/lessons/node-express";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -25,6 +29,10 @@ export const allLessons: Lesson[] = [
   ...pythonLessons,
   ...gitApiSqlLessons,
   ...aiLessons,
+  ...softwareTestingLessons,
+  ...apiTestingLessons,
+  ...reactLessons,
+  ...nodeExpressLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);
