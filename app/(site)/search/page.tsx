@@ -7,6 +7,9 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Search",
   description: `Search ${siteConfig.name} lessons, courses, and projects.`,
+  // Canonicalizes to the bare /search path regardless of ?q= -- individual
+  // queries aren't meant to rank as distinct pages.
+  alternates: { canonical: `${siteConfig.url}/search` },
 };
 
 export default function SearchPage() {

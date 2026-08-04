@@ -17,6 +17,7 @@ import { trackAccent } from "@/lib/ui/track-accent";
 import { accentClasses } from "@/lib/ui/category-accent";
 import { difficultyTone } from "@/lib/ui/difficulty";
 import { cn } from "@/lib/utils/cn";
+import { siteConfig } from "@/lib/site-config";
 
 type Params = Promise<{ trackSlug: string }>;
 
@@ -28,7 +29,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { trackSlug } = await params;
   const track = getTrackBySlug(trackSlug);
   if (!track) return {};
-  return { title: track.title, description: track.description };
+  return {
+    title: track.title,
+    description: track.description,
+    alternates: { canonical: `${siteConfig.url}/paths/${track.slug}` },
+  };
 }
 
 export default async function TrackDetailPage({ params }: { params: Params }) {

@@ -89,6 +89,13 @@ export function CodeEditor({
             tabSize: 2,
             scrollBeyondLastLine: false,
             renderLineHighlight: "none",
+            // Without this, Monaco's hidden input keeps its own generic
+            // default accessible name -- indistinguishable to a screen
+            // reader user when several editors exist on one lesson page
+            // (an example, a guided exercise, an independent exercise).
+            // The fallback <textarea> below already receives `ariaLabel`;
+            // this makes the real Monaco editor consistent with it.
+            ariaLabel,
           }}
         />
       </div>

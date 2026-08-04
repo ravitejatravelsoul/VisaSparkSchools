@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils/cn";
 export const metadata: Metadata = {
   title: "Learning Paths",
   description: "One connected path from zero coding knowledge to building real AI applications.",
+  alternates: { canonical: `${siteConfig.url}/paths` },
 };
 
 export default function PathsPage() {

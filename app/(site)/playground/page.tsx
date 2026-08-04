@@ -4,10 +4,12 @@ import { Container } from "@/components/ui/container";
 import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlaygroundClient } from "@/components/playground/playground-client";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Playground",
   description: "A free-form sandbox to experiment with HTML/CSS/JS, Python, or SQL.",
+  alternates: { canonical: `${siteConfig.url}/playground` },
 };
 
 export default function PlaygroundPage() {

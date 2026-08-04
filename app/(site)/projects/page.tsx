@@ -6,10 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader, SectionHeader } from "@/components/ui/page-header";
 import { allProjects } from "@/lib/content/registry";
 import { difficultyTone } from "@/lib/ui/difficulty";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Projects",
   description: "Guided projects and capstones that put each track's skills to work end to end.",
+  alternates: { canonical: `${siteConfig.url}/projects` },
 };
 
 export default function ProjectsPage() {

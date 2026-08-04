@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Accessibility",
   description: `${siteConfig.name}'s accessibility commitment and known limitations.`,
+  alternates: { canonical: `${siteConfig.url}/accessibility` },
 };
 
 export default function AccessibilityPage() {

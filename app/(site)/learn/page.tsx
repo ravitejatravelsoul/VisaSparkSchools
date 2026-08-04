@@ -18,6 +18,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Learn",
   description: `One starting point for everything ${siteConfig.name} teaches -- categories, technology guides, courses, and roadmaps.`,
+  alternates: { canonical: `${siteConfig.url}/learn` },
 };
 
 const entryPoints = [

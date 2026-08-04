@@ -31,7 +31,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { courseSlug } = await params;
   const course = getCourseBySlug(courseSlug);
   if (!course) return {};
-  return { title: course.title, description: course.description };
+  return {
+    title: course.title,
+    description: course.description,
+    alternates: { canonical: `${siteConfig.url}/courses/${course.slug}` },
+  };
 }
 
 export default async function CourseOverviewPage({ params }: { params: Params }) {

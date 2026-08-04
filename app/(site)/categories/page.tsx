@@ -11,6 +11,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Categories",
   description: `Explore ${siteConfig.name} by subject area -- frontend, backend, AI, data, cloud, and more.`,
+  alternates: { canonical: `${siteConfig.url}/categories` },
 };
 
 export default function CategoriesPage() {

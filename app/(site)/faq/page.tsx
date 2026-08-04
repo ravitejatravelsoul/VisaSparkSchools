@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "FAQ",
   description: `Frequently asked questions about ${siteConfig.name}.`,
+  alternates: { canonical: `${siteConfig.url}/faq` },
 };
 
 const faqs = [

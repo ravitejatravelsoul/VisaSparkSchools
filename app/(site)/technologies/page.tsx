@@ -10,6 +10,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Technology Directory",
   description: `Browse every technology guide on ${siteConfig.name} -- filter by category, difficulty, and what's actually available today.`,
+  alternates: { canonical: `${siteConfig.url}/technologies` },
 };
 
 export default function TechnologiesPage() {

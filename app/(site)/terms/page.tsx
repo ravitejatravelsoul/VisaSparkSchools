@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: `${siteConfig.name} terms of service (public beta template).`,
+  alternates: { canonical: `${siteConfig.url}/terms` },
 };
 
 export default function TermsPage() {

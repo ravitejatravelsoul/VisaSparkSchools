@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils/cn";
 export const metadata: Metadata = {
   title: "Course Catalog",
   description: `Every ${siteConfig.name} course, from web foundations to retrieval-augmented AI systems.`,
+  alternates: { canonical: `${siteConfig.url}/courses` },
 };
 
 export default function CoursesPage() {

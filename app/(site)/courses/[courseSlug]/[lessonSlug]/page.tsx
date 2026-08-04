@@ -27,6 +27,7 @@ import {
   PrevNextNav,
 } from "@/components/lesson/lesson-actions";
 import { TutorLauncher } from "@/components/ai/tutor-launcher";
+import { siteConfig } from "@/lib/site-config";
 
 type Params = Promise<{ courseSlug: string; lessonSlug: string }>;
 
@@ -41,6 +42,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: lesson.title,
     description: lesson.description,
+    alternates: {
+      canonical: `${siteConfig.url}/courses/${lesson.courseSlug}/${lesson.slug}`,
+    },
   };
 }
 

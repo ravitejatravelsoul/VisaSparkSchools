@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   // gets the name appended a second time by the parent template.
   title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}` },
   description: siteConfig.description,
+  alternates: { canonical: siteConfig.url },
 };
 
 const steps = [

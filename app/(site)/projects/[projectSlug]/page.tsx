@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Badge } from "@/components/ui/badge";
 import { getProjectBySlug, getLessonById, allTracks, allProjects } from "@/lib/content/registry";
 import { ProjectMilestoneChecklist } from "@/components/project/project-milestone-checklist";
+import { siteConfig } from "@/lib/site-config";
 
 type Params = Promise<{ projectSlug: string }>;
 
@@ -16,7 +17,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { projectSlug } = await params;
   const project = getProjectBySlug(projectSlug);
   if (!project) return {};
-  return { title: project.title, description: project.description };
+  return {
+    title: project.title,
+    description: project.description,
+    alternates: { canonical: `${siteConfig.url}/projects/${project.slug}` },
+  };
 }
 
 export default async function ProjectDetailPage({ params }: { params: Params }) {

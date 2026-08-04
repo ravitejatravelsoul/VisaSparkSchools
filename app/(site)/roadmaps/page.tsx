@@ -10,6 +10,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "Learning Roadmaps",
   description: `Ordered roadmaps of real ${siteConfig.name} guides, courses, and projects for a given goal -- not certifiable course paths.`,
+  alternates: { canonical: `${siteConfig.url}/roadmaps` },
 };
 
 export default function RoadmapsPage() {

@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { AuthForm } from "@/components/auth/auth-form";
+import { siteConfig } from "@/lib/site-config";
 
-export const metadata: Metadata = { title: "Sign up" };
+export const metadata: Metadata = {
+  title: "Sign up",
+  alternates: { canonical: `${siteConfig.url}/sign-up` },
+};
 
 export default function SignUpPage() {
   return (

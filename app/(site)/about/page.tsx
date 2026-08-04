@@ -5,6 +5,7 @@ import { siteConfig } from "@/lib/site-config";
 export const metadata: Metadata = {
   title: "About",
   description: `About ${siteConfig.name}, a self-learning coding and AI platform.`,
+  alternates: { canonical: `${siteConfig.url}/about` },
 };
 
 export default function AboutPage() {

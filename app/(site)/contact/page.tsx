@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/container";
 import { FeedbackForm } from "@/components/contact/feedback-form";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Send feedback or report a problem.",
+  alternates: { canonical: `${siteConfig.url}/contact` },
 };
 
 export default function ContactPage() {
