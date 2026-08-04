@@ -1,0 +1,10 @@
+# Normalize all text files to LF, regardless of the checkout platform's
+# core.autocrlf setting. Without this, npm's lockfile writer on Windows can
+# emit package-lock.json with CRLF line endings while every other file in
+# this repo (edited via LF-default tooling, or normalized by `npm run
+# format`, whose Prettier config defaults to endOfLine: "lf") stays LF --
+# the resulting mismatch is exactly what caused `npm run format:check` to
+# flag package-lock.json even though its actual JSON content was correctly
+# formatted. This file makes the LF convention explicit and durable instead
+# of relying on each contributor's local git/OS configuration.
+* text=auto eol=lf

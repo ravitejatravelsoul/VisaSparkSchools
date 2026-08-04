@@ -39,6 +39,41 @@ is required for the Pyodide and sql.js WebAssembly runtimes to instantiate. `obj
 - No secrets committed to the repository (verified: `.env.example` contains only variable names and
   explanations; grep the repo for `sk-`, `service_role`, etc. before any release).
 
+## Dependency vulnerability status (Phase 5E, verified 2026-08-03)
+
+`npm audit` reports **0 vulnerabilities** as of this commit, independently verified against the
+official npm/GitHub advisories (not just `npm audit`'s own summary) and the actual npm registry
+version history -- not assumed from a prior report. Three findings from an earlier pass were
+re-investigated and resolved without `npm audit fix --force`:
+
+- **`next` (high, via nested `postcss` and `sharp`)**: bumped `16.2.12` → `16.3.0`. Confirmed via
+  `npm view next@16.3.0` that this is the first published version after `16.2.12` (no intermediate
+  `16.2.13+` patch exists) and that npm's own audit tooling reports `isSemVerMajor: false` --
+  independently confirmed against the npm registry's real version list, not merely trusted. `next`
+  itself declares `postcss: 8.5.23` and `sharp: ^0.35.3`, both above the vulnerable ranges. `sharp`
+  is an **optional** dependency Next.js uses only for its built-in `/_next/image` optimization
+  route; this app never imports `next/image` and configures no `images.remotePatterns`, so the
+  route's real attack surface was already narrow (limited to the app's own local `public/` assets,
+  never a remote/attacker-supplied URL) even before the fix.
+- **`dompurify` (moderate, via `monaco-editor`)**: `monaco-editor@0.56.0` -- confirmed to be the
+  latest published version, i.e. there is no newer upstream release that bundles a patched
+  `dompurify` -- hard-pins `dompurify@3.4.8` in its own `package.json` (not a range). Resolved via a
+  root `package.json` `overrides` entry pinning `dompurify` to `^3.4.13` (the latest published
+  `dompurify`, confirmed via the npm registry and upstream changelog to be three patch releases of
+  bug/security fixes with no breaking API changes). DOMPurify's sanitization path inside Monaco is
+  only exercised by built-in hover/suggestion documentation for this app's configured languages
+  (TypeScript/JavaScript/Python/SQL/HTML) -- platform-authored content, not learner-typed or
+  otherwise attacker-controlled input, since this app configures no custom hover/markdown providers.
+- **`brace-expansion` (high, two separate nested copies via `eslint`'s and `eslint-config-next`'s
+  own `minimatch` dependencies)**: both are **devDependencies-only**, used exclusively by ESLint's
+  own internal config-glob matching against this repository's own file paths during
+  `npm run lint`/CI -- never reachable from the deployed application or from any learner-supplied
+  input. Resolved via `npm audit fix` (non-force); bumped to `1.1.18` and `5.0.9` respectively,
+  both confirmed above their advisories' vulnerable ranges.
+
+See `PROJECT_STATUS.md`'s Phase 5E report for the full before/after audit output, exploitability
+reasoning, and verification results.
+
 ## RLS verification procedure
 
 `supabase/verify-rls.sql` is a concrete, reproducible script implementing the procedure below --

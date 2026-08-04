@@ -1581,12 +1581,68 @@ Test Automation Framework Engineering courses (authored later in this same sessi
 stricter, newly-adopted convention) actually use — corrected to assert the absence of specific
 false-execution phrases instead, which is what the requirement actually called for.
 
+## Phase 5E — Dependency Security and CI-Gate Remediation (2026-08-03, complete)
+
+Starting checkpoint: local `main` and `origin/main` both `92d1540` (Phase 5D, pushed), clean tree.
+Objective: resolve the three dependency-vulnerability findings Phase 5D had documented but not
+fixed, and the `package-lock.json` `format:check` failure, without blindly using
+`npm audit fix --force`. Read-only assessment first: captured `npm audit --json`, `npm ls`, and
+`npm view` output for every flagged package, and **independently re-verified** (not assumed) the
+prior claim that a Next.js major upgrade was required — it was not. `npm view next@16.3.0
+dependencies`/`optionalDependencies` (queried directly against the npm registry) shows `postcss:
+8.5.23` and `sharp: ^0.35.3`, both already above the vulnerable ranges, and the registry's real
+version list confirms `16.3.0` is the very next published release after `16.2.12` with no
+intermediate patch — i.e. a genuine semver-minor bump (`isSemVerMajor: false`, independently
+confirmed), not a major one. See `docs/SECURITY.md`'s "Dependency vulnerability status" section for
+the full per-advisory reasoning (`next`/`postcss`/`sharp`, `dompurify`/`monaco-editor`,
+`brace-expansion`) and exploitability analysis.
+
+**What shipped:**
+
+1. `package.json`: `next` and `eslint-config-next` bumped `16.2.12` → `16.3.0` (verified minor,
+   directly resolves the `postcss`/`sharp` advisories via Next's own declared dependencies); a new
+   `overrides.dompurify: "^3.4.13"` entry forces `monaco-editor@0.56.0`'s hard-pinned, vulnerable
+   `dompurify@3.4.8` to the latest published, non-breaking patched release (`monaco-editor` itself
+   is already the latest available version — there is no newer upstream release to wait for).
+2. `npm audit fix` (non-force) resolved the remaining `brace-expansion` finding (two nested copies,
+   both devDependencies-only via `eslint`'s and `eslint-config-next`'s own `minimatch`, never
+   reachable from the deployed app or learner input) — `1.1.16→1.1.18` and `5.0.8→5.0.9`.
+3. `.gitattributes` (new, `* text=auto eol=lf`): root-caused the `package-lock.json`
+   `format:check` failure to `npm`'s Windows lockfile writer occasionally emitting CRLF line
+   endings while every other file in the repo (and Prettier's own default `endOfLine: "lf"`) is
+   LF — the committed git blob itself was already LF-clean, so this was a local-checkout/tooling
+   inconsistency, not genuinely malformed content. `.gitattributes` makes the LF convention
+   explicit and durable rather than relying on each contributor's local `core.autocrlf`; the
+   lockfile itself was renormalized to LF via `prettier --write`, verified to still be a byte-exact,
+   `npm ci`-reproducible lockfile afterward.
+
+**Result: `npm audit` → 0 vulnerabilities** (was 6: 1 low, 1 moderate, 4 high across
+`brace-expansion`/`dompurify`/`monaco-editor`/`next`/`postcss`/`sharp`), independently re-confirmed
+via a fresh `npm audit --json` capture after all changes.
+
+**Verification, all green**: `npm ci` (reproducible from the committed lockfile, 0 vulnerabilities),
+`format:check` (clean, including `package-lock.json`), `lint` (0 errors; 2 new **warnings** —
+non-blocking — surfaced by the upgraded `eslint-config-next`'s
+`@next/next/no-location-assign-relative-destination` rule flagging pre-existing `window.location.href`
+navigation in `components/auth/account-nav.tsx` and `auth-form.tsx`; left unchanged as an
+out-of-scope application-code concern for a dependency-security phase, not silently fixed),
+`typecheck` (clean), `content:validate` (17/18/216/20, pass), `content:validate-snippets` (402/402,
+pass), `test` (**300/300** Vitest tests passed, 30 files, including the dedicated
+`typescript-runner-lazy-load.test.ts`/`typescript-compile.test.ts` bundle-isolation tests), `build`
+(succeeds under `Next.js 16.3.0`, 408 static params, same as before the upgrade), a direct chunk
+inspection confirming neither Monaco's nor the TypeScript compiler's bundle is referenced from the
+homepage's script list post-upgrade, the focused `typescript-runner.spec.ts` (`--repeat-each=3`,
+18/18 pass), and the full Playwright suite (**297 passed, 5 skipped, 0 failed** — the same
+pre-existing skips, no regression from the dependency changes). `git diff --check`: clean.
+
+**Diff**: `package.json`, `package-lock.json`, `.gitattributes` (new), `docs/SECURITY.md`. No
+secrets, generated artifacts, unrelated lockfile churn, `.only`/`.fixme`/new skips, or weakened
+assertions. Commit: `chore: remediate dependency security findings` (local only, not pushed).
+
 ## If you pick this up next
 
-**Immediate next step**: Phase 5C's commit sits locally, one commit ahead of `origin/main` (still at
-`0dfd44a`), not yet pushed — safety-audit it (mirroring the audit process each phase above performed
-on the previous phase's commit) and push it before starting further work, so `origin/main` doesn't
-fall further behind local `main`.
+**Immediate next step**: Phase 5E's commit sits locally, one commit ahead of `origin/main` — push
+it (after its own safety audit, mirroring every prior phase) before starting further work.
 
 Recommended next step before any further feature phase, still outstanding from earlier phases:
 **provision a real Supabase project and execution-test the guest-to-account sync lifecycle end to
