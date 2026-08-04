@@ -60,10 +60,10 @@ describe("directory registry: uniqueness and referential integrity", () => {
     expect(allCategories.map((c) => c.id).sort()).toEqual(expectedIds.sort());
   });
 
-  it("keeps Aptitude, Reasoning, and Career/GD categories internal (no content built yet)", () => {
+  it("Aptitude, Reasoning, and Career/GD categories are public (Phase 6: real courses now exist)", () => {
     for (const id of ["quantitative-aptitude", "reasoning", "career-gd"] as const) {
       const category = getCategoryById(id);
-      expect(category?.publicVisibility).toBe(false);
+      expect(category?.publicVisibility).toBe(true);
     }
   });
 

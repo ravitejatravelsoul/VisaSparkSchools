@@ -159,6 +159,10 @@ interface ProgressStore {
   recordExerciseAttempt: (exerciseId: string, passed: boolean) => void;
   recordHintUsed: (exerciseId: string) => void;
   recordQuizResult: (lessonId: string, correct: number, total: number) => void;
+  recordPracticeAttempt: (
+    courseSlug: string,
+    result: { score: number; total: number; topicsNeedingReview: string[] },
+  ) => void;
   toggleBookmark: (lessonId: string) => void;
   setNote: (lessonId: string, text: string) => void;
   resolveNoteConflict: (lessonId: string, keep: "current" | "conflict") => void;
@@ -334,6 +338,39 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
         },
       };
       if (lesson) recomputeSkills(next, lesson.skills);
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /**
+   * Only overwrites bestScore/bestTotal when the new attempt's accuracy is
+   * at least as good as the stored best -- a weaker retry (e.g. rushing
+   * through a timed session) should never silently erase a genuinely better
+   * earlier result. lastAttemptedAt and topicsNeedingReview always reflect
+   * the most recent attempt regardless, since "when did I last practice"
+   * and "what's currently weak" should track the latest session, not the
+   * best-ever one.
+   */
+  recordPracticeAttempt: (courseSlug, result) => {
+    set((store) => {
+      const existing = store.state.practiceAttempts[courseSlug];
+      const existingAccuracy =
+        existing && existing.bestTotal > 0 ? existing.bestScore / existing.bestTotal : -1;
+      const newAccuracy = result.total > 0 ? result.score / result.total : 0;
+      const useNewAsBest = newAccuracy >= existingAccuracy;
+      const next = {
+        ...store.state,
+        practiceAttempts: {
+          ...store.state.practiceAttempts,
+          [courseSlug]: {
+            bestScore: useNewAsBest ? result.score : (existing?.bestScore ?? result.score),
+            bestTotal: useNewAsBest ? result.total : (existing?.bestTotal ?? result.total),
+            lastAttemptedAt: new Date().toISOString(),
+            topicsNeedingReview: result.topicsNeedingReview,
+          },
+        },
+      };
       persist(next);
       return { state: next };
     });

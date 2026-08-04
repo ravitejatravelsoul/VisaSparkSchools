@@ -19,6 +19,9 @@ import { playwrightLessons } from "@/content/lessons/playwright";
 import { seleniumLessons } from "@/content/lessons/selenium";
 import { linuxShellLessons } from "@/content/lessons/linux-shell";
 import { testAutomationFrameworkLessons } from "@/content/lessons/test-automation-framework";
+import { quantitativeAptitudeLessons } from "@/content/lessons/quantitative-aptitude";
+import { careerAndGdPreparationLessons } from "@/content/lessons/career-and-gd-preparation";
+import { logicalAnalyticalReasoningLessons } from "@/content/lessons/logical-analytical-reasoning";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -47,6 +50,9 @@ export const allLessons: Lesson[] = [
   ...seleniumLessons,
   ...linuxShellLessons,
   ...testAutomationFrameworkLessons,
+  ...quantitativeAptitudeLessons,
+  ...careerAndGdPreparationLessons,
+  ...logicalAnalyticalReasoningLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);

@@ -191,6 +191,30 @@ describe("mergeProgress (guest -> account merge)", () => {
     expect(merged.profile).toEqual(remote.profile);
   });
 
+  it("merges practice attempts: keeps the best-accuracy score, latest attempt time, and unions topics needing review", () => {
+    const local = createEmptyProgress();
+    local.practiceAttempts["quantitative-aptitude"] = {
+      bestScore: 20,
+      bestTotal: 36,
+      lastAttemptedAt: "2026-01-01T00:00:00.000Z",
+      topicsNeedingReview: ["Percentages"],
+    };
+    const remote = createEmptyProgress();
+    remote.practiceAttempts["quantitative-aptitude"] = {
+      bestScore: 30,
+      bestTotal: 36,
+      lastAttemptedAt: "2026-01-05T00:00:00.000Z",
+      topicsNeedingReview: ["Averages"],
+    };
+
+    const merged = mergeProgress(local, remote);
+    const result = merged.practiceAttempts["quantitative-aptitude"];
+    expect(result.bestScore).toBe(30);
+    expect(result.bestTotal).toBe(36);
+    expect(result.lastAttemptedAt).toBe("2026-01-05T00:00:00.000Z");
+    expect(result.topicsNeedingReview).toEqual(expect.arrayContaining(["Percentages", "Averages"]));
+  });
+
   it("never lets an empty auto-created remote profile row outrank real local preferences, even if it's timestamped later", () => {
     // Reproduces: a guest sets a learning goal at T1, then signs up at T2 >
     // T1. Supabase's handle_new_user trigger creates an empty profiles row

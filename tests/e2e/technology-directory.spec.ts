@@ -195,11 +195,14 @@ test("an invalid category slug returns 404", async ({ page }) => {
   expect(response?.status()).toBe(404);
 });
 
-test("an internal-draft category (Quantitative Aptitude) is not publicly reachable", async ({
+test("Quantitative Aptitude is publicly reachable (Phase 6: no longer an internal draft)", async ({
   page,
 }) => {
   const response = await page.goto("/categories/quantitative-aptitude");
-  expect(response?.status()).toBe(404);
+  expect(response?.status()).toBe(200);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Quantitative Aptitude" }),
+  ).toBeVisible();
 });
 
 test("filter state survives a full page refresh via the URL", async ({ page, isMobile }) => {

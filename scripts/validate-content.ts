@@ -366,8 +366,15 @@ function normalizeForDuplicateCheck(text: string): string {
     .replace(/\s+/g, " ")
     .trim();
 }
+// Scoped per course (not per lesson): Phase 6's practice sessions pool every
+// lesson's quiz questions into one course-wide bank (see
+// lib/practice/registry.ts), so a near-duplicate question sitting in two
+// different lessons of the same course would surface twice in that pool --
+// exactly what this check exists to catch, matching the comment above.
+const promptsSeenByCourse = new Map<string, Map<string, string>>();
 for (const lesson of allLessons) {
-  const promptsSeen = new Map<string, string>();
+  const promptsSeen = promptsSeenByCourse.get(lesson.courseSlug) ?? new Map<string, string>();
+  promptsSeenByCourse.set(lesson.courseSlug, promptsSeen);
   for (const q of lesson.quiz) {
     if (q.correctIndex < 0 || q.correctIndex >= q.choices.length) {
       fail(
@@ -382,10 +389,10 @@ for (const lesson of allLessons) {
     const existing = promptsSeen.get(normalized);
     if (existing) {
       fail(
-        `Lesson "${lesson.slug}" quiz questions "${existing}" and "${q.id}" appear to be the same question with only names/numbers changed.`,
+        `Course "${lesson.courseSlug}" quiz questions "${existing}" and "${lesson.slug}:${q.id}" appear to be the same question with only names/numbers changed.`,
       );
     }
-    promptsSeen.set(normalized, q.id);
+    promptsSeen.set(normalized, `${lesson.slug}:${q.id}`);
   }
 }
 

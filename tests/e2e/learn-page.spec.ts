@@ -11,10 +11,10 @@ test("Learn page renders with correctly spaced dynamic text", async ({ page }) =
   // template-literal strings, which Prettier can't reformat internally.
   // This test guards against the bug recurring in either form.
   const bodyText = (await page.textContent("body")) ?? "";
-  expect(bodyText).toContain("80 technology guides");
-  expect(bodyText).not.toContain("80technology");
-  expect(bodyText).toContain("13 categories");
-  expect(bodyText).not.toContain("13categories");
+  expect(bodyText).toContain("83 technology guides");
+  expect(bodyText).not.toContain("83technology");
+  expect(bodyText).toContain("16 categories");
+  expect(bodyText).not.toContain("16categories");
 });
 
 test("Learn page links to categories, technologies, courses, and roadmaps", async ({ page }) => {

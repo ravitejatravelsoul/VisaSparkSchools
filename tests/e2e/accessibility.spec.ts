@@ -82,6 +82,23 @@ const routes = [
   "/technologies/angularjs",
   "/roadmaps",
   "/roadmaps/complete-beginner-to-web-developer",
+  // Phase 6: Aptitude, Reasoning, and Career/GD preparation, plus the new
+  // generic practice-session feature (built once, available for every course).
+  "/courses/quantitative-aptitude",
+  "/courses/quantitative-aptitude/percentages",
+  "/courses/quantitative-aptitude/practice",
+  "/courses/logical-analytical-reasoning",
+  "/courses/logical-analytical-reasoning/syllogisms",
+  "/courses/logical-analytical-reasoning/practice",
+  "/courses/career-and-gd-preparation",
+  "/courses/career-and-gd-preparation/star-method",
+  "/courses/career-and-gd-preparation/practice",
+  "/projects/quantitative-aptitude-practice-portfolio",
+  "/categories/quantitative-aptitude",
+  "/categories/reasoning",
+  "/categories/career-gd",
+  "/technologies/quantitative-aptitude-guide",
+  "/roadmaps/placement-and-job-readiness",
 ];
 
 for (const route of routes) {

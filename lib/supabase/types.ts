@@ -228,6 +228,32 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
+      practice_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          best_score: number;
+          best_total: number;
+          topics_needing_review: string[];
+          last_attempted_at: string;
+        };
+        Insert: {
+          user_id: string;
+          course_id: string;
+          best_score: number;
+          best_total: number;
+          topics_needing_review: string[];
+          last_attempted_at?: string;
+        };
+        Update: {
+          best_score?: number;
+          best_total?: number;
+          topics_needing_review?: string[];
+          last_attempted_at?: string;
+        };
+        Relationships: [];
+      };
       daily_goals: {
         Row: { id: string; user_id: string; minutes: number; updated_at: string };
         Insert: { user_id: string; minutes: number };

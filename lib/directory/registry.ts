@@ -12,6 +12,7 @@ import { cybersecurityTechnologies } from "@/lib/directory/data/cybersecurity";
 import { testingQaTechnologies } from "@/lib/directory/data/testing-qa";
 import { dsaTechnologies } from "@/lib/directory/data/dsa";
 import { developerToolsTechnologies } from "@/lib/directory/data/developer-tools";
+import { placementPrepTechnologies } from "@/lib/directory/data/placement-prep";
 import { learningPaths as learningPathsInput } from "@/lib/directory/learning-paths";
 import {
   categorySchema,
@@ -46,6 +47,7 @@ export const allTechnologies: Technology[] = [
   ...testingQaTechnologies,
   ...dsaTechnologies,
   ...developerToolsTechnologies,
+  ...placementPrepTechnologies,
 ]
   .map((t) => technologySchema.parse(t))
   .sort((a, b) => a.name.localeCompare(b.name));

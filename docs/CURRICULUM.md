@@ -2,16 +2,16 @@
 
 > **This document describes the lesson-based course curriculum** (`content/`, `lib/content/`) —
 > full, structured courses with modules, exercises, quizzes, and projects. The platform also has a
-> technology directory (80 technology guides across 13 public categories, `lib/directory/`) and 16
+> technology directory (83 technology guides across 16 public categories, `lib/directory/`) and 16
 > public learning roadmaps — a different, complementary content system with its own documents: see
 > `docs/ARCHITECTURE.md`'s "Technology directory" section and `docs/CONTENT_AUTHORING.md`. A
 > technology guide is explicitly not the same thing as a course in this matrix. See
 > "Master curriculum architecture (Phase 5A+)" below for the complete guide-to-course coverage
-> matrix across all 80 guides, and "Complete-course definition" for what separates a course from a
+> matrix across all 83 guides, and "Complete-course definition" for what separates a course from a
 > guide.
 
-17 tracks, 18 courses, 216 lessons, 670 knowledge-check questions, 432 exercises (one guided plus
-one independent per lesson), 24 guided local labs, 18 guided projects, and 2 capstones. Every lesson
+18 tracks, 21 courses, 252 lessons, 778 knowledge-check questions, 504 exercises (one guided plus
+one independent per lesson), 24 guided local labs, 18 guided projects, and 5 capstones. Every lesson
 includes: objectives, prerequisites, a plain-language explanation, a working example, an editable
 example (where a runner applies), a guided exercise, an independent exercise, common mistakes, a
 3+ question knowledge check, a takeaway, a summary, and references. See the "Totals" table below
@@ -22,7 +22,7 @@ Track order (each chains into the next via `nextLessonSlug` within a track, and
 Foundations → HTML & CSS → JavaScript → TypeScript → React → Node.js & Express → Java →
 Data Structures & Algorithms → Python → Git, APIs & SQL → Database Design & PostgreSQL →
 AI, LLMs, RAG & Agents → Software Testing & QA → Playwright → Selenium → Linux & Shell
-Fundamentals → Test Automation Framework Engineering. (Java, Data Structures & Algorithms, Python,
+Fundamentals → Test Automation Framework Engineering → Placement & Career Readiness. (Java, Data Structures & Algorithms, Python,
 Database Design & PostgreSQL, and Software Testing & QA each build on an earlier JavaScript-chain
 course independently — see the per-course prerequisite graph in "Master curriculum architecture"
 below; none of them requires TypeScript, React, or Node.js/Express specifically, except Database
@@ -441,18 +441,47 @@ local TypeScript + Playwright + GitHub Actions work.
 
 **Guided project:** Build a Production-Grade Learning Platform Automation Framework
 
+## Track 18 — Placement & Career Readiness (36 lessons, 3 courses)
+
+Added in Phase 6. All three courses reuse the existing HTML/JS runner exclusively — no new runner
+was added. Every exercise (including the two "soft skill" courses) models its underlying technique
+as a genuine, deterministic JavaScript function checking concrete, rule-based structural criteria —
+never a claim that the platform judges a learner's real numerical ability, reasoning, or
+communication skill. All three courses also feed the new, reusable **practice-session engine**
+(`/courses/[courseSlug]/practice`, `lib/practice/`), which pools every lesson's quiz questions into
+one course-wide, untimed-or-timed self-practice session with a topic breakdown — available on every
+course on the platform, not just these three.
+
+**Quantitative Aptitude** (12 lessons, beginner, no prerequisites): number systems and divisibility,
+LCM/HCF, percentages, profit/loss/discount, simple and compound interest, ratio/proportion/
+mixtures, time-speed-distance, time and work, averages, permutations/combinations/probability, data
+interpretation, and mixed aptitude problem solving. **Guided project:** Quantitative Aptitude
+Practice Portfolio.
+
+**Logical and Analytical Reasoning** (12 lessons, beginner, no prerequisites): number/letter series,
+coding-decoding, analogies and classification, blood relations, direction sense, syllogisms,
+seating arrangements, puzzles and grouping, statements/assumptions/conclusions, non-verbal/pattern
+reasoning, critical reasoning, and mixed reasoning practice. **Guided project:** Logical and
+Analytical Reasoning Practice Portfolio.
+
+**Career and Group Discussion Preparation** (12 lessons, beginner, no prerequisites): professional
+communication basics, resume fundamentals, the elevator pitch, group discussion fundamentals,
+structuring GD arguments, GD etiquette and active listening, interview fundamentals, the STAR
+method, common interview questions, handling difficult questions, workplace professionalism, and a
+mock career-readiness capstone. **Guided project:** Mock Career Readiness Capstone.
+
 ## Totals
 
 | Metric                           | Count |
 | -------------------------------- | ----- |
-| Tracks                           | 17    |
-| Courses                          | 18    |
-| Lessons                          | 216   |
-| Knowledge-check questions        | 670   |
-| Exercises (guided + independent) | 432   |
+| Tracks                           | 18    |
+| Courses                          | 21    |
+| Lessons                          | 252   |
+| Knowledge-check questions        | 778   |
+| Exercises (guided + independent) | 504   |
 | Guided local labs                | 24    |
 | Guided projects                  | 18    |
-| Capstones                        | 2     |
+| Capstones                        | 5     |
 
 All counts above are computed from the live registry (query the registry's `allTracks`/
 `allCourses`/`allLessons`/`allProjects` exports directly, or cross-check the lesson/course/project
@@ -519,12 +548,18 @@ course named below is a documented plan, not a claim of availability — none of
    (already a lesson within the existing course; a dedicated deeper course is 5D) → Advanced RAG
    (5D) → Generative AI Application Engineering (5D) → LLM Evaluation, Safety, and Observability
    (5D)
-7. **Placement and Career Preparation** — Quantitative Aptitude (5D) → Logical Reasoning (5D) →
-   Verbal Ability (5D) → Interview and Group Discussion Preparation (5D) → Timed Placement Mock
-   Tests (5D). This track corresponds to the three categories (`quantitative-aptitude`,
-   `reasoning`, `career-gd`) and the one learning roadmap (`placement-and-job-readiness`) that
-   already exist in the registries as internal/draft, per Phase 3 — see `docs/PRD.md`'s Phase 5
-   section. None of this content exists yet.
+7. **Placement and Career Preparation** ✅ (Phase 6) — Quantitative Aptitude → Logical and
+   Analytical Reasoning → Career and Group Discussion Preparation, 12 lessons each (36 total), plus
+   a reusable practice-session engine (untimed/timed, topic breakdown, retry-incorrect/retry-weak-
+   topics) built once and available on every course, not just these three. This delivers the same
+   ground the original speculative 5-course breakdown (Quantitative Aptitude / Logical Reasoning /
+   Verbal Ability / Interview and GD Preparation / Timed Placement Mock Tests) named, consolidated
+   into 3 complete courses rather than 5 thinner ones — verbal ability folded into the Reasoning
+   course, and "timed mock tests" delivered as the practice engine's timed mode rather than a
+   separate course, since a generic engine serving every course is more valuable than one more
+   single-purpose course. The three categories (`quantitative-aptitude`, `reasoning`, `career-gd`)
+   and the `placement-and-job-readiness` roadmap are now public. See `PROJECT_STATUS.md`'s Phase 6
+   report for the full build, verification, and QA results.
 8. **Programming and Computer Science foundations** — Digital & Coding Foundations ✅ → the
    Data Structures and Algorithms course above (shared with track 2).
 
@@ -605,13 +640,13 @@ Phase 5C report for the full build, verification, and QA results.
 Architecture Fundamentals, Spring Boot, Data Analysis with Python and Pandas, Machine Learning
 Foundations, Performance and Security Testing Foundations, Docker, Continuous Integration and
 Delivery, Cloud Fundamentals, Kubernetes Fundamentals, Prompt Engineering (dedicated course),
-Advanced RAG, Generative AI Application Engineering, LLM Evaluation/Safety/Observability, and the
-full Placement and Career Preparation track (Quantitative Aptitude, Logical Reasoning, Verbal
-Ability, Interview/GD Preparation, Timed Placement Mock Tests). None of these are published yet.
+Advanced RAG, Generative AI Application Engineering, LLM Evaluation/Safety/Observability. None of
+these are published yet. (The Placement and Career Preparation track originally speculated here was
+instead delivered, in a consolidated 3-course form, as Phase 6 — see track 7 above.)
 
 ## Complete guide-to-course coverage matrix
 
-Every one of the 80 public technology guides, computed from the live registry (not retyped by
+Every one of the 83 public technology guides, computed from the live registry (not retyped by
 hand), mapped to its category, difficulty, and actual availability. "Course" means
 `lib/directory/availability.ts#getTechnologyAvailability()` resolves a real course for it today;
 "Runner" means a Playground language; "Project(s)" lists linked guided projects. Everything else is
@@ -762,11 +797,17 @@ guide-only, with its planned batch (or a documented reference-only reason) in th
 | Git             | beginner     | git-apis-sql             | —                    | git-collaboration-workflow  | ✅ available                                                                                                       |
 | Linux           | intermediate | linux-shell-fundamentals | — (guided local lab) | safe-project-validation-cli | ✅ available (Phase 5C)                                                                                            |
 
-**Summary:** 80 public technologies; 30 map to a real course (17 pre-Phase-5A + TypeScript +
-Software Testing Fundamentals + API Testing + React + Node.js + Express + Java + Data Structures
-and Algorithms + PostgreSQL + Playwright + Selenium + Bash + Linux); 5 more map to a runner or
-project without a full course (unchanged from Phase 3/4, minus Bash/Linux which are now courses);
-8 have an explicit, documented reference-only reason (not a course candidate at all); the
-remaining ~37 are genuinely planned for Phase 5D, listed above with their batch. (Test Automation
-Framework Engineering, the fourth Phase 5C course, has no dedicated technology-directory guide of
-its own — it teaches architecture built on Playwright, not a separate named technology.)
+### Placement Preparation (3, Phase 6)
+
+| Technology                              | Difficulty | Course                       | Runner | Project(s)                               | Batch / reason         |
+| --------------------------------------- | ---------- | ---------------------------- | ------ | ---------------------------------------- | ---------------------- |
+| Quantitative Aptitude                   | beginner   | quantitative-aptitude        | —      | quantitative-aptitude-practice-portfolio | ✅ available (Phase 6) |
+| Logical and Analytical Reasoning        | beginner   | logical-analytical-reasoning | —      | reasoning-practice-portfolio             | ✅ available (Phase 6) |
+| Career and Group Discussion Preparation | beginner   | career-and-gd-preparation    | —      | career-readiness-capstone                | ✅ available (Phase 6) |
+
+**Summary:** 83 public technologies; 33 map to a real course (30 pre-Phase-6 + the 3 above); 5 more
+map to a runner or project without a full course (unchanged from Phase 3/4, minus Bash/Linux which
+are now courses); 8 have an explicit, documented reference-only reason (not a course candidate at
+all); the remaining ~37 are genuinely planned for Phase 5D, listed above with their batch. (Test
+Automation Framework Engineering, the fourth Phase 5C course, has no dedicated technology-directory
+guide of its own — it teaches architecture built on Playwright, not a separate named technology.)

@@ -900,28 +900,28 @@ export const learningPaths: LearningPathInput[] = [
     steps: [
       {
         id: "s1",
-        type: "practice",
+        type: "course",
         refId: "quantitative-aptitude",
         title: "Quantitative aptitude practice",
         required: true,
       },
       {
         id: "s2",
-        type: "practice",
-        refId: "reasoning",
+        type: "course",
+        refId: "logical-analytical-reasoning",
         title: "Logical and verbal reasoning practice",
         required: true,
       },
       {
         id: "s3",
-        type: "practice",
-        refId: "career-gd",
+        type: "course",
+        refId: "career-and-gd-preparation",
         title: "Group discussion and interview preparation",
         required: true,
       },
     ],
     milestones: [],
-    estimatedTimeRange: "Not yet available",
+    estimatedTimeRange: "3-4 weeks, part-time",
     skillsEarned: [
       "Quantitative aptitude",
       "Logical and verbal reasoning",
@@ -932,12 +932,17 @@ export const learningPaths: LearningPathInput[] = [
     finalAssessmentRequired: false,
     certificateEligible: false,
     primaryCategoryIds: ["quantitative-aptitude", "reasoning", "career-gd"],
-    lastReviewed: "2026-08-01",
-    relatedTechnologyIds: [],
-    relatedCourseIds: [],
-    // Internal draft: every required step depends on Aptitude/Reasoning/GD
-    // content that does not exist yet (Phase 5). Not public until it does.
-    publicVisibility: false,
+    lastReviewed: "2026-08-04",
+    relatedTechnologyIds: ["quantitative-aptitude-guide", "reasoning-guide", "career-gd-guide"],
+    relatedCourseIds: [
+      "quantitative-aptitude",
+      "logical-analytical-reasoning",
+      "career-and-gd-preparation",
+    ],
+    // Phase 6: made public once all three courses (12 lessons each) existed
+    // and every step above resolved to real, available content -- see
+    // PROJECT_STATUS.md.
+    publicVisibility: true,
     roadmapOnly: true,
   },
 ];

@@ -88,6 +88,21 @@ export interface ActivityEvent {
   at: string;
 }
 
+/**
+ * Summary of a learner's practice-session attempts for one course (Phase 6).
+ * Deliberately a *summary*, not a full attempt history or raw answers: only
+ * the best score achieved, when the course was last practiced, and which
+ * topics are still weak enough to need review. No free-form learner input is
+ * ever stored here (every practice question is multiple-choice).
+ */
+export interface PracticeAttemptState {
+  bestScore: number;
+  bestTotal: number;
+  lastAttemptedAt: string;
+  /** Topic tags (see lib/practice/types.ts) below the review threshold on the most recent attempt. */
+  topicsNeedingReview: string[];
+}
+
 export interface ProfileState {
   displayName: string | null;
   learningGoal: string | null;
@@ -99,7 +114,7 @@ export interface ProfileState {
 
 /** The full shape persisted to localStorage (guest mode) or Supabase (signed in). */
 export interface ProgressState {
-  version: 3;
+  version: 4;
   lessonStatus: Record<string, LessonStatus>;
   exerciseAttempts: Record<string, ExerciseAttemptState>;
   quizResults: Record<string, QuizResultState>;
@@ -119,6 +134,8 @@ export interface ProgressState {
   roadmapProgress: Record<string, RoadmapProgressState>;
   /** project id -> milestone checklist progress */
   projectProgress: Record<string, ProjectProgressState>;
+  /** course slug -> practice session summary (Phase 6) */
+  practiceAttempts: Record<string, PracticeAttemptState>;
   /** newest first, capped at 50 */
   activity: ActivityEvent[];
   profile: ProfileState;
@@ -126,7 +143,7 @@ export interface ProgressState {
 
 export function createEmptyProgress(): ProgressState {
   return {
-    version: 3,
+    version: 4,
     lessonStatus: {},
     exerciseAttempts: {},
     quizResults: {},
@@ -140,6 +157,7 @@ export function createEmptyProgress(): ProgressState {
     enrollments: {},
     roadmapProgress: {},
     projectProgress: {},
+    practiceAttempts: {},
     activity: [],
     profile: {
       displayName: null,

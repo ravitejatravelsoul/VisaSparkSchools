@@ -32,6 +32,7 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     roadmapSteps,
     projectProgress,
     projectMilestones,
+    practiceAttempts,
     activity,
     profile,
   ] = await Promise.all([
@@ -48,6 +49,7 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     supabase.from("roadmap_step_completions").select("*").eq("user_id", userId),
     supabase.from("project_progress").select("*").eq("user_id", userId),
     supabase.from("project_milestone_completions").select("*").eq("user_id", userId),
+    supabase.from("practice_attempts").select("*").eq("user_id", userId),
     supabase.from("activity_log").select("*").eq("user_id", userId),
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
   ]);
@@ -66,6 +68,7 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     roadmapSteps,
     projectProgress,
     projectMilestones,
+    practiceAttempts,
     activity,
     profile,
   ]);
@@ -158,6 +161,15 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
   for (const row of projectMilestones.data ?? []) {
     const existing = state.projectProgress[row.project_id];
     if (existing) existing.completedMilestoneIds.push(row.milestone_id);
+  }
+
+  for (const row of practiceAttempts.data ?? []) {
+    state.practiceAttempts[row.course_id] = {
+      bestScore: row.best_score,
+      bestTotal: row.best_total,
+      topicsNeedingReview: row.topics_needing_review,
+      lastAttemptedAt: row.last_attempted_at,
+    };
   }
 
   state.activity = (activity.data ?? [])

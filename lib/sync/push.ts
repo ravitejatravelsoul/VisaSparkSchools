@@ -91,6 +91,15 @@ export async function pushProgress(
     p.completedMilestoneIds.map((milestone_id) => ({ user_id: userId, project_id, milestone_id })),
   );
 
+  const practiceAttemptRows = Object.entries(state.practiceAttempts).map(([course_id, p]) => ({
+    user_id: userId,
+    course_id,
+    best_score: p.bestScore,
+    best_total: p.bestTotal,
+    topics_needing_review: p.topicsNeedingReview,
+    last_attempted_at: p.lastAttemptedAt,
+  }));
+
   const activityRows = state.activity.map((event) => ({
     user_id: userId,
     event_id: event.id,
@@ -150,6 +159,11 @@ export async function pushProgress(
           onConflict: "user_id,project_id,milestone_id",
           ignoreDuplicates: true,
         })
+      : Promise.resolve({ error: null }),
+    practiceAttemptRows.length
+      ? supabase
+          .from("practice_attempts")
+          .upsert(practiceAttemptRows, { onConflict: "user_id,course_id" })
       : Promise.resolve({ error: null }),
     activityRows.length
       ? supabase

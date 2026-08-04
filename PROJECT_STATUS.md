@@ -1,6 +1,6 @@
 # Project Status — VisaSparkSchools
 
-Last updated: 2026-08-02. This is the durable checklist for the CodeWise → VisaSparkSchools
+Last updated: 2026-08-04. This is the durable checklist for the CodeWise → VisaSparkSchools
 expansion — update it precisely as work progresses. Do not mark anything done that hasn't
 actually been run and verified. Do not mark a later phase complete based only on scaffolding.
 
@@ -104,7 +104,7 @@ tests, the full Playwright suite including new focus-trap regression tests, prod
 axe accessibility sweep, and before/after Lighthouse). **Not pushed** (no remote configured).
 `c670ef1` was not amended or rewritten.
 
-## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phases 5–9 not started. Separately, a **Phase 5A — Interactive Curriculum Foundation** track (unrelated to the numbered "Phase 5" below, which is Aptitude/Reasoning/Career content) added a new TypeScript course and lab runner plus the schema/tooling/documentation foundation for future course batches — see "Phase 5A — Interactive Curriculum Foundation" below.
+## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phase 5 (delivered across sub-phases 5A/5A.2/5B/5C/5D/5E/5F) and Phase 6 (Aptitude, Reasoning, and Career Readiness) are now also complete — see their own sections below. Phases 7–9 and final deployment not started. Separately, a **Phase 5A — Interactive Curriculum Foundation** track (unrelated to the numbered "Phase 5" below, which is Aptitude/Reasoning/Career content) added a new TypeScript course and lab runner plus the schema/tooling/documentation foundation for future course batches — see "Phase 5A — Interactive Curriculum Foundation" below.
 
 This file replaces the previous CodeWise-era status document. That document's own numbering
 ("Phase 1–10") described the _original build_, not this expansion's 9-phase plan below — see
@@ -174,23 +174,45 @@ This file replaces the previous CodeWise-era status document. That document's ow
       containing-block/CSS bug, a Tailwind dynamic-class-generation bug silently dropping category
       accent colors) and added a missing keyboard focus trap to 4 modal dialogs that previously let
       Tab escape into the page behind them.
-- [ ] **Phase 5 — Aptitude and career.** Not started. Zero aptitude/reasoning/GD/career content
-      exists yet. This is a large, content-heavy phase (26 aptitude topics + 20 reasoning topics +
-      GD/career modules, each needing deterministic, seeded question generation) that has not been
-      scaffolded, let alone built.
-- [ ] **Phase 6 — Study Studio.** Not started. No workspace model, no upload handling, no
+- [x] **Phase 5F — Safe authentication navigation.** Complete. Replaced two hard-reload
+      `window.location.href` navigations (sign-out in `components/auth/account-nav.tsx`, post-auth
+      redirect in `components/auth/auth-form.tsx`) with `useRouter().push()`, after verifying the
+      guest-to-account sync lifecycle is entirely driven by `AuthProvider`'s `onAuthStateChange`
+      listener and never depended on a full page reload. Fixes the two
+      `@next/next/no-location-assign-relative-destination` warnings Phase 5E's dependency upgrade
+      surfaced. Three new regression test files added
+      (`tests/integration/account-nav.test.tsx`, `auth-form.test.tsx`, `auth-form-guest-mode.test.tsx`).
+      Commit: `fix: use safe authentication navigation` (local only, not pushed).
+- [x] **Phase 6 — Aptitude, Reasoning, and Career Readiness.** Complete. Three full public courses
+      (Quantitative Aptitude, Logical and Analytical Reasoning, Career and Group Discussion
+      Preparation; 12 lessons each, 36 total, 100% original content), a reusable practice-session
+      engine available on **every** course (not just these three) built by extending the existing
+      quiz architecture rather than duplicating it, and the previously-internal-draft "Placement and
+      Job Readiness" roadmap and its three categories made public now that real content backs every
+      step. Full details below under "Phase 6 — Aptitude, Reasoning, and Career Readiness: what was
+      actually done." Commit: `feat: add aptitude reasoning and career readiness` (local only, not
+      pushed).
+- [ ] **Phase 7 — Study Studio.** Not started. No workspace model, no upload handling, no
       extraction pipeline, no `docs/STUDY_STUDIO.md` content yet (the file does not exist).
-- [ ] **Phase 7 — Tools Lab and Project Studio.** Not started as new work. The existing single-file
+- [ ] **Phase 8 — Tools Lab and Project Studio.** Not started as new work. The existing single-file
       Playground (HTML/CSS/JS, Python, SQL) carries forward unchanged and still works. None of the
       ~28 requested Tools Lab utilities exist yet. Project Studio (multi-file, ZIP import/export,
       IndexedDB, snapshots) does not exist — the nav still says "Playground," accurately, and was
       deliberately _not_ relabeled "Project Studio" since that capability doesn't exist yet (see
       Phase 2 notes below).
-- [ ] **Phase 8 — Certificates.** Not started. No `docs/CERTIFICATES.md`, no certificate schema,
-      no eligibility logic, no PDF generation, no verification route.
-- [ ] **Phase 9 — Hardening.** Ongoing by nature (this expansion's Phase 2 work already included
-      its own testing/a11y/visual-QA pass — see below), but the full-scope Phase 9 pass across
-      Phases 3–8's eventual output has not happened because those phases don't exist yet.
+- [ ] **Phase 9 — Honest completion and skill-achievement certificates.** Not started. No
+      `docs/CERTIFICATES.md`, no certificate schema, no eligibility logic, no PDF generation, no
+      verification route. When built, certificates must be described only as VisaSparkSchools
+      completion or skill-achievement certificates — never as accreditation or professional
+      certification. Phase 6 deliberately left `certificateEligible`/`finalAssessmentRequired`
+      hard-locked to `false` on every path, including the newly-public Placement and Job Readiness
+      roadmap, so this phase has nothing false to walk back.
+- [ ] **Final preview/production deployment and live smoke testing.** Not started. No live Supabase
+      project has been provisioned or execution-tested end to end (see "If you pick this up next"),
+      and nothing in this repo has been deployed to a preview or production environment.
+- [ ] **Ongoing hardening.** Not itself a numbered phase — a continuous testing/a11y/visual-QA
+      discipline applied within every phase above as it ships (see each phase's own verification
+      section), not a separate future pass to schedule.
 
 ## Phase 2 — Rebrand: what was actually done
 
@@ -872,7 +894,7 @@ carry it).
 ### A pre-existing false marketing claim, corrected
 
 `siteConfig.description` (and its copies in `docs/BRANDING.md`'s positioning statement) claimed
-"honest completion certificates" as a current, delivered feature. Certificates are Phase 8, not
+"honest completion certificates" as a current, delivered feature. Certificates are Phase 9, not
 implemented — `README.md` already correctly said "No certificates... included in this beta," so the
 two docs directly contradicted each other, and the homepage surfaced the false claim to every
 visitor. Since this exact copy is what the homepage redesign put front and center, fixed it in
@@ -1639,34 +1661,210 @@ pre-existing skips, no regression from the dependency changes). `git diff --chec
 secrets, generated artifacts, unrelated lockfile churn, `.only`/`.fixme`/new skips, or weakened
 assertions. Commit: `chore: remediate dependency security findings` (local only, not pushed).
 
+## Phase 5F — Safe Authentication Navigation (2026-08-04, complete)
+
+Starting checkpoint: local `main` at Phase 5E's commit, clean tree. Objective: resolve the two
+`@next/next/no-location-assign-relative-destination` lint warnings Phase 5E's `eslint-config-next`
+upgrade surfaced, without weakening the lint rule or changing sign-in/sign-out behavior.
+
+Read the full guest-to-account sync lifecycle (`lib/sync/orchestrator.ts`'s `handleSignOut`/
+`handleSignedIn`, driven by `AuthProvider`'s `onAuthStateChange` listener) before changing anything,
+and confirmed via its existing test coverage that the hard-reload `window.location.href` navigations
+in `components/auth/account-nav.tsx` (sign-out) and `components/auth/auth-form.tsx` (post-auth
+redirect to `/dashboard`) were never load-bearing for state cleanup — the listener fires
+independently of any page reload, before the navigation's own continuation even runs. Replaced both
+with `useRouter().push()`. No redirect/return-path (`?redirect=`/`?next=`) query-param logic exists
+anywhere in the auth flow, which simplified the fix.
+
+**New tests**: `tests/integration/account-nav.test.tsx` (sign-out calls `signOut()` before
+`router.push("/")`), `auth-form.test.tsx` (successful sign-in/sign-up push to `/dashboard`; a failed
+sign-in never navigates), `auth-form-guest-mode.test.tsx` (Supabase-disabled guest mode never
+touches the router, relying on the test environment's real default rather than a mock).
+
+**Verification, all green**: `format:check`, `lint` (0 errors, 0 warnings — both prior warnings
+resolved), `typecheck`, `test` (308/308, up from 300), `build`, the focused new specs plus
+accessibility (49 passed, 1 skipped, 0 failed, 2/2 a11y), `git diff --check` clean.
+
+**Diff**: `components/auth/account-nav.tsx`, `components/auth/auth-form.tsx`, 3 new test files (205
+insertions, 2 deletions). Commit: `fix: use safe authentication navigation` (local only, not
+pushed).
+
+## Phase 6 — Aptitude, Reasoning, and Career Readiness (2026-08-04, complete)
+
+Starting checkpoint: local `main` one commit ahead of `origin/main` (Phase 5F), clean tree,
+17 tracks/18 courses/216 lessons/20 projects, 308/308 Vitest tests, lint 0/0, `npm audit` 0
+vulnerabilities — independently re-verified before starting, not assumed from the prior session
+summary.
+
+**Roadmap reconciliation (before writing any content)**: read `lib/directory/categories.ts`,
+`lib/directory/learning-paths.ts`, `lib/directory/validate.ts`, and `lib/content/types.ts` directly.
+Confirmed all three categories (`quantitative-aptitude`, `reasoning`, `career-gd`) and the
+`placement-and-job-readiness` roadmap were genuine internal drafts — `publicVisibility: false` with
+explicit "no content exists yet" comments, zero technologies registered under any of the three
+categories, and the roadmap's three steps used `type: "practice"`, a step type `pathStepTypeSchema`
+had already forward-declared but `lib/directory/validate.ts` had no resolution logic for (any
+required "practice"/"assessment" step unconditionally fails validation) — so the roadmap could never
+have gone public without either building the missing content or changing the step type. The "if all
+three are already complete, stop" exit condition did not apply; the full build proceeded.
+
+**Content**: three new public courses, `content/lessons/quantitative-aptitude.ts`,
+`logical-analytical-reasoning.ts`, `career-and-gd-preparation.ts` — 12 lessons each (36 total),
+4 modules each, meeting the same `MIN_LESSONS_PER_COMPLETE_COURSE`/`MIN_MODULES_PER_COMPLETE_COURSE`
+bar every course added since Phase 5A must meet (see `scripts/validate-content.ts`). Every lesson
+follows the established shape (objectives, a substantial original explanation, a runnable code
+example, guided + independent exercises with a real deterministic JS harness, common mistakes, a
+3-question quiz, takeaway, summary) — no thin lesson shells, no inflated counts. All content is
+100% original; no proprietary exam bank, book, or website content was copied. Every exercise in all
+three courses (including the two "soft skill" courses, Reasoning and Career/GD) models its technique
+as a genuine, deterministic, browser-executable JavaScript function — the same pattern
+`content/lessons/postgresql.ts`'s `simulateLostUpdate` already established for non-code decisions —
+rather than pretending to parse free-form English. Career/GD exercises specifically check concrete,
+rule-based structural criteria (does a STAR object have all four fields, does a resume bullet start
+with an approved action verb and include a number) and are never framed as judging a learner's real
+communication skill, personality, or employability.
+
+Two of the three courses were drafted by parallel background agents from an exhaustive, schema-exact
+brief (full `lessonSchema`, a worked example, and every hard validation constraint spelled out); the
+third agent (Logical and Analytical Reasoning) and a portion of a second agent's self-verification
+step both failed mid-run on a session usage limit. Their partial output was inspected directly rather
+than assumed: `career-and-gd-preparation.ts` had in fact finished writing all 12 lessons correctly
+before the failure (confirmed by reading the file, then by `content:validate`/`typecheck`/
+`content:validate-snippets` all passing with zero course-specific errors) and was kept as-is;
+`logical-analytical-reasoning.ts` did not exist at all and was authored directly, lesson by lesson,
+with every exercise's expected test values hand-computed and verified before being written into the
+harness.
+
+**Practice engine** (`lib/practice/`): rather than authoring a second, separate question bank,
+`getPracticeQuestionsForCourse()` derives a course-wide practice pool directly from every lesson's
+existing, already-validated `quiz` array, namespacing each question's id as `<lessonId>:<quizId>`
+for a stable, globally-unique identifier (extending the existing quiz architecture, not duplicating
+it, per the brief). `lib/practice/scoring.ts` is pure and side-effect-free: a seeded
+`shuffleWithSeed`/`mulberry32` PRNG for deterministic, testable question ordering, and
+`scorePracticeSession` for deterministic scoring with a per-topic breakdown and a review threshold
+(70% accuracy) — no AI or external API involved anywhere. `components/practice/practice-session.tsx`
+is a client component supporting untimed mode (immediate per-question feedback) and timed mode
+(explanations withheld until the session ends, with a visible-but-not-`aria-live` countdown that
+only announces at session start, one-minute-remaining, and time's-up — never every second), a
+score/topic breakdown, retry-incorrect-only, retry-weak-topics-only, and a reset control. The
+shuffle seed is chosen inside the "Start practice" click handler, never during render, so there is
+nothing for server/client hydration to mismatch on. Available at `/courses/[courseSlug]/practice`
+for **every** course in the registry (21, not just the 3 new ones) — a deliberate generalization,
+since the engine is fully generic and this required no extra content.
+
+**Progress and sync**: `ProgressState` bumped 3→4, adding `practiceAttempts: Record<courseSlug,
+{ bestScore, bestTotal, lastAttemptedAt, topicsNeedingReview }>` — a summary only (best score, not a
+full attempt history; topic tags, never raw free-form learner input, since every practice question is
+multiple-choice). `lib/learning/storage.ts`'s `migrate()` handles v3→v4 explicitly (preserving
+enrollments/roadmap/project/activity data that an earlier, less careful migration path would have
+dropped) and `mergeProgress` merges practice attempts by best accuracy, latest attempt time, and a
+union of topics needing review — mirroring the existing quiz-result merge convention.
+`lib/learning/store.ts` gained `recordPracticeAttempt`, which never regresses `bestScore` on a
+weaker retry. A new Supabase migration, `supabase/migrations/0003_phase6_practice_attempts.sql`
+(one `practice_attempts` header row per user/course, RLS-enabled, matching the `enrollments`/
+`roadmap_progress` pattern — not the append-only `quiz_attempts` pattern, since only a summary is
+kept), was authored and reviewed against the existing schema conventions but **not applied to any
+remote environment** and could not be executed against a local Postgres instance in this environment
+(no Docker available) — consistent with 0001/0002's own "static review only" precedent.
+`lib/sync/push.ts`/`pull.ts` wired accordingly.
+
+**Registries**: added the `placement-prep` track; wired all three courses, their 36 lessons, and
+three capstone projects (`quantitative-aptitude-practice-portfolio`,
+`reasoning-practice-portfolio`, `career-readiness-capstone` — self-practice portfolios, honestly
+never labeled a certified or proctored exam) into `content/tracks.ts`/`courses.ts`/`projects.ts`/
+`lib/content/registry.ts`. Flipped all three categories to `publicVisibility: true`. Since
+`lib/directory/validate.ts` hard-fails a public category with zero public technologies, added one
+technology-guide entry per category (`lib/directory/data/placement-prep.ts`, each `courseId`-linked
+to its real course) rather than leaving the categories structurally empty. Fixed the
+`placement-and-job-readiness` roadmap's three steps from `type: "practice"` (never resolvable, see
+above) to `type: "course"` pointing at the three real course slugs, and set `publicVisibility: true`
+— `certificateEligible`/`finalAssessmentRequired` remain hard-locked `false`, as required.
+`scripts/validate-content.ts`'s quiz-duplicate check was widened from per-lesson to per-course scope
+(matching what its own comment already claimed but the code didn't do), since a course-wide practice
+pool now surfaces every lesson's questions together — re-running it against all 18 pre-existing
+courses found zero pre-existing near-duplicates, confirming this stricter check didn't regress
+anything.
+
+**Discovery/SEO**: canonical URLs, `BreadcrumbList` JSON-LD, and a sitemap entry for every course's
+new `/practice` route (`app/sitemap.ts`); a "Practice this course" link added to every course
+overview page.
+
+**Tests added**: `tests/unit/practice-scoring.test.ts` (13, pure scoring/shuffle determinism),
+`practice-registry.test.ts` (6, against real Quantitative Aptitude content), `practice-store.test.ts`
+(5, the store action), `tests/integration/practice-session.test.tsx` (11, component behavior
+including timed-vs-untimed feedback timing and the empty-state), plus extensions to
+`storage-migration.test.ts` and `progress-merge.test.ts` for the v4 field, and
+`tests/e2e/practice-session.spec.ts` (7 specs × 2 browsers, including a bundle-isolation check
+confirming the practice engine's code is never requested on the homepage or an unrelated lesson
+page). Five pre-existing tests that encoded the old "these are internal drafts" assumption
+(`directory-registry.test.ts`, `directory-learning-paths.test.ts`, `search-index-build.test.ts`,
+two in `progress-store-phase4.test.ts`) were updated to assert the new, now-true reality instead of
+weakened or deleted; `search-index-build.test.ts`'s draft-id list was also changed from a hardcoded
+list to one derived live from the registries, so it stays correct as content moves from draft to
+public in the future instead of silently testing against stale ids. `tests/e2e/accessibility.spec.ts`
+gained 16 new routes (all three courses, one lesson and one practice page each, the capstone project,
+the three categories, the new technology guide, and the roadmap) and `learn-page.spec.ts`'s
+hardcoded "13 categories"/"80 technology guides" counts were updated to the new true counts (16/83).
+
+**Verification, all green**: `npm audit` (0 vulnerabilities), `format:check`, `lint` (0 errors, 0
+warnings), `typecheck`, `content:validate` (**21 courses, 252 lessons, 23 projects, 18 tracks; 16
+public categories, 83 technologies, 16 learning paths**, pass), `content:validate-snippets` (474/474
+browser-executable reference solutions pass — one Selenium-course failure on the first run was a
+runner timeout, confirmed as a pre-existing flake unrelated to this phase by re-running clean;
+`content/lessons/selenium.ts` was never touched), `test` (**348/348** Vitest tests, 37 files),
+`build` (succeeds; the new `/courses/[courseSlug]/practice` route statically generates for all 21
+courses), the full Playwright suite (**339 passed, 5 skipped, 0 failed**, chromium + mobile-chromium,
+including all 190 accessibility-route checks with zero critical/serious axe violations), `git diff
+--check` clean.
+
+**Final diff audit**: reviewed the complete diff for secrets/credentials, environment files,
+personal data, generated artifacts, placeholder content, `.only`/`.fixme`/new skips/weakened
+assertions, and unrelated changes — none found. 25 tracked files modified, 12 new files
+(3 lesson files, `lib/practice/` (3 files), `components/practice/practice-session.tsx`, the new
+practice route, `lib/directory/data/placement-prep.ts`, the Supabase migration, and 4 new test
+files).
+
+**Remaining limitations, stated honestly**: no live Supabase project exists to execution-test the
+new `practice_attempts` table or migration against a real database (see "If you pick this up next").
+Practice questions are drawn only from each course's own 36 lesson-quiz questions (3 per lesson,
+12 lessons) — a real, sufficient pool for genuine practice, not an inflated question bank. No
+certificate or final-assessment claim was enabled anywhere, per the brief. Phases 7 (Study Studio),
+8 (Tools Lab/Project Studio), and 9 (certificates) remain entirely unstarted.
+
+Commit: `feat: add aptitude reasoning and career readiness` (local only, not pushed).
+
 ## If you pick this up next
 
-**Immediate next step**: Phase 5E's commit sits locally, one commit ahead of `origin/main` — push
-it (after its own safety audit, mirroring every prior phase) before starting further work.
+**Immediate next step**: three commits sit locally, ahead of `origin/main` — `chore: remediate
+dependency security findings` (Phase 5E), `fix: use safe authentication navigation` (Phase 5F), and
+`feat: add aptitude reasoning and career readiness` (Phase 6). Push them (after each one's own
+safety audit, mirroring every prior phase — none have been re-audited as a group) before starting
+further work.
 
 Recommended next step before any further feature phase, still outstanding from earlier phases:
 **provision a real Supabase project and execution-test the guest-to-account sync lifecycle end to
 end** (sign up, complete some lessons as a guest first, sign in, verify the merge; sign out and
-confirm nothing leaks; sign in as a second account on the same device and confirm the same).
-Everything is implemented and mock-tested (Phase 4 report, items 17-24), but "the mock behaves
-correctly" and "the real Postgres/RLS/auth stack behaves correctly" are different claims, and only
-the first has been verified in this build. Phase 4.5's redesign is visual/interaction-only and
-doesn't change this recommendation.
+confirm nothing leaks; sign in as a second account on the same device and confirm the same) —
+including Phase 6's new `practice_attempts` table and migration, which has only been reviewed
+statically and never run against a real or local Postgres instance (no Docker in this environment).
+Everything is implemented and mock-tested, but "the mock behaves correctly" and "the real
+Postgres/RLS/auth stack behaves correctly" are different claims, and only the first has been
+verified in this build.
 
-Recommended next _phase_: with Phase 5A/5A.2/5B/5C all complete (18 courses, 17 tracks, 216 lessons,
-20 projects, 24 guided local labs), **Phase 5 (Aptitude, Reasoning, and career content)** — letting
-the three currently-internal categories and the one currently-draft learning roadmap (Placement and
-Job Readiness) go public — is now the most direct remaining path to closing out the curriculum
-expansion's original scope. Other options, not started, listed here only as possibilities: mapping
-more of the remaining guide-only technologies (including automation-adjacent ones like Docker,
-Kubernetes, and GitHub Actions, now that Playwright/Selenium/Linux/Bash/Test-Automation-Framework
-guides all link to real courses) to real courses as those courses get built; building out Study
-Studio (Phase 6) or Project Studio/Tools Lab (Phase 7), both large enough to warrant their own
-from-scratch planning pass the way this session did for Phase 3 and Phase 4; or building the
-course-reviews system deferred in Phase 4 (item 39), once a moderation/abuse/ownership model is
-designed. Whichever is chosen, re-run the full verified-green command list above before and after
-each coherent chunk of work, exactly as this session did, and do not add a navigation entry for any
-surface until its destination page is real and non-empty.
+Recommended next _phase_: with Phase 5 (all sub-phases) and Phase 6 now complete — 21 courses,
+18 tracks, 252 lessons, 23 projects, every category and every roadmap either public or genuinely
+still-unbuilt (no more categories that are "public in name only") — the curriculum-expansion arc
+from the original brief is closed. The next natural phase is **Phase 7 (Study Studio)** or
+**Phase 8 (Tools Lab and Project Studio)**, both large enough to warrant their own from-scratch
+planning pass the way this session did for Phase 3, Phase 4, and Phase 6. Other options, not
+started, listed here only as possibilities: mapping more of the remaining guide-only technologies
+(including automation-adjacent ones like Docker, Kubernetes, and GitHub Actions) to real courses as
+those courses get built; building the course-reviews system deferred in Phase 4 (item 39), once a
+moderation/abuse/ownership model is designed; or **Phase 9 (honest completion and skill-achievement
+certificates)**, which should wait until there is real assessment infrastructure to certify against.
+Whichever is chosen, re-run the full verified-green command list above before and after each
+coherent chunk of work, exactly as this session did, and do not add a navigation entry for any
+surface until its destination page is real and non-empty. Do not enable `certificateEligible` or
+`finalAssessmentRequired` on any path until Phase 9 actually exists.
 
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 

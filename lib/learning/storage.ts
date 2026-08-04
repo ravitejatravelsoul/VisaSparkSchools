@@ -5,6 +5,7 @@ import {
   type EnrollmentState,
   type RoadmapProgressState,
   type ProjectProgressState,
+  type PracticeAttemptState,
   type ActivityEvent,
 } from "@/lib/learning/types";
 
@@ -28,7 +29,7 @@ export function perUserStorageKey(userId: string): string {
  * (not deleted) as a recoverable backup rather than removed immediately.
  */
 const LEGACY_STORAGE_KEY = "codewise:progress";
-const CURRENT_VERSION = 3;
+const CURRENT_VERSION = 4;
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -123,11 +124,26 @@ function migrate(parsed: unknown): ProgressState {
       ...empty,
       ...data,
       notes: migrateNotes(data.notes),
+      practiceAttempts: (data.practiceAttempts as ProgressState["practiceAttempts"]) ?? {},
       profile: { ...empty.profile, ...(data.profile as object | undefined) },
     } as ProgressState;
   }
 
-  // Any older version (1, 2, or missing): reconstruct a safe v3 shape,
+  // v3 -> v4 (Phase 6): every field already matches the current shape except
+  // the new practiceAttempts map, which didn't exist yet -- keep everything
+  // else exactly as v3's own "current version" branch would have.
+  if (data.version === 3) {
+    return {
+      ...empty,
+      ...data,
+      version: CURRENT_VERSION,
+      notes: migrateNotes(data.notes),
+      practiceAttempts: {},
+      profile: { ...empty.profile, ...(data.profile as object | undefined) },
+    } as ProgressState;
+  }
+
+  // Any older version (1, 2, or missing): reconstruct a safe v4 shape,
   // keeping every field that still matches and defaulting the rest --
   // never crash or drop unrelated data just because one shape changed.
   return {
@@ -148,6 +164,7 @@ function migrate(parsed: unknown): ProgressState {
     enrollments: {},
     roadmapProgress: {},
     projectProgress: {},
+    practiceAttempts: {},
     activity: [],
   };
 }
@@ -217,6 +234,28 @@ function mergeProjectProgress(
     completedMilestoneIds: Array.from(
       new Set([...a.completedMilestoneIds, ...b.completedMilestoneIds]),
     ),
+  };
+}
+
+/**
+ * Best score wins by accuracy (matching mergeProgress's quizResults rule
+ * below); topicsNeedingReview is a union rather than picking one side's list
+ * wholesale, since a topic either side found weak is still worth reviewing.
+ */
+function mergePracticeAttempt(
+  a: PracticeAttemptState | undefined,
+  b: PracticeAttemptState | undefined,
+): PracticeAttemptState {
+  if (!a) return b!;
+  if (!b) return a;
+  const aAccuracy = a.bestTotal > 0 ? a.bestScore / a.bestTotal : 0;
+  const bAccuracy = b.bestTotal > 0 ? b.bestScore / b.bestTotal : 0;
+  const best = aAccuracy >= bAccuracy ? a : b;
+  return {
+    bestScore: best.bestScore,
+    bestTotal: best.bestTotal,
+    lastAttemptedAt: a.lastAttemptedAt >= b.lastAttemptedAt ? a.lastAttemptedAt : b.lastAttemptedAt,
+    topicsNeedingReview: Array.from(new Set([...a.topicsNeedingReview, ...b.topicsNeedingReview])),
   };
 }
 
@@ -340,6 +379,17 @@ export function mergeProgress(local: ProgressState, remote: ProgressState): Prog
     merged.projectProgress[id] = mergeProjectProgress(
       local.projectProgress[id],
       remote.projectProgress[id],
+    );
+  }
+
+  const practiceCourseIds = new Set([
+    ...Object.keys(local.practiceAttempts),
+    ...Object.keys(remote.practiceAttempts),
+  ]);
+  for (const id of practiceCourseIds) {
+    merged.practiceAttempts[id] = mergePracticeAttempt(
+      local.practiceAttempts[id],
+      remote.practiceAttempts[id],
     );
   }
 

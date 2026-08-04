@@ -1574,4 +1574,225 @@ export const projects: Project[] = [
       { label: "Playwright Docs: Fixtures", url: "https://playwright.dev/docs/test-fixtures" },
     ],
   },
+  {
+    id: "quantitative-aptitude-practice-portfolio",
+    slug: "quantitative-aptitude-practice-portfolio",
+    title: "Quantitative Aptitude Practice Portfolio",
+    description:
+      "Work every lesson in the Quantitative Aptitude course, then use the course's practice session to find and close your own weak spots -- a self-practice capstone, not a proctored exam.",
+    difficulty: "beginner",
+    estimatedHours: 4,
+    isCapstone: true,
+    trackSlugs: ["placement-prep"],
+    prerequisiteLessonIds: [
+      "qa-number-systems-divisibility",
+      "qa-lcm-hcf",
+      "qa-percentages",
+      "qa-profit-loss-discount",
+      "qa-simple-compound-interest",
+      "qa-ratio-proportion-mixtures",
+      "qa-time-speed-distance",
+      "qa-time-and-work",
+      "qa-averages",
+      "qa-permutations-combinations-probability",
+      "qa-data-interpretation",
+      "qa-mixed-aptitude-practice",
+    ],
+    objectives: [
+      "Complete every lesson exercise and quiz in the Quantitative Aptitude course",
+      "Complete an untimed practice session and review every topic's explanations",
+      "Complete a timed practice session and reflect honestly on pacing",
+      "Identify and revisit your own weakest topics until their practice accuracy improves",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Work every lesson",
+        description:
+          "Complete the guided and independent exercise and the quiz in all 12 Quantitative Aptitude lessons.",
+        checklist: [
+          "All 12 lessons show as completed on your dashboard",
+          "Every lesson's guided and independent exercise passes",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Untimed practice pass",
+        description:
+          "Run the course's practice session in untimed mode, reading every explanation as you go.",
+        checklist: [
+          "One full untimed practice session completed",
+          "You can name at least one topic where you read an explanation you didn't already know",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Timed practice pass",
+        description:
+          "Run the practice session again in timed mode to rehearse pacing under a limit.",
+        checklist: [
+          "One full timed practice session completed",
+          "You noted which questions took longer than the rest",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Close the gap",
+        description:
+          "Use the practice session's topic breakdown to find your weakest topic(s), revisit that lesson, then retry that topic.",
+        checklist: [
+          "At least one weak topic identified from a practice session's topic breakdown",
+          "The corresponding lesson revisited and the topic re-practiced with an improved score",
+        ],
+      },
+    ],
+    references: [],
+  },
+  {
+    id: "reasoning-practice-portfolio",
+    slug: "reasoning-practice-portfolio",
+    title: "Logical and Analytical Reasoning Practice Portfolio",
+    description:
+      "Work every lesson in the Logical and Analytical Reasoning course, then use the course's practice session to find and close your own weak spots -- a self-practice capstone, not a proctored exam.",
+    difficulty: "beginner",
+    estimatedHours: 4,
+    isCapstone: true,
+    trackSlugs: ["placement-prep"],
+    prerequisiteLessonIds: [
+      "lr-number-letter-series",
+      "lr-coding-decoding",
+      "lr-analogies-classification",
+      "lr-blood-relations",
+      "lr-direction-sense",
+      "lr-syllogisms",
+      "lr-seating-arrangements",
+      "lr-puzzles-grouping",
+      "lr-statement-conclusions",
+      "lr-non-verbal-reasoning",
+      "lr-critical-reasoning",
+      "lr-mixed-reasoning-practice",
+    ],
+    objectives: [
+      "Complete every lesson exercise and quiz in the Logical and Analytical Reasoning course",
+      "Complete an untimed practice session and review every topic's explanations",
+      "Complete a timed practice session and reflect honestly on pacing",
+      "Identify and revisit your own weakest topics until their practice accuracy improves",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Work every lesson",
+        description:
+          "Complete the guided and independent exercise and the quiz in all 12 Reasoning lessons.",
+        checklist: [
+          "All 12 lessons show as completed on your dashboard",
+          "Every lesson's guided and independent exercise passes",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Untimed practice pass",
+        description:
+          "Run the course's practice session in untimed mode, reading every explanation as you go.",
+        checklist: [
+          "One full untimed practice session completed",
+          "You can name at least one topic where you read an explanation you didn't already know",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Timed practice pass",
+        description:
+          "Run the practice session again in timed mode to rehearse pacing under a limit.",
+        checklist: [
+          "One full timed practice session completed",
+          "You noted which questions took longer than the rest",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Close the gap",
+        description:
+          "Use the practice session's topic breakdown to find your weakest topic(s), revisit that lesson, then retry that topic.",
+        checklist: [
+          "At least one weak topic identified from a practice session's topic breakdown",
+          "The corresponding lesson revisited and the topic re-practiced with an improved score",
+        ],
+      },
+    ],
+    references: [],
+  },
+  {
+    id: "career-readiness-capstone",
+    slug: "career-readiness-capstone",
+    title: "Mock Career Readiness Capstone",
+    description:
+      "Draft a resume, self-practice a group discussion contribution, and prepare STAR-format interview answers -- an integrated self-practice capstone, honestly framed as practice, never a certified or proctored evaluation.",
+    difficulty: "beginner",
+    estimatedHours: 4,
+    isCapstone: true,
+    trackSlugs: ["placement-prep"],
+    prerequisiteLessonIds: [
+      "cgd-professional-communication-basics",
+      "cgd-resume-fundamentals",
+      "cgd-elevator-pitch",
+      "cgd-gd-fundamentals",
+      "cgd-gd-structuring-arguments",
+      "cgd-gd-etiquette-listening",
+      "cgd-interview-fundamentals",
+      "cgd-star-method",
+      "cgd-common-interview-questions",
+      "cgd-handling-difficult-questions",
+      "cgd-workplace-professionalism",
+      "cgd-mock-career-readiness-practice",
+    ],
+    objectives: [
+      "Draft resume bullet points that follow the action-verb-plus-result structure",
+      "Structure a group discussion opening and two follow-up contributions on a topic of your choice",
+      "Write three complete STAR-format answers for your own real experiences",
+      "Complete the course's practice session and review your topic breakdown",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Resume and introduction draft",
+        description:
+          "Write at least 4 resume bullet points and a 30-45 second personal introduction, applying this course's structural checklists.",
+        checklist: [
+          "At least 4 resume bullets, each starting with an action verb and including a concrete result",
+          "One personal introduction draft covering who you are, relevant background, and what you're looking for",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Group discussion self-practice",
+        description:
+          "Pick a topic and write an opening statement plus two follow-up contributions that build on a hypothetical prior speaker's point.",
+        checklist: [
+          "One structured opening statement (claim, reasoning, example)",
+          "Two follow-up contributions that explicitly reference and build on a prior point",
+        ],
+      },
+      {
+        id: "m3",
+        title: "STAR interview answers",
+        description:
+          "Write three complete STAR-format answers for three different real experiences of your own.",
+        checklist: [
+          "Three answers, each with a non-empty Situation, Task, Action, and Result",
+          "Each answer describes a different real experience",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Practice session review",
+        description: "Complete the course's practice session and review your topic breakdown.",
+        checklist: [
+          "One full practice session completed",
+          "At least one topic identified for further review, or confirmation that none are weak",
+        ],
+      },
+    ],
+    references: [],
+  },
 ];

@@ -164,6 +164,15 @@ export default async function CourseOverviewPage({ params }: { params: Params })
         lessons={lessons}
       />
 
+      <p className="mt-3 text-sm">
+        <Link
+          href={`/courses/${course.slug}/practice`}
+          className="font-medium text-(--color-brand-strong) hover:underline"
+        >
+          Practice this course &rarr;
+        </Link>
+      </p>
+
       <div className="mt-8 flex flex-col gap-8">
         {course.modules.map((mod) => {
           const moduleLessons = mod.lessonSlugs

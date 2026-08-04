@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildIndex } from "../../scripts/build-search-index";
+import { allCategories, allTechnologies, allLearningPaths } from "@/lib/directory/registry";
 
 /**
  * Verifies the search index generation is deterministic and safe to run on
@@ -24,18 +25,17 @@ describe("search index generation (npm run content:search-index)", () => {
 
   it("never includes internal-draft categories, technologies, or learning paths", () => {
     const index = buildIndex();
-    const draftIds = ["quantitative-aptitude", "reasoning", "career-gd", "placement-job-readiness"];
-    for (const doc of index) {
-      expect(draftIds).not.toContain(doc.id);
+    const indexIds = new Set(index.map((d) => d.id));
+    // Derived from the live registries rather than a hardcoded list, so this
+    // stays correct as content moves from draft to public over time (e.g.
+    // Phase 6 made Aptitude/Reasoning/Career-GD public) instead of quietly
+    // testing against stale ids.
+    const draftCategoryIds = allCategories.filter((c) => !c.publicVisibility).map((c) => c.id);
+    const draftTechnologyIds = allTechnologies.filter((t) => !t.publicVisibility).map((t) => t.id);
+    const draftPathIds = allLearningPaths.filter((p) => !p.publicVisibility).map((p) => p.id);
+    for (const id of [...draftCategoryIds, ...draftTechnologyIds, ...draftPathIds]) {
+      expect(indexIds).not.toContain(id);
     }
-    // Belt-and-suspenders: no document title/description should mention the
-    // draft-only subject areas at all, since nothing public covers them yet.
-    const leaked = index.filter((d) =>
-      /quantitative aptitude|group discussion|placement and job readiness/i.test(
-        `${d.title} ${d.description}`,
-      ),
-    );
-    expect(leaked).toEqual([]);
   });
 
   it("never includes raw lesson body content -- only title/description/keywords metadata", () => {

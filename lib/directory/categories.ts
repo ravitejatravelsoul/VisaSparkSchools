@@ -214,15 +214,16 @@ export const categories: CategoryInput[] = [
     name: "Quantitative Aptitude",
     shortDescription: "Numerical reasoning practice for placement tests.",
     introduction:
-      "Quantitative aptitude practice for placement and entrance exams -- number systems, percentages, time/speed/distance, data interpretation, and more. Planned for a future phase.",
+      "Quantitative aptitude practice for placement and entrance exams -- number systems, percentages, time/speed/distance, data interpretation, and more.",
     icon: "quantitative-aptitude",
     order: 13,
     searchKeywords: ["aptitude", "quant", "placement test", "numerical reasoning"],
     relatedCategoryIds: ["reasoning"],
     audience: "Students and recent graduates preparing for placement tests.",
-    // Internal draft: no topics/practice content exists yet (Phase 5). Kept
-    // out of public navigation and the sitemap until it does.
-    publicVisibility: false,
+    // Phase 6: made public once the Quantitative Aptitude course (12
+    // lessons) and its practice session existed and every registry
+    // reference resolved -- see PROJECT_STATUS.md.
+    publicVisibility: true,
     featured: false,
   },
   {
@@ -231,13 +232,13 @@ export const categories: CategoryInput[] = [
     name: "Logical and Verbal Reasoning",
     shortDescription: "Pattern recognition, verbal, and critical-reasoning practice.",
     introduction:
-      "Logical and verbal reasoning practice for placement and entrance exams -- series, analogies, syllogisms, reading comprehension, and more. Planned for a future phase.",
+      "Logical and verbal reasoning practice for placement and entrance exams -- series, analogies, syllogisms, reading comprehension, and more.",
     icon: "reasoning",
     order: 14,
     searchKeywords: ["reasoning", "logical reasoning", "verbal ability", "placement test"],
     relatedCategoryIds: ["quantitative-aptitude"],
     audience: "Students and recent graduates preparing for placement tests.",
-    publicVisibility: false,
+    publicVisibility: true,
     featured: false,
   },
   {
@@ -246,13 +247,13 @@ export const categories: CategoryInput[] = [
     name: "Career and Group Discussion Preparation",
     shortDescription: "Group discussion practice and job-readiness fundamentals.",
     introduction:
-      "Career and group discussion preparation -- GD frameworks, resume basics, and interview preparation. Planned for a future phase.",
+      "Career and group discussion preparation -- GD frameworks, resume basics, and interview preparation.",
     icon: "career-gd",
     order: 15,
     searchKeywords: ["group discussion", "career prep", "interview prep", "resume"],
     relatedCategoryIds: ["quantitative-aptitude", "reasoning"],
     audience: "Students and recent graduates preparing for campus placements and interviews.",
-    publicVisibility: false,
+    publicVisibility: true,
     featured: false,
   },
 ];

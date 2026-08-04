@@ -133,4 +133,12 @@ export const tracks: Track[] = [
       "The architecture behind a maintainable automation suite: layering, fixtures, test data, CI quality gates, and framework health at scale.",
     order: 16,
   },
+  {
+    id: "placement-prep",
+    slug: "placement-prep",
+    title: "Placement & Career Readiness",
+    description:
+      "Quantitative aptitude, logical and analytical reasoning, and group discussion and interview preparation for campus placements.",
+    order: 17,
+  },
 ];

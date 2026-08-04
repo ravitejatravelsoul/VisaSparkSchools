@@ -1137,4 +1137,160 @@ export const courses: CourseInput[] = [
       },
     ],
   },
+  {
+    id: "quantitative-aptitude",
+    slug: "quantitative-aptitude",
+    trackSlug: "placement-prep",
+    title: "Quantitative Aptitude",
+    description:
+      "Numerical reasoning for placement tests: number systems, percentages, interest, time/speed/distance, and data interpretation.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 5,
+    audience:
+      "Students and recent graduates preparing for campus placement and entrance aptitude tests.",
+    learningOutcomes: [
+      "Solve number system, percentage, profit/loss, and interest problems accurately and quickly",
+      "Apply ratio, proportion, time/speed/distance, and time/work techniques to multi-step word problems",
+      "Read and compute from tabular and chart-style data without common interpretation mistakes",
+      "Combine multiple aptitude techniques to solve mixed, realistic placement-test-style problems",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: ["logical-analytical-reasoning"],
+    relatedTechnologySlugs: ["quantitative-aptitude-guide"],
+    modules: [
+      {
+        id: "qa-number-foundations",
+        title: "Number foundations",
+        summary: "Number systems and divisibility, LCM/HCF, and percentages.",
+        lessonSlugs: ["number-systems-divisibility", "lcm-hcf", "percentages"],
+      },
+      {
+        id: "qa-applied-arithmetic",
+        title: "Applied arithmetic",
+        summary: "Profit/loss/discount, simple and compound interest, ratio and mixtures.",
+        lessonSlugs: [
+          "profit-loss-discount",
+          "simple-compound-interest",
+          "ratio-proportion-mixtures",
+        ],
+      },
+      {
+        id: "qa-time-speed-work",
+        title: "Time, speed & work",
+        summary: "Time/speed/distance, time and work, and averages.",
+        lessonSlugs: ["time-speed-distance", "time-and-work", "averages"],
+      },
+      {
+        id: "qa-data-and-mixed-practice",
+        title: "Data and mixed practice",
+        summary: "Permutations/combinations/probability, data interpretation, and mixed practice.",
+        lessonSlugs: [
+          "permutations-combinations-probability",
+          "data-interpretation",
+          "mixed-aptitude-practice",
+        ],
+      },
+    ],
+  },
+  {
+    id: "logical-analytical-reasoning",
+    slug: "logical-analytical-reasoning",
+    trackSlug: "placement-prep",
+    title: "Logical and Analytical Reasoning",
+    description:
+      "Pattern recognition and structured logical reasoning for placement tests: series, coding-decoding, arrangements, and critical reasoning.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 5,
+    audience:
+      "Students and recent graduates preparing for campus placement and entrance reasoning tests.",
+    learningOutcomes: [
+      "Identify patterns in number, letter, and coded series and continue them correctly",
+      "Solve blood relation, direction sense, and syllogism problems using a systematic method rather than intuition",
+      "Work through seating arrangement and grouping puzzles by eliminating possibilities from clues",
+      "Distinguish stated facts, unstated assumptions, and valid conclusions in an argument",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: ["career-and-gd-preparation"],
+    relatedTechnologySlugs: ["reasoning-guide"],
+    modules: [
+      {
+        id: "lr-patterns-and-sequences",
+        title: "Patterns and sequences",
+        summary: "Number/letter series, coding-decoding, and analogies/classification.",
+        lessonSlugs: ["number-letter-series", "coding-decoding", "analogies-classification"],
+      },
+      {
+        id: "lr-logical-structures",
+        title: "Logical structures",
+        summary: "Blood relations, direction sense, and syllogisms.",
+        lessonSlugs: ["blood-relations", "direction-sense", "syllogisms"],
+      },
+      {
+        id: "lr-puzzles-and-arrangements",
+        title: "Puzzles and arrangements",
+        summary: "Seating arrangements, puzzles/grouping, and statements/conclusions.",
+        lessonSlugs: ["seating-arrangements", "puzzles-grouping", "statement-conclusions"],
+      },
+      {
+        id: "lr-visual-and-mixed-reasoning",
+        title: "Visual and mixed reasoning",
+        summary: "Non-verbal reasoning, critical reasoning, and mixed practice.",
+        lessonSlugs: ["non-verbal-reasoning", "critical-reasoning", "mixed-reasoning-practice"],
+      },
+    ],
+  },
+  {
+    id: "career-and-gd-preparation",
+    slug: "career-and-gd-preparation",
+    trackSlug: "placement-prep",
+    title: "Career and Group Discussion Preparation",
+    description:
+      "Professional communication, group discussion technique, and interview preparation for campus placements.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 5,
+    audience:
+      "Students and recent graduates preparing for campus placement group discussions and interviews.",
+    learningOutcomes: [
+      "Write achievement-oriented resume bullets and a concise personal introduction",
+      "Structure and deliver a group discussion contribution, and build on others' points respectfully",
+      "Answer behavioral interview questions using the complete STAR structure",
+      "Prepare composed, specific responses to common and difficult interview questions",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["career-gd-guide"],
+    modules: [
+      {
+        id: "cgd-professional-communication-foundations",
+        title: "Professional communication foundations",
+        summary: "Professional communication basics, resume fundamentals, and the elevator pitch.",
+        lessonSlugs: ["professional-communication-basics", "resume-fundamentals", "elevator-pitch"],
+      },
+      {
+        id: "cgd-group-discussion-skills",
+        title: "Group discussion skills",
+        summary: "GD fundamentals, structuring arguments, and etiquette/active listening.",
+        lessonSlugs: ["gd-fundamentals", "gd-structuring-arguments", "gd-etiquette-listening"],
+      },
+      {
+        id: "cgd-interview-preparation",
+        title: "Interview preparation",
+        summary: "Interview fundamentals, the STAR method, and common interview questions.",
+        lessonSlugs: ["interview-fundamentals", "star-method", "common-interview-questions"],
+      },
+      {
+        id: "cgd-applied-career-readiness",
+        title: "Applied career readiness",
+        summary: "Handling difficult questions, workplace professionalism, and mock practice.",
+        lessonSlugs: [
+          "handling-difficult-questions",
+          "workplace-professionalism",
+          "mock-career-readiness-practice",
+        ],
+      },
+    ],
+  },
 ];

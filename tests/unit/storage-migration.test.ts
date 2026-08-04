@@ -67,3 +67,55 @@ describe("loadProgress brand-rename migration (CodeWise -> VisaSparkSchools)", (
     expect(window.localStorage.getItem(LEGACY_KEY)).toBeNull();
   });
 });
+
+describe("v3 -> v4 migration (Phase 6: practiceAttempts)", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("upgrades stored v3 data to v4, defaulting practiceAttempts to {} and preserving everything else", () => {
+    const v3 = {
+      ...createEmptyProgress(),
+      version: 3,
+      dailyGoalMinutes: 42,
+      bookmarks: ["html-document-structure"],
+      enrollments: { "html-css-fundamentals": { enrolledAt: "2026-01-01T00:00:00.000Z" } },
+    };
+    delete (v3 as { practiceAttempts?: unknown }).practiceAttempts;
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(v3));
+
+    const state = loadProgress();
+    expect(state.version).toBe(4);
+    expect(state.dailyGoalMinutes).toBe(42);
+    expect(state.bookmarks).toEqual(["html-document-structure"]);
+    expect(state.enrollments["html-css-fundamentals"]).toBeDefined();
+    expect(state.practiceAttempts).toEqual({});
+  });
+
+  it("reads current v4 data (including practiceAttempts) straight through unchanged", () => {
+    const v4 = {
+      ...createEmptyProgress(),
+      practiceAttempts: {
+        "quantitative-aptitude": {
+          bestScore: 30,
+          bestTotal: 36,
+          lastAttemptedAt: "2026-08-01T00:00:00.000Z",
+          topicsNeedingReview: ["Percentages"],
+        },
+      },
+    };
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(v4));
+
+    const state = loadProgress();
+    expect(state.practiceAttempts["quantitative-aptitude"]).toEqual(
+      v4.practiceAttempts["quantitative-aptitude"],
+    );
+  });
+
+  it("older/unversioned data reconstructs safely with an empty practiceAttempts map", () => {
+    window.localStorage.setItem(NEW_KEY, JSON.stringify({ dailyGoalMinutes: 15 }));
+    const state = loadProgress();
+    expect(state.version).toBe(4);
+    expect(state.practiceAttempts).toEqual({});
+  });
+});

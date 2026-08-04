@@ -34,10 +34,11 @@ describe("learning path registry", () => {
     }
   });
 
-  it("keeps Placement and Job Readiness internal (depends on unbuilt Aptitude/Reasoning/GD content)", () => {
+  it("Placement and Job Readiness is public (Phase 6: Aptitude/Reasoning/GD courses now exist)", () => {
     const placement = getLearningPathBySlug("placement-and-job-readiness");
     expect(placement).toBeDefined();
-    expect(placement!.publicVisibility).toBe(false);
+    expect(placement!.publicVisibility).toBe(true);
+    expect(placement!.steps.every((s) => s.type === "course")).toBe(true);
   });
 
   it("every public path has every required step resolving to real, available content", () => {

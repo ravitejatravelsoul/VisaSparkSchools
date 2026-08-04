@@ -173,7 +173,7 @@ describe("setProfile", () => {
     expect(afterSecond.updatedAt >= afterFirst.updatedAt).toBe(true);
   });
 
-  it("rejects an unknown or internal roadmap id for currentRoadmapId, keeping the previous value", () => {
+  it("rejects an unknown roadmap id for currentRoadmapId, keeping the previous value", () => {
     useProgressStore
       .getState()
       .setProfile({ currentRoadmapId: "complete-beginner-to-web-developer" });
@@ -181,12 +181,12 @@ describe("setProfile", () => {
     expect(useProgressStore.getState().state.profile.currentRoadmapId).toBe(
       "complete-beginner-to-web-developer",
     );
+  });
 
-    // The one real, registered-but-internal roadmap must also be rejected --
-    // not just unknown strings.
+  it("accepts a real, public roadmap id for currentRoadmapId (Phase 6: placement-and-job-readiness is now public)", () => {
     useProgressStore.getState().setProfile({ currentRoadmapId: "placement-and-job-readiness" });
     expect(useProgressStore.getState().state.profile.currentRoadmapId).toBe(
-      "complete-beginner-to-web-developer",
+      "placement-and-job-readiness",
     );
   });
 
@@ -218,9 +218,11 @@ describe("validation gates against unknown/internal ids (direct store calls, not
     expect(useProgressStore.getState().state.roadmapProgress).toEqual({});
   });
 
-  it("startRoadmap silently no-ops for the one internal/draft roadmap", () => {
+  it("startRoadmap succeeds for placement-and-job-readiness (Phase 6: now public, no longer draft)", () => {
     useProgressStore.getState().startRoadmap("placement-and-job-readiness");
-    expect(useProgressStore.getState().state.roadmapProgress).toEqual({});
+    expect(
+      useProgressStore.getState().state.roadmapProgress["placement-and-job-readiness"],
+    ).toBeDefined();
   });
 
   it("toggleRoadmapStep silently no-ops for an unknown roadmap id", () => {

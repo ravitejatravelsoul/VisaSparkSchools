@@ -50,6 +50,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
+  // Phase 6: every course gets a derived practice-session route (built from
+  // that course's own lesson quizzes -- see lib/practice/registry.ts), not
+  // just the three new placement-prep courses.
+  const practiceRoutes = allCourses.map((course) => ({
+    url: `${base}/courses/${course.slug}/practice`,
+    changeFrequency: "monthly" as const,
+    priority: 0.4,
+  }));
+
   const projectRoutes = allProjects.map((project) => ({
     url: `${base}/projects/${project.slug}`,
     changeFrequency: "monthly" as const,
@@ -82,6 +91,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...trackRoutes,
     ...courseRoutes,
     ...lessonRoutes,
+    ...practiceRoutes,
     ...projectRoutes,
     ...categoryRoutes,
     ...technologyRoutes,
