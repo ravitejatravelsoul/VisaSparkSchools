@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { featureFlags } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,7 @@ const COPY: Record<Mode, { title: string; cta: string; footer: React.ReactNode }
 };
 
 export function AuthForm({ mode }: { mode: Mode }) {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -107,7 +109,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
       setMessage(error.message);
     } else {
       setStatus("done");
-      window.location.href = "/dashboard";
+      // As with sign-out (see AccountNav), the guest-to-account sync
+      // lifecycle (lib/sync/orchestrator.ts's handleSignedIn) is driven by
+      // AuthProvider's onAuthStateChange listener firing independently of
+      // this navigation, not by a page reload -- it already starts as soon
+      // as Supabase's sign-in call resolves and fires that event, which
+      // happens before this .then()-equivalent continuation runs. A full
+      // reload was never required for the sync to run correctly.
+      router.push("/dashboard");
     }
   };
 
