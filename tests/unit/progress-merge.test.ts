@@ -215,6 +215,89 @@ describe("mergeProgress (guest -> account merge)", () => {
     expect(result.topicsNeedingReview).toEqual(expect.arrayContaining(["Percentages", "Averages"]));
   });
 
+  it("merges study plans by plan id, last-write-wins whole-object on updatedAt", () => {
+    const local = createEmptyProgress();
+    local.studyPlans["plan-1"] = {
+      id: "plan-1",
+      title: "Old title",
+      courseSlugs: ["how-computing-works"],
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      targetDate: null,
+      preferredDaysOfWeek: [1],
+      minutesPerSession: 30,
+      status: "active",
+      schedule: {},
+    };
+    const remote = createEmptyProgress();
+    remote.studyPlans["plan-1"] = {
+      ...local.studyPlans["plan-1"],
+      title: "New title",
+      updatedAt: "2026-01-05T00:00:00.000Z",
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.studyPlans["plan-1"].title).toBe("New title");
+  });
+
+  it("never drops a study plan that exists on only one side", () => {
+    const local = createEmptyProgress();
+    local.studyPlans["plan-a"] = {
+      id: "plan-a",
+      title: "A",
+      courseSlugs: [],
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      targetDate: null,
+      preferredDaysOfWeek: [1],
+      minutesPerSession: 30,
+      status: "active",
+      schedule: {},
+    };
+    const remote = createEmptyProgress();
+    remote.studyPlans["plan-b"] = { ...local.studyPlans["plan-a"], id: "plan-b", title: "B" };
+
+    const merged = mergeProgress(local, remote);
+    expect(Object.keys(merged.studyPlans).sort()).toEqual(["plan-a", "plan-b"]);
+  });
+
+  it("resolves an active-focus-session conflict by keeping whichever started more recently", () => {
+    const local = createEmptyProgress();
+    local.activeFocusSession = {
+      id: "focus-old",
+      mode: "untimed",
+      startedAt: "2026-01-01T00:00:00.000Z",
+      accumulatedSeconds: 0,
+      runningSince: "2026-01-01T00:00:00.000Z",
+    };
+    const remote = createEmptyProgress();
+    remote.activeFocusSession = {
+      id: "focus-new",
+      mode: "untimed",
+      startedAt: "2026-01-05T00:00:00.000Z",
+      accumulatedSeconds: 0,
+      runningSince: "2026-01-05T00:00:00.000Z",
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.activeFocusSession?.id).toBe("focus-new");
+  });
+
+  it("merges focus minutes by MAX per date, never sum -- staying safe under a repeated merge", () => {
+    const local = createEmptyProgress();
+    local.focusMinutesByDate = { "2026-08-01": 20 };
+    const remote = createEmptyProgress();
+    remote.focusMinutesByDate = { "2026-08-01": 35, "2026-08-02": 10 };
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.focusMinutesByDate["2026-08-01"]).toBe(35);
+    expect(merged.focusMinutesByDate["2026-08-02"]).toBe(10);
+
+    // Re-running the merge with the already-merged result must not inflate further.
+    const mergedAgain = mergeProgress(merged, remote);
+    expect(mergedAgain.focusMinutesByDate["2026-08-01"]).toBe(35);
+  });
+
   it("never lets an empty auto-created remote profile row outrank real local preferences, even if it's timestamped later", () => {
     // Reproduces: a guest sets a learning goal at T1, then signs up at T2 >
     // T1. Supabase's handle_new_user trigger creates an empty profiles row

@@ -164,12 +164,18 @@ export default async function CourseOverviewPage({ params }: { params: Params })
         lessons={lessons}
       />
 
-      <p className="mt-3 text-sm">
+      <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
         <Link
           href={`/courses/${course.slug}/practice`}
           className="font-medium text-(--color-brand-strong) hover:underline"
         >
           Practice this course &rarr;
+        </Link>
+        <Link
+          href="/study-studio?tab=plan"
+          className="font-medium text-(--color-brand-strong) hover:underline"
+        >
+          Add to a study plan &rarr;
         </Link>
       </p>
 

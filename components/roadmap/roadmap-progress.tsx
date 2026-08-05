@@ -98,6 +98,14 @@ export function RoadmapStartControls({ path }: { path: LearningPath }) {
           Start this roadmap
         </Button>
       )}
+      <p className="mt-2 text-sm">
+        <Link
+          href="/study-studio?tab=plan"
+          className="font-medium text-(--color-brand-strong) hover:underline"
+        >
+          Plan this roadmap&apos;s courses in Study Studio &rarr;
+        </Link>
+      </p>
     </div>
   );
 }

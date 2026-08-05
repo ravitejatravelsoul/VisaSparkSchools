@@ -6,14 +6,24 @@ import {
   type ProgressState,
   type LessonStatus,
   type ActivityEvent,
+  type StudyPlanState,
+  type FocusSessionState,
 } from "@/lib/learning/types";
-import { loadProgressFrom, saveProgressTo, STORAGE_KEY } from "@/lib/learning/storage";
+import {
+  loadProgressFrom,
+  saveProgressTo,
+  STORAGE_KEY,
+  pruneFocusMinutes,
+} from "@/lib/learning/storage";
 import { calculateLessonMasteryContribution, averageMastery } from "@/lib/learning/mastery";
 import { addDays, nextIntervalDays, type ReviewResult } from "@/lib/learning/review-schedule";
+import { localDateKey } from "@/lib/learning/daily-goal";
+import { buildSchedule, type StudySchedule } from "@/lib/study-plan/planner";
 import {
   allLessons,
   getCourseBySlug,
   getLessonById,
+  getLessonsForCourse,
   getProjectBySlug,
 } from "@/lib/content/registry";
 import {
@@ -24,6 +34,72 @@ import {
   SELF_REPORTED_STEP_TYPES,
 } from "@/lib/learning/completion";
 import type { Lesson } from "@/lib/content/types";
+
+function generateId(prefix: string): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+const lessonMinutesById: Record<string, number> = Object.fromEntries(
+  allLessons.map((l) => [l.id, l.estimatedMinutes]),
+);
+
+/**
+ * Rebuilds a plan's schedule from `today` onward: every lesson already
+ * completed on a past date keeps its real historical placement untouched,
+ * and everything else -- overdue incomplete lessons, anything still
+ * upcoming, and (if `plan.courseSlugs` changed) any newly-added course's
+ * lessons -- is freshly packed starting today via the same deterministic
+ * `buildSchedule` the initial plan creation uses. Shared by
+ * `recalculateStudyPlan` (explicit user action) and `updateStudyPlan`
+ * (whenever a scheduling-relevant field changes).
+ */
+function rebuildPlanSchedule(
+  plan: StudyPlanState,
+  lessonStatus: Record<string, LessonStatus>,
+  today: string,
+): StudySchedule {
+  const keptHistory: StudySchedule = {};
+  for (const [dateKey, lessonIds] of Object.entries(plan.schedule)) {
+    if (dateKey >= today) continue;
+    const completed = lessonIds.filter((id) => lessonStatus[id] === "completed");
+    if (completed.length > 0) keptHistory[dateKey] = completed;
+  }
+  const alreadyPlacedHistorically = new Set(Object.values(keptHistory).flat());
+  const freshLessonIds = plan.courseSlugs
+    .flatMap((slug) => getLessonsForCourse(slug))
+    .filter((l) => lessonStatus[l.id] !== "completed" && !alreadyPlacedHistorically.has(l.id))
+    .map((l) => l.id);
+  const rebuilt = buildSchedule(
+    {
+      lessonIds: freshLessonIds,
+      startDate: today,
+      preferredDaysOfWeek: plan.preferredDaysOfWeek,
+      minutesPerSession: plan.minutesPerSession,
+    },
+    lessonMinutesById,
+  );
+  return { ...keptHistory, ...rebuilt };
+}
+
+/** Parses a Study Studio "Today" queue item id back into its owning plan/lesson (see lib/study-studio/today.ts). */
+function parseTodayItemId(
+  itemId: string,
+):
+  | { kind: "plan-lesson"; planId: string; lessonId: string }
+  | { kind: "review"; lessonId: string }
+  | null {
+  if (itemId.startsWith("plan-lesson:")) {
+    const [, planId, lessonId] = itemId.split(":");
+    if (planId && lessonId) return { kind: "plan-lesson", planId, lessonId };
+  }
+  if (itemId.startsWith("review:")) {
+    const lessonId = itemId.slice("review:".length);
+    if (lessonId) return { kind: "review", lessonId };
+  }
+  return null;
+}
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -167,6 +243,40 @@ interface ProgressStore {
   setNote: (lessonId: string, text: string) => void;
   resolveNoteConflict: (lessonId: string, keep: "current" | "conflict") => void;
   reviewLesson: (lessonId: string, result: ReviewResult) => void;
+  resetReviewSchedule: (lessonId: string) => void;
+  createStudyPlan: (input: {
+    title: string;
+    courseSlugs: string[];
+    targetDate: string | null;
+    preferredDaysOfWeek: number[];
+    minutesPerSession: number;
+  }) => string;
+  updateStudyPlan: (
+    id: string,
+    patch: Partial<
+      Pick<
+        StudyPlanState,
+        "title" | "courseSlugs" | "targetDate" | "preferredDaysOfWeek" | "minutesPerSession"
+      >
+    >,
+  ) => void;
+  pauseStudyPlan: (id: string) => void;
+  resumeStudyPlan: (id: string) => void;
+  recalculateStudyPlan: (id: string) => void;
+  deleteStudyPlan: (id: string) => void;
+  startFocusSession: (opts: {
+    mode: "untimed" | "countdown";
+    countdownMinutes?: number;
+    lessonId?: string;
+    courseSlug?: string;
+  }) => void;
+  pauseFocusSession: () => void;
+  resumeFocusSession: () => void;
+  finishFocusSession: () => void;
+  cancelFocusSession: () => void;
+  dismissTodayItem: (itemId: string) => void;
+  rescheduleTodayItem: (itemId: string, newDateKey: string) => void;
+  removeTodayItem: (itemId: string) => void;
   setDailyGoal: (minutes: number) => void;
   enroll: (courseId: string) => void;
   startRoadmap: (pathId: string) => void;
@@ -448,6 +558,334 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
             dueAt: addDays(new Date(), newInterval).toISOString(),
             intervalDays: newInterval,
           },
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /** Resets a completed lesson's review schedule back to day 1, requiring a UI-level confirmation before calling this since it discards spaced-repetition progress. No-ops for a lesson that was never reviewed. */
+  resetReviewSchedule: (lessonId) => {
+    set((store) => {
+      if (!store.state.reviewQueue[lessonId]) return { state: store.state };
+      const next = {
+        ...store.state,
+        reviewQueue: {
+          ...store.state.reviewQueue,
+          [lessonId]: { dueAt: addDays(new Date(), 1).toISOString(), intervalDays: 1 },
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  createStudyPlan: (input) => {
+    const id = generateId("plan");
+    set((store) => {
+      const now = new Date().toISOString();
+      const lessonIds = input.courseSlugs
+        .flatMap((slug) => getLessonsForCourse(slug))
+        .filter((l) => store.state.lessonStatus[l.id] !== "completed")
+        .map((l) => l.id);
+      const schedule = buildSchedule(
+        {
+          lessonIds,
+          startDate: todayIso(),
+          preferredDaysOfWeek: input.preferredDaysOfWeek,
+          minutesPerSession: input.minutesPerSession,
+        },
+        lessonMinutesById,
+      );
+      const plan: StudyPlanState = {
+        id,
+        title: input.title,
+        courseSlugs: input.courseSlugs,
+        createdAt: now,
+        updatedAt: now,
+        targetDate: input.targetDate,
+        preferredDaysOfWeek: input.preferredDaysOfWeek,
+        minutesPerSession: input.minutesPerSession,
+        status: "active",
+        schedule,
+      };
+      const next = { ...store.state, studyPlans: { ...store.state.studyPlans, [id]: plan } };
+      persist(next);
+      return { state: next };
+    });
+    return id;
+  },
+
+  updateStudyPlan: (id, patch) => {
+    set((store) => {
+      const existing = store.state.studyPlans[id];
+      if (!existing) return { state: store.state };
+      const scheduleRelevantFieldChanged =
+        ("courseSlugs" in patch &&
+          JSON.stringify(patch.courseSlugs) !== JSON.stringify(existing.courseSlugs)) ||
+        ("preferredDaysOfWeek" in patch &&
+          JSON.stringify(patch.preferredDaysOfWeek) !==
+            JSON.stringify(existing.preferredDaysOfWeek)) ||
+        ("minutesPerSession" in patch && patch.minutesPerSession !== existing.minutesPerSession);
+      const updated: StudyPlanState = {
+        ...existing,
+        ...patch,
+        updatedAt: new Date().toISOString(),
+      };
+      if (scheduleRelevantFieldChanged) {
+        updated.schedule = rebuildPlanSchedule(updated, store.state.lessonStatus, todayIso());
+      }
+      const next = { ...store.state, studyPlans: { ...store.state.studyPlans, [id]: updated } };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  pauseStudyPlan: (id) => {
+    set((store) => {
+      const existing = store.state.studyPlans[id];
+      if (!existing || existing.status === "paused") return { state: store.state };
+      const next = {
+        ...store.state,
+        studyPlans: {
+          ...store.state.studyPlans,
+          [id]: { ...existing, status: "paused" as const, updatedAt: new Date().toISOString() },
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  resumeStudyPlan: (id) => {
+    set((store) => {
+      const existing = store.state.studyPlans[id];
+      if (!existing || existing.status === "active") return { state: store.state };
+      const next = {
+        ...store.state,
+        studyPlans: {
+          ...store.state.studyPlans,
+          [id]: { ...existing, status: "active" as const, updatedAt: new Date().toISOString() },
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /** Explicit "rebalance my missed work" action -- never marks any lesson complete, only moves un-done schedule entries forward. See rebuildPlanSchedule. */
+  recalculateStudyPlan: (id) => {
+    set((store) => {
+      const existing = store.state.studyPlans[id];
+      if (!existing) return { state: store.state };
+      const schedule = rebuildPlanSchedule(existing, store.state.lessonStatus, todayIso());
+      const next = {
+        ...store.state,
+        studyPlans: {
+          ...store.state.studyPlans,
+          [id]: { ...existing, schedule, updatedAt: new Date().toISOString() },
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  deleteStudyPlan: (id) => {
+    set((store) => {
+      if (!store.state.studyPlans[id]) return { state: store.state };
+      const studyPlans = { ...store.state.studyPlans };
+      delete studyPlans[id];
+      const next = { ...store.state, studyPlans };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  startFocusSession: (opts) => {
+    set((store) => {
+      const now = new Date().toISOString();
+      const session: FocusSessionState = {
+        id: generateId("focus"),
+        mode: opts.mode,
+        countdownMinutes: opts.countdownMinutes,
+        lessonId: opts.lessonId,
+        courseSlug: opts.courseSlug,
+        startedAt: now,
+        accumulatedSeconds: 0,
+        runningSince: now,
+      };
+      const next = { ...store.state, activeFocusSession: session };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  pauseFocusSession: () => {
+    set((store) => {
+      const session = store.state.activeFocusSession;
+      if (!session || !session.runningSince) return { state: store.state };
+      const elapsedSinceResume = (Date.now() - new Date(session.runningSince).getTime()) / 1000;
+      const next = {
+        ...store.state,
+        activeFocusSession: {
+          ...session,
+          accumulatedSeconds: session.accumulatedSeconds + elapsedSinceResume,
+          runningSince: null,
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  resumeFocusSession: () => {
+    set((store) => {
+      const session = store.state.activeFocusSession;
+      if (!session || session.runningSince) return { state: store.state };
+      const next = {
+        ...store.state,
+        activeFocusSession: { ...session, runningSince: new Date().toISOString() },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /**
+   * Idempotent (safe to call twice, e.g. from two tabs both reacting to a
+   * countdown reaching zero): a session that's already finished is simply
+   * `null`, so a second call finds nothing to bank and no-ops. Elapsed time
+   * is always computed from timestamps, never a shared counter, so both
+   * tabs compute the same total independently.
+   */
+  finishFocusSession: () => {
+    set((store) => {
+      const session = store.state.activeFocusSession;
+      if (!session) return { state: store.state };
+      const now = new Date();
+      const runningExtra = session.runningSince
+        ? (now.getTime() - new Date(session.runningSince).getTime()) / 1000
+        : 0;
+      const totalMinutes = Math.round((session.accumulatedSeconds + runningExtra) / 60);
+      const today = localDateKey(now, store.state.profile.timezone);
+      // Only write a focusMinutesByDate entry when real time was actually
+      // banked -- an unwritten day is what lets Insights' hasAnyFocusHistory
+      // flag correctly mean "ever logged focus time," not "ever clicked
+      // Finish," including on a near-instant start/finish.
+      const next = {
+        ...store.state,
+        activeFocusSession: null,
+        focusMinutesByDate:
+          totalMinutes > 0
+            ? pruneFocusMinutes(
+                {
+                  ...store.state.focusMinutesByDate,
+                  [today]: (store.state.focusMinutesByDate[today] ?? 0) + totalMinutes,
+                },
+                now,
+              )
+            : store.state.focusMinutesByDate,
+      };
+      if (totalMinutes > 0) {
+        logActivity(next, {
+          id: `focus-session-completed:${session.id}`,
+          type: "focus-session-completed",
+          refId: session.id,
+          title: `${totalMinutes} minute${totalMinutes === 1 ? "" : "s"}`,
+          at: now.toISOString(),
+        });
+      }
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /** Discards the active session without banking any time -- for a learner who started by mistake. */
+  cancelFocusSession: () => {
+    set((store) => {
+      if (!store.state.activeFocusSession) return { state: store.state };
+      const next = { ...store.state, activeFocusSession: null };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  dismissTodayItem: (itemId) => {
+    set((store) => {
+      const today = localDateKey(new Date(), store.state.profile.timezone);
+      const current =
+        store.state.todayDismissed.date === today ? store.state.todayDismissed.itemIds : [];
+      if (current.includes(itemId)) return { state: store.state };
+      const next = {
+        ...store.state,
+        todayDismissed: { date: today, itemIds: [...current, itemId] },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /** Only meaningful for plan-lesson and review items (see parseTodayItemId) -- silently no-ops for any other item kind, since a recommendation/weak-topic item has no single date to move. */
+  rescheduleTodayItem: (itemId, newDateKey) => {
+    set((store) => {
+      const parsed = parseTodayItemId(itemId);
+      if (!parsed) return { state: store.state };
+
+      if (parsed.kind === "review") {
+        if (!store.state.reviewQueue[parsed.lessonId]) return { state: store.state };
+        const next = {
+          ...store.state,
+          reviewQueue: {
+            ...store.state.reviewQueue,
+            [parsed.lessonId]: {
+              ...store.state.reviewQueue[parsed.lessonId],
+              dueAt: new Date(`${newDateKey}T00:00:00.000Z`).toISOString(),
+            },
+          },
+        };
+        persist(next);
+        return { state: next };
+      }
+
+      const plan = store.state.studyPlans[parsed.planId];
+      if (!plan) return { state: store.state };
+      const schedule: StudySchedule = {};
+      for (const [dateKey, lessonIds] of Object.entries(plan.schedule)) {
+        const filtered = lessonIds.filter((id) => id !== parsed.lessonId);
+        if (filtered.length > 0) schedule[dateKey] = filtered;
+      }
+      schedule[newDateKey] = [...(schedule[newDateKey] ?? []), parsed.lessonId];
+      const next = {
+        ...store.state,
+        studyPlans: {
+          ...store.state.studyPlans,
+          [parsed.planId]: { ...plan, schedule, updatedAt: new Date().toISOString() },
+        },
+      };
+      persist(next);
+      return { state: next };
+    });
+  },
+
+  /** Only meaningful for plan-lesson items -- permanently drops that lesson from its plan's schedule. Silently no-ops for any other item kind. */
+  removeTodayItem: (itemId) => {
+    set((store) => {
+      const parsed = parseTodayItemId(itemId);
+      if (!parsed || parsed.kind !== "plan-lesson") return { state: store.state };
+      const plan = store.state.studyPlans[parsed.planId];
+      if (!plan) return { state: store.state };
+      const schedule: StudySchedule = {};
+      for (const [dateKey, lessonIds] of Object.entries(plan.schedule)) {
+        const filtered = lessonIds.filter((id) => id !== parsed.lessonId);
+        if (filtered.length > 0) schedule[dateKey] = filtered;
+      }
+      const next = {
+        ...store.state,
+        studyPlans: {
+          ...store.state.studyPlans,
+          [parsed.planId]: { ...plan, schedule, updatedAt: new Date().toISOString() },
         },
       };
       persist(next);

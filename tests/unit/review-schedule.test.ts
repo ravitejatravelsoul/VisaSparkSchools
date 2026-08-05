@@ -26,6 +26,38 @@ describe("nextIntervalDays", () => {
   it("treats an unrecognized interval (e.g. corrupted or legacy data) as index 0", () => {
     expect(nextIntervalDays(999, "good")).toBe(REVIEW_INTERVALS_DAYS[0]);
   });
+
+  it("'hard' repeats the current interval instead of resetting or advancing (Phase 7)", () => {
+    expect(nextIntervalDays(7, "hard")).toBe(7);
+    expect(nextIntervalDays(1, "hard")).toBe(1);
+    expect(nextIntervalDays(30, "hard")).toBe(30);
+  });
+
+  it("'hard' treats an unrecognized interval as index 0, same as 'good' (Phase 7)", () => {
+    expect(nextIntervalDays(999, "hard")).toBe(REVIEW_INTERVALS_DAYS[0]);
+  });
+
+  it("'easy' skips ahead two steps instead of one (Phase 7)", () => {
+    expect(nextIntervalDays(1, "easy")).toBe(7);
+    expect(nextIntervalDays(3, "easy")).toBe(14);
+  });
+
+  it("'easy' stays capped at the last interval, never overflowing (Phase 7)", () => {
+    expect(nextIntervalDays(14, "easy")).toBe(30);
+    expect(nextIntervalDays(30, "easy")).toBe(30);
+  });
+
+  it("severity ordering holds for every interval: again <= hard <= good <= easy (Phase 7)", () => {
+    for (const interval of REVIEW_INTERVALS_DAYS) {
+      const again = nextIntervalDays(interval, "again");
+      const hard = nextIntervalDays(interval, "hard");
+      const good = nextIntervalDays(interval, "good");
+      const easy = nextIntervalDays(interval, "easy");
+      expect(again).toBeLessThanOrEqual(hard);
+      expect(hard).toBeLessThanOrEqual(good);
+      expect(good).toBeLessThanOrEqual(easy);
+    }
+  });
 });
 
 describe("addDays", () => {

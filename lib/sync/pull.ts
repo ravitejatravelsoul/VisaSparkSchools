@@ -33,6 +33,8 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     projectProgress,
     projectMilestones,
     practiceAttempts,
+    studyPlans,
+    focusMinutes,
     activity,
     profile,
   ] = await Promise.all([
@@ -50,6 +52,8 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     supabase.from("project_progress").select("*").eq("user_id", userId),
     supabase.from("project_milestone_completions").select("*").eq("user_id", userId),
     supabase.from("practice_attempts").select("*").eq("user_id", userId),
+    supabase.from("study_plans").select("*").eq("user_id", userId),
+    supabase.from("focus_minutes").select("*").eq("user_id", userId),
     supabase.from("activity_log").select("*").eq("user_id", userId),
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
   ]);
@@ -69,6 +73,8 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     projectProgress,
     projectMilestones,
     practiceAttempts,
+    studyPlans,
+    focusMinutes,
     activity,
     profile,
   ]);
@@ -170,6 +176,25 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
       topicsNeedingReview: row.topics_needing_review,
       lastAttemptedAt: row.last_attempted_at,
     };
+  }
+
+  for (const row of studyPlans.data ?? []) {
+    state.studyPlans[row.plan_id] = {
+      id: row.plan_id,
+      title: row.title,
+      courseSlugs: row.course_slugs,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      targetDate: row.target_date,
+      preferredDaysOfWeek: row.preferred_days_of_week,
+      minutesPerSession: row.minutes_per_session,
+      status: row.status,
+      schedule: row.schedule,
+    };
+  }
+
+  for (const row of focusMinutes.data ?? []) {
+    state.focusMinutesByDate[row.date] = row.minutes;
   }
 
   state.activity = (activity.data ?? [])

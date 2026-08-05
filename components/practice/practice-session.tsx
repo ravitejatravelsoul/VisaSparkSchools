@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useProgressStore } from "@/lib/learning/store";
 import {
   scorePracticeSession,
@@ -350,7 +351,13 @@ export function PracticeSession({
               ))}
             </div>
             {result.topicsNeedingReview.length > 0 && (
-              <Alert tone="info">Consider reviewing: {result.topicsNeedingReview.join(", ")}</Alert>
+              <Alert tone="info">
+                Consider reviewing: {result.topicsNeedingReview.join(", ")}
+                {" · "}
+                <Link href="/study-studio?tab=review" className="underline">
+                  Review these in Study Studio
+                </Link>
+              </Alert>
             )}
             <div className="flex flex-wrap gap-3">
               {result.incorrectQuestionIds.length > 0 && (

@@ -45,6 +45,7 @@ const ACTIVITY_LABEL: Record<ActivityEvent["type"], (event: ActivityEvent) => st
   "project-milestone-completed": (e) => `Completed a milestone in ${e.title}`,
   "project-completed": (e) => `Completed project: ${e.title}`,
   "bookmark-added": (e) => `Bookmarked: ${e.title}`,
+  "focus-session-completed": (e) => `Focus session: ${e.title}`,
 };
 
 export function DashboardClient() {
@@ -135,6 +136,21 @@ export function DashboardClient() {
           </CardBody>
         </Card>
       )}
+
+      <Card>
+        <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Study Studio</h2>
+            <p className="text-sm text-(--color-ink-muted)">
+              Today&apos;s queue, study plans, spaced review, a focus timer, and insights, all in
+              one place.
+            </p>
+          </div>
+          <LinkButton href="/study-studio" variant="secondary">
+            Open Study Studio
+          </LinkButton>
+        </CardBody>
+      </Card>
 
       <section className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Lessons completed" value={String(completedCount)} />

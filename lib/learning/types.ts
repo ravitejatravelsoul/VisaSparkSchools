@@ -77,7 +77,8 @@ export type ActivityEventType =
   | "roadmap-completed"
   | "project-milestone-completed"
   | "project-completed"
-  | "bookmark-added";
+  | "bookmark-added"
+  | "focus-session-completed";
 
 export interface ActivityEvent {
   /** Stable, idempotent id (e.g. "lesson-completed:js-variables") -- logging the same event twice never duplicates it. */
@@ -103,6 +104,51 @@ export interface PracticeAttemptState {
   topicsNeedingReview: string[];
 }
 
+/**
+ * A learner-authored study plan (Phase 7). Stores only a *schedule* --
+ * which real lesson id lands on which calendar day -- never a duplicate
+ * completion flag. "Done" is always read live from `lessonStatus`, exactly
+ * like course/roadmap completion elsewhere in this file; a plan can never
+ * fall out of sync with real progress because it never stores progress of
+ * its own.
+ */
+export interface StudyPlanState {
+  id: string;
+  title: string;
+  /** Real course slugs this plan covers -- a learning-path selection is expanded to its course steps at creation time. */
+  courseSlugs: string[];
+  createdAt: string;
+  updatedAt: string;
+  /** yyyy-mm-dd; null means open-ended (no target). */
+  targetDate: string | null;
+  /** 0 (Sunday) - 6 (Saturday), at least one day. */
+  preferredDaysOfWeek: number[];
+  minutesPerSession: number;
+  status: "active" | "paused";
+  /** yyyy-mm-dd -> lesson ids scheduled that day, in order. */
+  schedule: Record<string, string[]>;
+}
+
+/**
+ * The learner's one current/paused focus timer (Phase 7) -- not a history
+ * list. Elapsed time is always *computed* from these timestamps
+ * (`accumulatedSeconds` plus, if running, `now - runningSince`), never
+ * incremented by a client-side counter -- so two tabs open on the same
+ * session compute the identical elapsed time from the same persisted
+ * numbers instead of racing to update a shared counter.
+ */
+export interface FocusSessionState {
+  id: string;
+  mode: "untimed" | "countdown";
+  countdownMinutes?: number;
+  lessonId?: string;
+  courseSlug?: string;
+  startedAt: string;
+  accumulatedSeconds: number;
+  /** ISO timestamp the current run segment resumed at; null while paused. */
+  runningSince: string | null;
+}
+
 export interface ProfileState {
   displayName: string | null;
   learningGoal: string | null;
@@ -114,7 +160,7 @@ export interface ProfileState {
 
 /** The full shape persisted to localStorage (guest mode) or Supabase (signed in). */
 export interface ProgressState {
-  version: 4;
+  version: 5;
   lessonStatus: Record<string, LessonStatus>;
   exerciseAttempts: Record<string, ExerciseAttemptState>;
   quizResults: Record<string, QuizResultState>;
@@ -136,6 +182,14 @@ export interface ProgressState {
   projectProgress: Record<string, ProjectProgressState>;
   /** course slug -> practice session summary (Phase 6) */
   practiceAttempts: Record<string, PracticeAttemptState>;
+  /** plan id -> study plan (Phase 7) */
+  studyPlans: Record<string, StudyPlanState>;
+  /** The one current/paused focus timer, if any (Phase 7). */
+  activeFocusSession: FocusSessionState | null;
+  /** yyyy-mm-dd -> minutes of active (unpaused) focus time that day. Pruned to the most recent 90 days on every write -- bounded, never unbounded history. */
+  focusMinutesByDate: Record<string, number>;
+  /** Today's dismissed Study Studio queue item ids -- reset (treated as empty) whenever `date` isn't today, so this can never grow unbounded either. */
+  todayDismissed: { date: string; itemIds: string[] };
   /** newest first, capped at 50 */
   activity: ActivityEvent[];
   profile: ProfileState;
@@ -143,7 +197,7 @@ export interface ProgressState {
 
 export function createEmptyProgress(): ProgressState {
   return {
-    version: 4,
+    version: 5,
     lessonStatus: {},
     exerciseAttempts: {},
     quizResults: {},
@@ -158,6 +212,10 @@ export function createEmptyProgress(): ProgressState {
     roadmapProgress: {},
     projectProgress: {},
     practiceAttempts: {},
+    studyPlans: {},
+    activeFocusSession: null,
+    focusMinutesByDate: {},
+    todayDismissed: { date: "", itemIds: [] },
     activity: [],
     profile: {
       displayName: null,

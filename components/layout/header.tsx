@@ -34,6 +34,11 @@ export function Header() {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <span className="hidden sm:inline-flex">
+            <LinkButton href="/study-studio" variant="secondary" size="sm">
+              Study Studio
+            </LinkButton>
+          </span>
+          <span className="hidden sm:inline-flex">
             <LinkButton href="/dashboard" variant="secondary" size="sm">
               Dashboard
             </LinkButton>

@@ -6,8 +6,28 @@ import {
   type RoadmapProgressState,
   type ProjectProgressState,
   type PracticeAttemptState,
+  type StudyPlanState,
+  type FocusSessionState,
   type ActivityEvent,
 } from "@/lib/learning/types";
+
+/** focusMinutesByDate keeps at most this many most-recent days -- bounded history, never unbounded. */
+const FOCUS_MINUTES_RETENTION_DAYS = 90;
+
+/** Drops any focusMinutesByDate entry older than the retention window, relative to `now`. */
+export function pruneFocusMinutes(
+  minutesByDate: Record<string, number>,
+  now: Date = new Date(),
+): Record<string, number> {
+  const cutoff = new Date(now.getTime());
+  cutoff.setDate(cutoff.getDate() - FOCUS_MINUTES_RETENTION_DAYS);
+  const cutoffKey = cutoff.toISOString().slice(0, 10);
+  const result: Record<string, number> = {};
+  for (const [date, minutes] of Object.entries(minutesByDate)) {
+    if (date >= cutoffKey) result[date] = minutes;
+  }
+  return result;
+}
 
 export const STORAGE_KEY = "visasparkschools:progress";
 
@@ -29,7 +49,7 @@ export function perUserStorageKey(userId: string): string {
  * (not deleted) as a recoverable backup rather than removed immediately.
  */
 const LEGACY_STORAGE_KEY = "codewise:progress";
-const CURRENT_VERSION = 4;
+const CURRENT_VERSION = 5;
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -125,13 +145,41 @@ function migrate(parsed: unknown): ProgressState {
       ...data,
       notes: migrateNotes(data.notes),
       practiceAttempts: (data.practiceAttempts as ProgressState["practiceAttempts"]) ?? {},
+      studyPlans: (data.studyPlans as ProgressState["studyPlans"]) ?? {},
+      activeFocusSession: (data.activeFocusSession as ProgressState["activeFocusSession"]) ?? null,
+      focusMinutesByDate: pruneFocusMinutes(
+        (data.focusMinutesByDate as ProgressState["focusMinutesByDate"]) ?? {},
+      ),
+      todayDismissed: (data.todayDismissed as ProgressState["todayDismissed"]) ?? {
+        date: "",
+        itemIds: [],
+      },
       profile: { ...empty.profile, ...(data.profile as object | undefined) },
     } as ProgressState;
   }
 
-  // v3 -> v4 (Phase 6): every field already matches the current shape except
-  // the new practiceAttempts map, which didn't exist yet -- keep everything
-  // else exactly as v3's own "current version" branch would have.
+  // v4 -> v5 (Phase 7): every field already matches the current shape except
+  // the new Study Studio fields, which didn't exist yet -- keep everything
+  // else exactly as v4's own "current version" branch would have.
+  if (data.version === 4) {
+    return {
+      ...empty,
+      ...data,
+      version: CURRENT_VERSION,
+      notes: migrateNotes(data.notes),
+      practiceAttempts: (data.practiceAttempts as ProgressState["practiceAttempts"]) ?? {},
+      studyPlans: {},
+      activeFocusSession: null,
+      focusMinutesByDate: {},
+      todayDismissed: { date: "", itemIds: [] },
+      profile: { ...empty.profile, ...(data.profile as object | undefined) },
+    } as ProgressState;
+  }
+
+  // v3 -> v5 (Phase 6 + Phase 7 fields both missing): every field already
+  // matches the current shape except practiceAttempts and the Study Studio
+  // fields, none of which existed yet -- keep everything else exactly as
+  // v3's own "current version" branch would have.
   if (data.version === 3) {
     return {
       ...empty,
@@ -139,11 +187,15 @@ function migrate(parsed: unknown): ProgressState {
       version: CURRENT_VERSION,
       notes: migrateNotes(data.notes),
       practiceAttempts: {},
+      studyPlans: {},
+      activeFocusSession: null,
+      focusMinutesByDate: {},
+      todayDismissed: { date: "", itemIds: [] },
       profile: { ...empty.profile, ...(data.profile as object | undefined) },
     } as ProgressState;
   }
 
-  // Any older version (1, 2, or missing): reconstruct a safe v4 shape,
+  // Any older version (1, 2, or missing): reconstruct a safe v5 shape,
   // keeping every field that still matches and defaulting the rest --
   // never crash or drop unrelated data just because one shape changed.
   return {
@@ -165,6 +217,10 @@ function migrate(parsed: unknown): ProgressState {
     roadmapProgress: {},
     projectProgress: {},
     practiceAttempts: {},
+    studyPlans: {},
+    activeFocusSession: null,
+    focusMinutesByDate: {},
+    todayDismissed: { date: "", itemIds: [] },
     activity: [],
   };
 }
@@ -257,6 +313,56 @@ function mergePracticeAttempt(
     lastAttemptedAt: a.lastAttemptedAt >= b.lastAttemptedAt ? a.lastAttemptedAt : b.lastAttemptedAt,
     topicsNeedingReview: Array.from(new Set([...a.topicsNeedingReview, ...b.topicsNeedingReview])),
   };
+}
+
+/**
+ * A study plan is a coherent object (schedule + settings edited together as
+ * a unit), so it's merged whole via last-write-wins on `updatedAt` -- like
+ * `profile` below -- rather than stitching individual fields from each side,
+ * which could produce a schedule that doesn't match either side's settings.
+ */
+function mergeStudyPlan(
+  a: StudyPlanState | undefined,
+  b: StudyPlanState | undefined,
+): StudyPlanState {
+  if (!a) return b!;
+  if (!b) return a;
+  return a.updatedAt >= b.updatedAt ? a : b;
+}
+
+/**
+ * At most one active focus session can exist at a time, so a genuine
+ * conflict (two devices both mid-session) is resolved by keeping whichever
+ * started more recently -- focus sessions are ephemeral working state, not
+ * permanent history, so this is a reasonable, low-stakes tiebreak rather
+ * than something requiring a conflict UI like notes get.
+ */
+function mergeActiveFocusSession(
+  a: FocusSessionState | null,
+  b: FocusSessionState | null,
+): FocusSessionState | null {
+  if (!a) return b;
+  if (!b) return a;
+  return a.startedAt >= b.startedAt ? a : b;
+}
+
+/**
+ * Per-date minutes are merged by MAX, not sum, deliberately: `mergeProgress`
+ * must be safe to re-run (see the module doc below), and summing two values
+ * that already include a prior merge's result would double-count on every
+ * subsequent merge. This undercounts genuine same-day study split across two
+ * devices, but stays correct under repeated merges -- the same tradeoff
+ * `quizResults`/`practiceAttempts` already make with best-of instead of sum.
+ */
+function mergeFocusMinutesByDate(
+  a: Record<string, number>,
+  b: Record<string, number>,
+): Record<string, number> {
+  const merged: Record<string, number> = { ...a };
+  for (const [date, minutes] of Object.entries(b)) {
+    merged[date] = Math.max(merged[date] ?? 0, minutes);
+  }
+  return pruneFocusMinutes(merged);
 }
 
 function mergeActivity(a: ActivityEvent[], b: ActivityEvent[]): ActivityEvent[] {
@@ -392,6 +498,25 @@ export function mergeProgress(local: ProgressState, remote: ProgressState): Prog
       remote.practiceAttempts[id],
     );
   }
+
+  const planIds = new Set([...Object.keys(local.studyPlans), ...Object.keys(remote.studyPlans)]);
+  for (const id of planIds) {
+    merged.studyPlans[id] = mergeStudyPlan(local.studyPlans[id], remote.studyPlans[id]);
+  }
+
+  merged.activeFocusSession = mergeActiveFocusSession(
+    local.activeFocusSession,
+    remote.activeFocusSession,
+  );
+
+  merged.focusMinutesByDate = mergeFocusMinutesByDate(
+    local.focusMinutesByDate,
+    remote.focusMinutesByDate,
+  );
+
+  // Session/device-local UI preference, not meaningful data to merge across
+  // devices -- same rationale as `dailyGoalMinutes` above.
+  merged.todayDismissed = local.todayDismissed;
 
   merged.activity = mergeActivity(local.activity, remote.activity);
 

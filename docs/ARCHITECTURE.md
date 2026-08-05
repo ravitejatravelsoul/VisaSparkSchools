@@ -197,11 +197,13 @@ are globally unique, and no lab's reference solution or copy falsely implies loc
 ## Learning engine and account sync (Phase 4)
 
 `lib/learning/store.ts` is a Zustand store wrapping a single `ProgressState` object
-(`lib/learning/types.ts`, currently version 3): lesson status, exercise attempts, quiz results,
+(`lib/learning/types.ts`, currently version 5): lesson status, exercise attempts, quiz results,
 skill mastery, review queue, bookmarks, versioned notes, streak, daily goal, recently viewed,
-**enrollments**, **roadmap progress**, **project progress**, a capped **activity** feed, and
-**profile** preferences. Every mutator persists to `localStorage` on every call
-(`lib/learning/storage.ts`), under one of two keys:
+**enrollments**, **roadmap progress**, **project progress**, a capped **activity** feed, **profile**
+preferences, **practice attempts** (Phase 6 — see below), and **study plans**/**active focus
+session**/**focus minutes by date**/**today-dismissed queue items** (Phase 7 — see "Study Studio"
+below). Every mutator persists to `localStorage` on every call (`lib/learning/storage.ts`), under
+one of two keys:
 
 - `visasparkschools:progress` — the shared **guest** key, used whenever nobody is signed in.
 - `visasparkschools:progress:<userId>` — a **per-account** cache key, used only while that
@@ -268,6 +270,54 @@ current roadmap's next required course step → continue the most recently acces
 `lesson-completed` events (summed `estimatedMinutes`) in the learner's timezone, not a running
 timer; missing a day never deletes anything, since it only ever reads today's slice of a permanent
 log.
+
+**Practice attempts (Phase 6)**: `practiceAttempts: Record<courseSlug, PracticeAttemptState>` is a
+per-course _summary_ (best score, last attempted, topics needing review) written by
+`lib/practice/registry.ts`'s course-wide practice sessions — never a full attempt history or raw
+answers. Synced via the `practice_attempts` table (`supabase/migrations/0003_...`).
+
+## Study Studio (Phase 7)
+
+A learner-facing surface at `/study-studio` (`app/(site)/study-studio/`, excluded from
+`sitemap.xml`/`robots.txt` like `/dashboard`) unifying six views, built entirely on the architecture
+above — no duplicated progress store, question bank, notes, or bookmarks:
+
+- **Today** (`lib/study-studio/today.ts#buildTodayQueue`) — a pure function building a deterministic
+  daily queue from real study-plan schedule entries, due reviews, and weak practice topics, with a
+  dashboard-recommendation fallback.
+- **Study Plan** (`lib/study-plan/planner.ts`) — a pure, registry-free scheduling module.
+  `buildSchedule` greedily packs a lesson-id list onto preferred days of the week within a
+  minutes-per-session budget; `rebalanceSchedule` moves overdue incomplete lessons forward while
+  never rewriting a completed lesson's real historical date, and is idempotent. `lib/learning/
+store.ts` connects this to real course/lesson data and `Date.now()`.
+- **Review** (`lib/study-studio/review.ts`) — flashcards derived from the _same_ lesson-quiz content
+  the Phase 6 practice engine already reuses (never a second question bank), rated Again/Hard/Good/
+  Easy. `review-schedule.ts#nextIntervalDays` was extended from the original two-button again/good
+  schedule to all four ratings as a strict type-union widening (existing callers unaffected). A
+  lesson's overall result is the _worst_ rating given across its cards.
+- **Focus** — `FocusSessionState` stores only `accumulatedSeconds` plus a `runningSince` timestamp
+  (or `null` while paused); elapsed time is always computed from these timestamps, never a shared
+  incrementing counter, so multiple tabs reading the same persisted session agree without racing.
+  `finishFocusSession` is idempotent.
+- **Insights** (`lib/study-studio/insights.ts#buildInsights`) — aggregates only already-stored data
+  for a 7- or 30-day range; `hasAnyFocusHistory`/`hasActivePlan` flags keep "never used this feature"
+  visibly distinct from "used it, got a real zero."
+- **Saved Learning** — a filterable view directly over the existing `bookmarks`/`notes` state; no new
+  data model.
+
+**Persistence**: `ProgressState` v4→v5 added `studyPlans`, `activeFocusSession`,
+`focusMinutesByDate` (pruned to 90 days on every write), and `todayDismissed` (self-resetting once
+its stored date isn't today). `mergeProgress` merges study plans whole-object by `updatedAt`, the
+active focus session by most-recent `startedAt`, and focus minutes **by MAX per date, not sum** (sum
+would double-count on a repeated merge — the same reason `quizResults`/`practiceAttempts` use
+best-of). `activeFocusSession`/`todayDismissed` are deliberately local-only (never synced to
+Supabase) — single-device ephemeral state with no real cross-device value. `study_plans` and
+`focus_minutes` are synced via `supabase/migrations/0004_...`.
+
+**Performance**: the Today tab loads eagerly (no per-lesson quiz content); Study Plan, Review,
+Focus, Insights, and Saved Learning are each `next/dynamic`-loaded on first open, keeping the Review
+tab's flashcard/quiz-derivation code out of the landing page's initial bundle (verified by a
+Playwright script-response check).
 
 ## AI tutor (optional)
 

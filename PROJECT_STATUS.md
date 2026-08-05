@@ -192,8 +192,14 @@ This file replaces the previous CodeWise-era status document. That document's ow
       step. Full details below under "Phase 6 — Aptitude, Reasoning, and Career Readiness: what was
       actually done." Commit: `feat: add aptitude reasoning and career readiness` (local only, not
       pushed).
-- [ ] **Phase 7 — Study Studio.** Not started. No workspace model, no upload handling, no
-      extraction pipeline, no `docs/STUDY_STUDIO.md` content yet (the file does not exist).
+- [x] **Phase 7 — Study Studio.** Complete. A learner-facing Study Studio at `/study-studio`
+      (Today/Study Plan/Review/Focus/Insights/Saved Learning), built entirely on top of existing
+      progress, quiz, and practice architecture — no duplicated question banks, notes, or bookmarks.
+      Deterministic study-plan scheduling and rebalancing, spaced-review flashcards reusing lesson
+      quiz content with 4-button Again/Hard/Good/Easy ratings, an untimed/countdown focus timer
+      counting only active time, real-data-only insights, and a unified bookmarks/notes view. Full
+      details below under "Phase 7 — Study Studio: what was actually done." Commit:
+      `feat: add integrated study studio` (local only, not pushed).
 - [ ] **Phase 8 — Tools Lab and Project Studio.** Not started as new work. The existing single-file
       Playground (HTML/CSS/JS, Python, SQL) carries forward unchanged and still works. None of the
       ~28 requested Tools Lab utilities exist yet. Project Studio (multi-file, ZIP import/export,
@@ -1832,39 +1838,204 @@ certificate or final-assessment claim was enabled anywhere, per the brief. Phase
 
 Commit: `feat: add aptitude reasoning and career readiness` (local only, not pushed).
 
+## Phase 7 — Study Studio (2026-08-04, complete)
+
+Starting checkpoint: local `main` = `7e98ddc` (Phase 6), 2 commits ahead of `origin/main` = `18f41f3`,
+0 behind, clean tree — independently re-verified, not assumed. `ebd8d4c` and `7e98ddc` confirmed as
+two separate commits (neither amended, no history rewritten).
+
+**Architecture reuse (audited before writing anything)**: read `lib/learning/types.ts`/`storage.ts`/
+`store.ts`, `lib/learning/review-schedule.ts`/`mastery.ts`/`completion.ts`/`daily-goal.ts`/
+`recommendation.ts`, `lib/practice/` (Phase 6), `lib/sync/orchestrator.ts`/`lifecycle.ts`, and the
+existing notes/bookmark components before designing anything. Every feature below extends this
+architecture; nothing duplicates an existing progress store, question bank, notes system, or
+bookmark list.
+
+**Today**: `lib/study-studio/today.ts#buildTodayQueue` is a pure function building a deterministic
+daily queue from real data only — a signed-in day's active study-plan lessons, due reviews
+(`reviewQueue`/`isDue`), and weak practice topics (Phase 6's `practiceAttempts.topicsNeedingReview`)
+— falling back to the existing dashboard recommendation only if nothing else is queued. Start/
+Continue links to the real lesson or practice page; Skip today, Reschedule, and Remove are real store
+actions (`dismissTodayItem`/`rescheduleTodayItem`/`removeTodayItem`), not UI-only state — lesson/
+practice progress itself remains untouched and is always the completion source of truth.
+
+**Study Plan**: `lib/study-plan/planner.ts` is a pure, dependency-free scheduling module (no registry
+imports, no `Date.now()`) — `buildSchedule` greedily packs a lesson-id list onto preferred days of
+the week within a minutes-per-session budget (always placing at least one lesson per active day, even
+one that alone exceeds the budget); `estimateCompletionDate`/`isTargetRealistic` compute and warn
+against a plan's real projected finish date; `rebalanceSchedule` moves overdue incomplete lessons
+forward while preserving every completed lesson's real historical date untouched, and is verified
+idempotent (re-running it on its own output changes nothing further). Course-selection UI supports
+choosing one or more real courses (a roadmap selection is not a separate concept — the same course
+picker covers it, since every roadmap's required steps already resolve to real courses per Phase 6);
+target-date or open-ended; preferred days/minutes/pace; live preview before creating; edit, pause,
+resume, recalculate, and delete, each a real store action with a confirmation step before delete.
+22 dedicated planner unit tests cover every rule, including the idempotency and "never marks anything
+complete" guarantees.
+
+**Review**: reuses the exact same lesson-quiz content the Phase 6 practice engine derives its
+questions from (`lib/study-studio/review.ts#buildFlashcardsForLessons`) — no separate question bank.
+A flashcard shows a quiz prompt, a Reveal-answer step, then Again/Hard/Good/Easy rating buttons;
+`lib/learning/review-schedule.ts`'s `nextIntervalDays` was extended from the original two-button
+again/good schedule to all four ratings (a strict type-union widening — every existing caller and the
+dashboard's own two-button "Due for review" section keep compiling and behaving identically, verified
+by 5 new backward-compatibility-focused tests). A lesson's overall review result is the _worst_
+rating given across its cards (`worstReviewResult`), so struggling on any one question schedules an
+earlier retry. Weak-topic lessons (Phase 6 integration) are reviewable on demand regardless of due
+date. `resetReviewSchedule` requires an explicit confirm step before discarding a lesson's spaced-
+repetition progress. No mastery or exam-readiness claim is made anywhere in the copy.
+
+**Focus**: untimed or countdown sessions. `FocusSessionState` stores only `accumulatedSeconds` plus
+a `runningSince` timestamp (or `null` while paused) — elapsed time is always _computed_ from these
+timestamps, never incremented by a shared client-side counter, so two tabs reading the same persisted
+session independently compute the identical elapsed time instead of racing to update one. Pause
+truly stops the clock (verified: 10 minutes paused banks 0 additional seconds); Finish is idempotent
+(calling it twice, e.g. from two tabs both reacting to a countdown reaching zero, only banks time
+once); Cancel discards without banking anything. A real bug caught and fixed during testing: the
+initial implementation wrote a 0-minute `focusMinutesByDate` entry even for a near-instant start/
+finish, which would have made Insights' "no focus history yet" flag falsely flip to "used, 0 minutes"
+after an accidental click — fixed to only write an entry when real time was actually banked. The
+visible countdown updates every second (component-local re-render only, never a per-second
+localStorage write); a single `aria-live` region announces only at session start, one-minute-
+remaining, and time's-up — never every second.
+
+**Insights**: `lib/study-studio/insights.ts#buildInsights` aggregates only real, already-stored data
+— lessons completed (from the activity log), active study minutes (from `focusMinutesByDate`),
+planned-vs-completed lessons (from active study plans' schedules), courses practiced, due reviews,
+weak topics, and course completion percentages — for a 7- or 30-day range. A `hasAnyFocusHistory`/
+`hasActivePlan` pair of flags keeps "never used this feature" (an empty state) visibly distinct from
+"used it, got a real zero" (a `0` stat), tested explicitly. No fabricated numbers, productivity
+score, or employment claim anywhere.
+
+**Saved Learning**: a unified, filterable view directly over the _existing_ `bookmarks` array and
+`notes` map — no new data model. Filterable by course and by type (bookmarked/noted/both); a note's
+text is only ever rendered to the signed-in owner's own client, exactly like the existing dashboard
+notes section already did.
+
+**Persistence and sync**: `ProgressState` bumped 4→5, adding `studyPlans`, `activeFocusSession`,
+`focusMinutesByDate` (pruned to the most recent 90 days on every write — bounded, never unbounded
+history), and `todayDismissed` (self-resetting once its stored date isn't today, so it can't grow
+unbounded either). `lib/learning/storage.ts#migrate()` handles v4→v5 explicitly (and v3→v5 for an
+even-older stored guest state), preserving every existing field; `mergeProgress` merges study plans
+whole-object by `updatedAt` (a plan's schedule and settings are edited together as a unit, so
+stitching individual fields from each side could produce an inconsistent result), the active focus
+session by most-recent `startedAt` (a genuine two-device conflict is rare, low-stakes, ephemeral
+working state — not something requiring a conflict UI like notes get), and per-date focus minutes by
+**MAX, not sum** — summing would double-count on every re-run of a merge that's supposed to be safe
+to repeat, the same reason `quizResults`/`practiceAttempts` already use best-of instead of sum.
+`todayDismissed` is device-local (last-write-wins, same as `dailyGoalMinutes`), never meaningfully
+mergeable across devices. A new Supabase migration, `supabase/migrations/0004_phase7_study_studio.sql`
+(`study_plans` and `focus_minutes` tables, RLS-enabled, matching existing conventions), was authored
+and reviewed but **not applied to any remote environment** — migration `0003` was not touched.
+Deliberately **no** table was added for `activeFocusSession`/`todayDismissed`: both are single-device
+ephemeral state with no real cross-device sync value, so they stay local-only; `mergeProgress` still
+merges them correctly during a guest-to-account merge since a remote pull simply never populates them
+and local's real value always wins over the empty default. `lib/sync/push.ts`/`pull.ts` wired for the
+two new tables.
+
+**Integration**: a "Study Studio" link added to the header (desktop) and mobile nav drawer, alongside
+the existing Dashboard link; a Study Studio callout card on the dashboard; a "Review these in Study
+Studio" link on Phase 6's practice-session results when topics need review; a "Plan this roadmap's
+courses in Study Studio" link on roadmap pages; an "Add to a study plan" link on course pages.
+`/study-studio` added to `robots.txt`'s disallow list (matching `/dashboard`/`/profile`) and
+confirmed absent from `sitemap.xml` — this is personalized, per-account content, never public.
+Certificate/final-assessment eligibility remains untouched and disabled everywhere.
+
+**Performance and accessibility**: the Study Studio page eagerly loads only the lightweight Today tab
+(no per-lesson quiz content); Study Plan, Review, Focus, Insights, and Saved Learning are each loaded
+via `next/dynamic` on first open — verified with a dedicated Playwright test asserting the Review
+tab's flashcard-building function bodies are never present in any script response the landing page
+requests. Tabs use a real WAI-ARIA tablist (roving `tabindex`, `ArrowLeft`/`ArrowRight`/`Home`/`End`
+keyboard support, `aria-selected`/`aria-controls`), verified via both integration and Playwright
+keyboard tests. `useSearchParams()` is wrapped in a `<Suspense>` boundary with a properly-sized
+skeleton fallback (never `fallback={null}`, which PROJECT_STATUS.md's Phase 2 section already
+documents as a real, previously-measured CLS bug class on this codebase). Zero critical/serious axe
+violations across all six tabs, both viewports (12 accessibility-route checks).
+
+**Tests added**: `tests/unit/study-plan-planner.test.ts` (22), `study-studio-today.test.ts` (10),
+`study-studio-review.test.ts` (14), `study-studio-insights.test.ts` (11), `study-plan-store.test.ts`
+(17), `focus-session-store.test.ts` (14), plus extensions to `review-schedule.test.ts` (+5),
+`storage-migration.test.ts` (+3), `progress-merge.test.ts` (+4) — 100 new/extended unit tests.
+Integration tests: `today-panel.test.tsx` (3), `study-plan-panel.test.tsx` (6), `review-panel.test.tsx`
+(6), `focus-panel.test.tsx` (7), `study-studio-tabs.test.tsx` (8), `insights-and-saved-panel.test.tsx`
+(8) — 38 new integration tests. Playwright: `study-studio.spec.ts` (14 specs × up to 2 browsers,
+including the bundle-isolation check, a real reload-recovery check for an in-progress focus session,
+and mobile/desktop nav variants), plus 6 new accessibility-route checks.
+
+**Verification, all green**: `npm ci` (reproducible, 0 vulnerabilities), `npm audit` (0
+vulnerabilities), `format:check`, `lint` (0 errors, 0 warnings), `typecheck`, `content:validate`
+(unchanged: 21 courses/252 lessons/23 projects/18 tracks; 16/83/16 directory — Phase 7 added no
+content), `content:validate-snippets` (474/474), `test` (**485/485** Vitest tests, 49 files), `git
+diff --check` clean. `build`: `next build` (Turbopack) failed on this specific machine _after_
+`npm ci`'s reinstall, with a Windows Application Control policy blocking the freshly-rewritten
+`@next/swc-win32-x64-msvc` native binary from loading (`An Application Control policy has blocked
+this file`) — an OS-level host policy, not a code defect: re-verified by removing and reinstalling
+that single package (same block persisted) and by running `next build --webpack`, which **succeeded
+cleanly, generating all 480 routes including `/study-studio`**, proving the application code itself
+is correct. The full Playwright suite (**379 passed, 7 skipped, 0 failed**, chromium + mobile-
+chromium, including every new Study Studio and accessibility check) was run and confirmed green
+_before_ `npm ci`'s reinstall triggered this environment issue, against the identical application
+code (`npm ci` only reinstalls `node_modules` from the same lockfile; it changes no source file).
+
+**Final diff audit**: reviewed the complete diff for secrets/credentials, environment files, personal
+data, generated artifacts, placeholder content, `.only`/`.fixme`/new skips/weakened assertions, and
+unrelated changes — none found. 18 tracked files modified, 20 new files (4 `lib/study-plan`/
+`lib/study-studio` modules, 8 `components/study-studio/*` files, the Study Studio route, the Supabase
+migration, and 13 new test files).
+
+**Remaining limitations, stated honestly**: no live Supabase project exists to execution-test the new
+`study_plans`/`focus_minutes` tables or migration `0004` against a real database (same outstanding
+item as Phase 6). Deletion of a study plan (or any collection this codebase already supports deleting
+locally, such as a note or bookmark) is never propagated as a remote row deletion during sync — an
+existing, consistent limitation across this entire sync layer, not something newly introduced here.
+Multi-tab reactivity is not implemented anywhere in this codebase (a change in one tab doesn't
+live-update another open tab without a reload) — Focus sessions rely on timestamp-based elapsed-time
+correctness and idempotent finish/cancel operations for safety under that constraint, the same as
+every other piece of state here. No certificate or final-assessment claim was enabled anywhere.
+Phases 8 (Tools Lab/Project Studio) and 9 (certificates), plus final deployment/migration application
+and live smoke testing, remain entirely unstarted.
+
+Commit: `feat: add integrated study studio` (local only, not pushed).
+
 ## If you pick this up next
 
-**Immediate next step**: three commits sit locally, ahead of `origin/main` — `chore: remediate
-dependency security findings` (Phase 5E), `fix: use safe authentication navigation` (Phase 5F), and
-`feat: add aptitude reasoning and career readiness` (Phase 6). Push them (after each one's own
-safety audit, mirroring every prior phase — none have been re-audited as a group) before starting
-further work.
+**Immediate next step**: four commits sit locally, ahead of `origin/main` — `chore: remediate
+dependency security findings` (Phase 5E), `fix: use safe authentication navigation` (Phase 5F),
+`feat: add aptitude reasoning and career readiness` (Phase 6), and `feat: add integrated study
+studio` (Phase 7). Push them (after each one's own safety audit, mirroring every prior phase — none
+have been re-audited as a group) before starting further work.
+
+**Environment note for whoever runs this next**: on this Windows machine, `next build` (Turbopack)
+currently fails with a Windows Application Control policy blocking the native
+`@next/swc-win32-x64-msvc` binary, triggered by `npm ci`'s reinstall — confirmed not a code issue
+(`next build --webpack` succeeds cleanly). If this recurs, either resolve the host's Application
+Control policy for that binary or use `next build --webpack` / `next dev --webpack`; Playwright's
+`webServer` command in `playwright.config.ts` uses the default (Turbopack) build and will need the
+same workaround until the policy is resolved.
 
 Recommended next step before any further feature phase, still outstanding from earlier phases:
 **provision a real Supabase project and execution-test the guest-to-account sync lifecycle end to
 end** (sign up, complete some lessons as a guest first, sign in, verify the merge; sign out and
 confirm nothing leaks; sign in as a second account on the same device and confirm the same) —
-including Phase 6's new `practice_attempts` table and migration, which has only been reviewed
-statically and never run against a real or local Postgres instance (no Docker in this environment).
-Everything is implemented and mock-tested, but "the mock behaves correctly" and "the real
-Postgres/RLS/auth stack behaves correctly" are different claims, and only the first has been
-verified in this build.
+including Phase 6's `practice_attempts` table and Phase 7's `study_plans`/`focus_minutes` tables
+(migrations `0003` and `0004`), none of which have been run against a real or local Postgres
+instance (no Docker in this environment). Everything is implemented and mock-tested, but "the mock
+behaves correctly" and "the real Postgres/RLS/auth stack behaves correctly" are different claims,
+and only the first has been verified in this build.
 
-Recommended next _phase_: with Phase 5 (all sub-phases) and Phase 6 now complete — 21 courses,
-18 tracks, 252 lessons, 23 projects, every category and every roadmap either public or genuinely
-still-unbuilt (no more categories that are "public in name only") — the curriculum-expansion arc
-from the original brief is closed. The next natural phase is **Phase 7 (Study Studio)** or
-**Phase 8 (Tools Lab and Project Studio)**, both large enough to warrant their own from-scratch
-planning pass the way this session did for Phase 3, Phase 4, and Phase 6. Other options, not
-started, listed here only as possibilities: mapping more of the remaining guide-only technologies
-(including automation-adjacent ones like Docker, Kubernetes, and GitHub Actions) to real courses as
-those courses get built; building the course-reviews system deferred in Phase 4 (item 39), once a
-moderation/abuse/ownership model is designed; or **Phase 9 (honest completion and skill-achievement
-certificates)**, which should wait until there is real assessment infrastructure to certify against.
-Whichever is chosen, re-run the full verified-green command list above before and after each
-coherent chunk of work, exactly as this session did, and do not add a navigation entry for any
-surface until its destination page is real and non-empty. Do not enable `certificateEligible` or
-`finalAssessmentRequired` on any path until Phase 9 actually exists.
+Recommended next _phase_: with Phase 5 (all sub-phases), Phase 6, and Phase 7 now complete, the
+curriculum-expansion arc and a full learner-facing Study Studio are both closed out. The next
+natural phase is **Phase 8 (Tools Lab and Project Studio)**, large enough to warrant its own
+from-scratch planning pass the way this session did for Phase 3, Phase 4, Phase 6, and Phase 7.
+Other options, not started, listed here only as possibilities: mapping more of the remaining
+guide-only technologies (including automation-adjacent ones like Docker, Kubernetes, and GitHub
+Actions) to real courses as those courses get built; building the course-reviews system deferred in
+Phase 4 (item 39), once a moderation/abuse/ownership model is designed; or **Phase 9 (honest
+completion and skill-achievement certificates)**, which should wait until there is real assessment
+infrastructure to certify against. Whichever is chosen, re-run the full verified-green command list
+above before and after each coherent chunk of work, exactly as this session did, and do not add a
+navigation entry for any surface until its destination page is real and non-empty. Do not enable
+`certificateEligible` or `finalAssessmentRequired` on any path until Phase 9 actually exists.
 
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 

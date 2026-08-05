@@ -254,6 +254,52 @@ export interface Database {
         };
         Relationships: [];
       };
+      study_plans: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan_id: string;
+          title: string;
+          course_slugs: string[];
+          target_date: string | null;
+          preferred_days_of_week: number[];
+          minutes_per_session: number;
+          status: "active" | "paused";
+          schedule: Record<string, string[]>;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          plan_id: string;
+          title: string;
+          course_slugs: string[];
+          target_date: string | null;
+          preferred_days_of_week: number[];
+          minutes_per_session: number;
+          status: "active" | "paused";
+          schedule: Record<string, string[]>;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          title?: string;
+          course_slugs?: string[];
+          target_date?: string | null;
+          preferred_days_of_week?: number[];
+          minutes_per_session?: number;
+          status?: "active" | "paused";
+          schedule?: Record<string, string[]>;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      focus_minutes: {
+        Row: { id: string; user_id: string; date: string; minutes: number };
+        Insert: { user_id: string; date: string; minutes: number };
+        Update: { minutes?: number };
+        Relationships: [];
+      };
       daily_goals: {
         Row: { id: string; user_id: string; minutes: number; updated_at: string };
         Insert: { user_id: string; minutes: number };

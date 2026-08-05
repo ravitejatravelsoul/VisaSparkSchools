@@ -69,6 +69,15 @@ export function MobileNav() {
               <ul className="mt-1 flex flex-col gap-1">
                 <li>
                   <Link
+                    href="/study-studio"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"
+                  >
+                    Study Studio
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/dashboard"
                     onClick={() => setOpen(false)}
                     className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"

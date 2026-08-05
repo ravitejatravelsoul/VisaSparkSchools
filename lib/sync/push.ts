@@ -100,6 +100,26 @@ export async function pushProgress(
     last_attempted_at: p.lastAttemptedAt,
   }));
 
+  const studyPlanRows = Object.values(state.studyPlans).map((p) => ({
+    user_id: userId,
+    plan_id: p.id,
+    title: p.title,
+    course_slugs: p.courseSlugs,
+    target_date: p.targetDate,
+    preferred_days_of_week: p.preferredDaysOfWeek,
+    minutes_per_session: p.minutesPerSession,
+    status: p.status,
+    schedule: p.schedule,
+    created_at: p.createdAt,
+    updated_at: p.updatedAt,
+  }));
+
+  const focusMinutesRows = Object.entries(state.focusMinutesByDate).map(([date, minutes]) => ({
+    user_id: userId,
+    date,
+    minutes,
+  }));
+
   const activityRows = state.activity.map((event) => ({
     user_id: userId,
     event_id: event.id,
@@ -164,6 +184,12 @@ export async function pushProgress(
       ? supabase
           .from("practice_attempts")
           .upsert(practiceAttemptRows, { onConflict: "user_id,course_id" })
+      : Promise.resolve({ error: null }),
+    studyPlanRows.length
+      ? supabase.from("study_plans").upsert(studyPlanRows, { onConflict: "user_id,plan_id" })
+      : Promise.resolve({ error: null }),
+    focusMinutesRows.length
+      ? supabase.from("focus_minutes").upsert(focusMinutesRows, { onConflict: "user_id,date" })
       : Promise.resolve({ error: null }),
     activityRows.length
       ? supabase

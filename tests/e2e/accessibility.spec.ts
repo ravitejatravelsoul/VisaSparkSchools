@@ -99,6 +99,13 @@ const routes = [
   "/categories/career-gd",
   "/technologies/quantitative-aptitude-guide",
   "/roadmaps/placement-and-job-readiness",
+  // Phase 7: Study Studio.
+  "/study-studio",
+  "/study-studio?tab=plan",
+  "/study-studio?tab=review",
+  "/study-studio?tab=focus",
+  "/study-studio?tab=insights",
+  "/study-studio?tab=saved",
 ];
 
 for (const route of routes) {
