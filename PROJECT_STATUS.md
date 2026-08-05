@@ -222,7 +222,7 @@ This file replaces the previous CodeWise-era status document. That document's ow
       remain hard-locked `false` on every learning-path record -- this phase never touched them;
       final assessments remain a distinct, unbuilt concept. Full details below under "Phase 9 —
       Honest Completion Certificates: what was actually done." Commit: `feat: add honest completion
-    certificates` (local only, not pushed).
+  certificates` (local only, not pushed).
 - [ ] **Final preview/production deployment and live smoke testing.** Not started. No live Supabase
       project has been provisioned or execution-tested end to end (see "If you pick this up next"),
       and nothing in this repo has been deployed to a preview or production environment.
