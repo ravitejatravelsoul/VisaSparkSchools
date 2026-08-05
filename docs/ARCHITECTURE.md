@@ -319,6 +319,52 @@ Focus, Insights, and Saved Learning are each `next/dynamic`-loaded on first open
 tab's flashcard/quiz-derivation code out of the landing page's initial bundle (verified by a
 Playwright script-response check).
 
+## Tools Hub and Project Studio (Phase 8)
+
+**Tools Hub** (`/tools`, `lib/tools/`, `components/tools/`): a small, hand-curated registry
+(`lib/tools/registry.ts`) of 7 client-only utilities, each its own route
+(`app/(site)/tools/[toolSlug]/page.tsx`) and its own `next/dynamic` import
+(`components/tools/tool-runner.tsx`) so the directory page never ships any individual tool's
+implementation code. Every tool processes data with the browser's own built-ins only — no `eval`,
+no network request, no server round trip. Two tools have their pure logic extracted into testable
+modules (`lib/tools/text-diff.ts`'s DP-based line diff, `lib/tools/color-contrast.ts`'s WCAG 2.1
+relative-luminance/contrast-ratio math); the rest are simple enough to test at the component level.
+
+**Project Studio** (`/project-studio`, excluded from `sitemap.xml`/`robots.txt` like
+`/dashboard`/`/study-studio`): reuses `content/projects.ts`, `ProjectMilestoneChecklist`, and
+`toggleProjectMilestone`/`projectProgress` completely unmodified. The only new piece is a
+hand-curated allowlist (`lib/project-studio/runner-mapping.ts#PROJECT_RUNNER_LANGUAGE`) mapping 7
+of the 23 projects — the ones whose real deliverable is genuinely browser-executable — to the
+existing HTML/JS, Python, or TypeScript runner (never a new runner). This is deliberately **not**
+derived from `trackSlugs` alone: several tracks (`placement-prep`, `git-api-sql`,
+`software-testing`, `ai-llm-rag`) are shared by 2-3 projects, so a loose track match would wire a
+runner to an ambiguous or wrong project. Unmapped projects show the same fixed "runs on your own
+computer" honesty banner every guided local lab already uses. In-browser code autosaves via the
+existing `usePersistedCode` hook, keyed `project-studio:<projectId>` — deliberately not synced to
+Supabase, matching the established per-exercise-code precedent (Phase 4 item 40); Export/Import
+gives a manual JSON round trip instead. No new `ProgressState` field or Supabase migration was
+needed — milestone completion already existed.
+
+## Honest completion certificates (Phase 9)
+
+Full detail in `docs/CERTIFICATES.md`. `ProgressState` v5→v6 added
+`certificates: Record<string, CertificateState>` (`lib/learning/types.ts`); every descriptive
+field on a `CertificateState` is a snapshot taken at issuance, never re-read live. Eligibility
+(`lib/certificates/eligibility.ts`) is derived entirely from existing state
+(`isCourseComplete`/`isProjectComplete`/`practiceAttempts`) — no new completion concept. Course
+Completion is universal; Skill Achievement is gated behind a hand-curated 16-of-21-course
+allowlist with a genuine, unambiguous mapped capstone project, using the same "don't guess an
+ambiguous mapping" discipline as Project Studio's runner allowlist above.
+
+Issuance (`useProgressStore().issueCertificate`) is deterministic
+(id = `${type}:${targetId}`) and idempotent by construction: the store checks for an existing id
+before writing, exactly like `ensureEnrolled`/`startRoadmap` elsewhere in this file.
+`mergeProgress`'s `mergeCertificates` unions by id, keeping the earlier `issuedAt` on a genuine
+cross-device collision. `supabase/migrations/0005_...` adds owner-only RLS (no update policy —
+certificates are immutable once issued) and a column-restricted `certificates_public` view granted
+to `anon`, backing the optional `/certificates/verify/[code]` public-verification route with a
+random, non-enumerable `verification_code`.
+
 ## AI tutor (optional)
 
 `lib/ai/` is a small, provider-agnostic pipeline: `chunking.ts` splits lesson content by heading;

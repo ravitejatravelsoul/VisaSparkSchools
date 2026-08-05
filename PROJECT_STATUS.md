@@ -104,7 +104,7 @@ tests, the full Playwright suite including new focus-trap regression tests, prod
 axe accessibility sweep, and before/after Lighthouse). **Not pushed** (no remote configured).
 `c670ef1` was not amended or rewritten.
 
-## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phase 5 (delivered across sub-phases 5A/5A.2/5B/5C/5D/5E/5F) and Phase 6 (Aptitude, Reasoning, and Career Readiness) are now also complete — see their own sections below. Phases 7–9 and final deployment not started. Separately, a **Phase 5A — Interactive Curriculum Foundation** track (unrelated to the numbered "Phase 5" below, which is Aptitude/Reasoning/Career content) added a new TypeScript course and lab runner plus the schema/tooling/documentation foundation for future course batches — see "Phase 5A — Interactive Curriculum Foundation" below.
+## Overall status: Phase 1 (audit), Phase 2 (rebrand), Phase 3 (technology architecture), Phase 4 (learning and accounts), and Phase 4.5 (UI/UX redesign) complete, source-level audited, and verified. Phase 4 was independently reviewed against source (not the original report) before committing -- see "Phase 4 checkpoint audit" below for the 12 genuine defects found and fixed. Phase 4.5 is a presentation-only design-system pass on top of Phase 4 -- it changed no learning, account, sync, merge, privacy, enrollment, completion, roadmap, daily-goal, or recommendation behavior, and found/fixed 2 real pre-existing bugs plus a missing focus trap across 4 modal dialogs along the way (see "Phase 4.5 — UI/UX redesign" below). Each phase committed as its own local checkpoint commit; exact hashes recorded in `git log`. Phase 5 (delivered across sub-phases 5A/5A.2/5B/5C/5D/5E/5F), Phase 6 (Aptitude, Reasoning, and Career Readiness), Phase 7 (Study Studio), Phase 8 (Tools Hub and Project Studio), and Phase 9 (honest completion certificates) are now also complete — see their own sections below. Final deployment/live migration application not started. Separately, a **Phase 5A — Interactive Curriculum Foundation** track (unrelated to the numbered "Phase 5" below, which is Aptitude/Reasoning/Career content) added a new TypeScript course and lab runner plus the schema/tooling/documentation foundation for future course batches — see "Phase 5A — Interactive Curriculum Foundation" below.
 
 This file replaces the previous CodeWise-era status document. That document's own numbering
 ("Phase 1–10") described the _original build_, not this expansion's 9-phase plan below — see
@@ -200,19 +200,29 @@ This file replaces the previous CodeWise-era status document. That document's ow
       counting only active time, real-data-only insights, and a unified bookmarks/notes view. Full
       details below under "Phase 7 — Study Studio: what was actually done." Commit:
       `feat: add integrated study studio` (local only, not pushed).
-- [ ] **Phase 8 — Tools Lab and Project Studio.** Not started as new work. The existing single-file
-      Playground (HTML/CSS/JS, Python, SQL) carries forward unchanged and still works. None of the
-      ~28 requested Tools Lab utilities exist yet. Project Studio (multi-file, ZIP import/export,
-      IndexedDB, snapshots) does not exist — the nav still says "Playground," accurately, and was
-      deliberately _not_ relabeled "Project Studio" since that capability doesn't exist yet (see
-      Phase 2 notes below).
-- [ ] **Phase 9 — Honest completion and skill-achievement certificates.** Not started. No
-      `docs/CERTIFICATES.md`, no certificate schema, no eligibility logic, no PDF generation, no
-      verification route. When built, certificates must be described only as VisaSparkSchools
-      completion or skill-achievement certificates — never as accreditation or professional
-      certification. Phase 6 deliberately left `certificateEligible`/`finalAssessmentRequired`
-      hard-locked to `false` on every path, including the newly-public Placement and Job Readiness
-      roadmap, so this phase has nothing false to walk back.
+- [x] **Phase 8 — Tools Hub and Project Studio.** Complete. A Tools Hub at `/tools` (7
+      genuinely distinct, local-only browser utilities: JSON formatter/validator, regex tester,
+      text diff, URL encoder/decoder, Base64 encoder/decoder, timestamp converter, color contrast
+      checker) and a Project Studio at `/project-studio` letting a learner work through any of the
+      23 existing projects' objectives/milestones, with a real in-browser HTML/JS/Python/TypeScript
+      runner for the 7 projects whose deliverable is genuinely browser-executable (a small,
+      hand-curated allowlist, never the whole set). The existing single-file Playground carries
+      forward unchanged; "Playground" in nav was left as-is since Project Studio is a distinct,
+      genuinely new surface, not a rename. Full details below under "Phase 8 — Tools Hub and
+      Project Studio: what was actually done." Commit: `feat: add tools and project studio` (local
+      only, not pushed).
+- [x] **Phase 9 — Honest completion and skill-achievement certificates.** Complete.
+      `docs/CERTIFICATES.md`, `ProgressState` v5 → v6 (`certificates` field), deterministic/
+      idempotent issuance, a hand-curated 16-of-21-course Skill Achievement allowlist (the other 5
+      deliberately excluded for lacking an unambiguous capstone), a certificates dashboard,
+      printable certificate presentation, and an honest public-verification route gated behind
+      Supabase actually being configured. Certificates are described only as "VisaSparkSchools
+      Certificate of Completion" / "VisaSparkSchools Skill Achievement," with a fixed
+      non-accreditation disclaimer. Phase 6's `certificateEligible`/`finalAssessmentRequired`
+      remain hard-locked `false` on every learning-path record -- this phase never touched them;
+      final assessments remain a distinct, unbuilt concept. Full details below under "Phase 9 —
+      Honest Completion Certificates: what was actually done." Commit: `feat: add honest completion
+    certificates` (local only, not pushed).
 - [ ] **Final preview/production deployment and live smoke testing.** Not started. No live Supabase
       project has been provisioned or execution-tested end to end (see "If you pick this up next"),
       and nothing in this repo has been deployed to a preview or production environment.
@@ -1052,10 +1062,15 @@ valid (unaffected by Phase 3 changes) and was not redundantly recaptured.
 - **No live Supabase project, Vercel deployment, or AI provider key.** Everything AI/Supabase-
   related remains statically reviewed and mock-tested only, never executed against real
   infrastructure.
-- **Per-exercise saved code does not sync to Supabase.** It remains a local-only `localStorage`
-  convenience feature (`lib/learning/use-persisted-code.ts`) — no requirement identified it as one
-  of the Phase 4 tables to add, and promoting it would need its own migration and merge rule (see
-  the Phase 4 report, item 40).
+- **Per-exercise saved code, and Phase 8's per-project workspace code, do not sync to Supabase.**
+  Both remain a local-only `localStorage` convenience feature built on the same
+  `lib/learning/use-persisted-code.ts` hook — no requirement identified either as one of the tables
+  to add, and promoting them would need their own migration and merge rule (see the Phase 4 report,
+  item 40). Project Studio compensates with an explicit JSON export/import instead.
+- **Certificate public verification (`certificates_public` view, migration `0005`) is reviewed but
+  not execution-tested against a live database.** The column-restriction and the
+  view-bypasses-RLS technique it relies on are standard Postgres/Supabase practice, but have never
+  been run against a real project — see `docs/CERTIFICATES.md`.
 - **Course reviews were not built.** Deferred per explicit instruction until a full moderation/
   abuse/ownership model exists (see the Phase 4 report, item 39).
 - Manual cross-browser testing remains Chromium-only (desktop + mobile viewport/UA profile via
@@ -1992,18 +2007,155 @@ Multi-tab reactivity is not implemented anywhere in this codebase (a change in o
 live-update another open tab without a reload) — Focus sessions rely on timestamp-based elapsed-time
 correctness and idempotent finish/cancel operations for safety under that constraint, the same as
 every other piece of state here. No certificate or final-assessment claim was enabled anywhere.
-Phases 8 (Tools Lab/Project Studio) and 9 (certificates), plus final deployment/migration application
-and live smoke testing, remain entirely unstarted.
+Final deployment/migration application and live smoke testing remain entirely unstarted.
 
 Commit: `feat: add integrated study studio` (local only, not pushed).
 
+## Phase 8 — Tools Hub and Project Studio: what was actually done
+
+**Tools Hub** (`/tools`, `lib/tools/`, `components/tools/`): 7 hand-curated, genuinely distinct
+browser-only utilities -- JSON Formatter & Validator, Regex Tester, Text Diff Checker, URL
+Encoder/Decoder, Base64 Encoder/Decoder, Timestamp Converter, Color Contrast Checker (real WCAG
+2.1 contrast-ratio math, the same standard this platform's own design system is held to). Every
+tool processes data with the browser's own built-ins (`JSON.parse`/`RegExp`/`encodeURIComponent`/
+`btoa`/`TextEncoder`/`Date`) -- no `eval`, no network request, no upload, no paid API, no external
+AI. Each tool has its own stable route (`/tools/[toolSlug]`), safe input-length limits (enforced
+both via `maxLength` and in state), a visible character counter where relevant, a documented
+`MAX_MATCHES`/zero-width-match guard in the regex tester specifically to prevent a pathological
+pattern from hanging the tab, copy/reset controls, a one-click example, and 1-2 related course
+links resolved against the real course registry (verified by a test that every `relatedCourseSlugs`
+entry is a real course). Each tool's implementation is its own `next/dynamic` import
+(`components/tools/tool-runner.tsx`), so `/tools` never ships any individual tool's code --
+verified the same way Phase 7 verified Study Studio's tab isolation (a Playwright test scanning
+every `/_next/static/chunks/` response body for tool-specific function names). Wired into the
+existing Fuse.js search index (`scripts/build-search-index.ts`, a new `"tool"` `SearchDocument`
+type) and `app/sitemap.ts`.
+
+**Project Studio** (`/project-studio`, `lib/project-studio/`, `components/project-studio/`): lets a
+learner pick any of the 23 existing projects (`content/projects.ts`, unchanged) and see its real
+objectives, milestones, and completion criteria, reusing `ProjectMilestoneChecklist` and the
+existing `toggleProjectMilestone`/`projectProgress` store action and state completely unmodified --
+no new milestone/progress concept was introduced. A small, hand-curated allowlist
+(`lib/project-studio/runner-mapping.ts`, `PROJECT_RUNNER_LANGUAGE`) wires exactly 7 of the 23
+projects (personal-portfolio-page → html, interactive-quiz-app → javascript,
+expense-tracker-cli → python, api-powered-weather-app → javascript, typed-study-tracker →
+typescript, sample-api-validation-suite → javascript, learning-path-recommendation-engine →
+typescript) to the existing HTML/JS, Python, and TypeScript runners (`components/runners/*`) --
+never a new runner. The other 16 projects (React, Node/Express, Java, Playwright, Selenium, Bash,
+a real local PostgreSQL install, the AI/RAG capstones, and the three Aptitude/Reasoning/Career-GD
+self-practice capstones) show a fixed, honest "Set up and run this on your own computer" notice
+instead, mirroring the same fixed banner every guided local lab already shows
+(`components/lesson/guided-local-lab-panel.tsx`) -- confirmed by a unit test that no runner-mapped
+project's own description contradicts this. In-browser code autosaves per project via the existing
+`usePersistedCode` hook (the same pattern already used for per-exercise code, and, matching that
+existing precedent from Phase 4, deliberately **not** added to the Supabase sync layer -- see
+Phase 4 item 40), with a confirmation-gated Reset and a JSON Export/Import round trip (validates
+the imported file's `projectId` matches the current project before restoring). Milestone completion
+stays 100% self-reported (opening the page, or the workspace, never marks anything complete); the
+brief's "platform-verified execution" is interpreted honestly and narrowly on the certificate/
+completion-criteria copy: the platform genuinely executes a learner's code and shows real output/
+errors for runner-backed projects, but never grades it against that project's specific
+requirements. No new `ProgressState` field, storage version, or Supabase migration was needed for
+Phase 8 -- every piece of persisted state it touches already existed.
+
+**Navigation**: "Tools" and "Project Studio" added to `footerLinks.product`; a "Certificates"
+footer link was also added in this same edit in preparation for Phase 9. "Tools", "Project Studio",
+and "Certificates" added to the mobile nav drawer's quick-links list alongside the existing "Study
+Studio"/"Dashboard" entries; a "Certificates" quick-action button was added to the desktop header
+at the `lg:` breakpoint specifically (not `sm:`, to avoid crowding the existing Study
+Studio/Dashboard buttons at tablet widths). The read-only `/projects/[slug]` page gained an "Open
+in Project Studio" button; the Project Studio workspace page links back to it as "View the
+read-only project page."
+
+**Testing**: 59 new Vitest tests (registry integrity, `diffLines`/`evaluateWcag`/`parseHexColor`
+pure-function unit tests, `PROJECT_RUNNER_LANGUAGE` invariants, `ProjectRunnerPanel` autosave/
+reset/import/export integration tests with Monaco mocked out -- this codebase's established
+convention is that no Vitest test renders a real runner component directly; that's what the
+Playwright suite is for), 36 new focused Playwright tests (directory search/filter, every tool's
+core correctness including unsafe-input handling, runner-backed vs. non-runner project behavior,
+reset confirmation, milestone self-reporting, 404s, bundle isolation), and 22 accessibility route
+checks (a real `aria-required-children` violation was found and fixed during this work: the URL
+encoder's and Base64 converter's Encode/Decode toggle used `role="tablist"` with plain `<button>`
+children instead of `role="tab"` -- fixed by switching to `role="group"` with `aria-pressed`
+toggle buttons, the correct pattern for a two-state toggle that was never really a tablist).
+
+Commit: `feat: add tools and project studio` (local only, not pushed).
+
+## Phase 9 — Honest Completion Certificates: what was actually done
+
+Full detail in `docs/CERTIFICATES.md` (new). Summary:
+
+`ProgressState` bumped v5 → v6, adding `certificates: Record<string, CertificateState>`
+(`lib/learning/types.ts`). Migration branches added for v3/v4/v5 → v6
+(`lib/learning/storage.ts#migrate`), all defaulting `certificates` to `{}` and preserving every
+other field untouched. `mergeProgress` extended with `mergeCertificates` (union by id; the same id
+independently issued on two devices before syncing keeps whichever has the earlier `issuedAt`,
+never both, stable under repeated merges).
+
+Two certificate types (`lib/certificates/eligibility.ts`), both derived from existing progress
+data, never a new completion concept:
+
+- **Course Completion** -- every course qualifies once `isCourseComplete` (unchanged) is true.
+- **Skill Achievement** -- a hand-curated allowlist of **16 of 21 courses**
+  (`SKILL_ACHIEVEMENT_COURSES`) with a genuine, unambiguous 1:1 mapped capstone/guided project;
+  requires lessons complete + a practice-session best score ≥70% + that project's milestones all
+  complete. The other 5 courses (`how-computing-works`, `ai-foundations`, `git-apis-sql`,
+  `software-testing-foundations`, `api-testing-and-automation`) are deliberately excluded for
+  lacking an unambiguous single capstone, not silently defaulted to eligible or ineligible.
+  `tests/unit/certificate-eligibility.test.ts` verifies every allowlist entry programmatically
+  (real course, real project, genuine track correspondence, no project reused across two courses).
+
+Issuance (`useProgressStore().issueCertificate`) is deterministic (id = `${type}:${targetId}`) and
+idempotent -- calling it again when a record already exists returns the same id unchanged, never a
+duplicate. Every descriptive field on an issued certificate (`targetTitle`, `displayName`,
+`criteriaSnapshot`, `contentVersionRef`) is a snapshot taken at issuance, never re-read live, so a
+later course rename or profile-name change can never silently alter an already-issued record.
+
+A certificates dashboard (`/certificates`) shows every course's eligibility/requirement-progress
+(met vs. unmet criteria, not just a pass/fail badge) and an Issue/View action per type. A printable
+certificate presentation (`/certificates/[type]/[targetId]`) uses the browser's own print dialog
+(`window.print()` against a `print:`-styled layout; site header/footer hidden via a new
+`print:hidden` wrapper in `app/(site)/layout.tsx`) -- no PDF-generation dependency was added.
+
+Supabase migration `0005_phase9_certificates.sql` (reviewed, **not applied to any live
+project**): a `certificates` table, owner-only RLS for select/insert/delete (deliberately no
+update policy -- certificates are immutable once issued), a unique `(user_id, cert_id)` constraint
+backing the app-level idempotency check at the database level too, and a column-restricted
+`certificates_public` view (only type/title/display-name/issued-at/criteria/version/verification-
+code -- never user_id/id/cert_id) granted to `anon` for public verification lookups by a random,
+non-enumerable `verification_code` that is never derived from any account identifier.
+
+A guest, or any deployment without Supabase configured, sees an explicit "stored only on this
+device, not independently verifiable" disclosure. Once signed in with Supabase enabled, the
+certificate page shows a real `/certificates/verify/[code]` link. That route itself
+(`app/(site)/certificates/verify/[code]/page.tsx`) is genuinely functional -- if Supabase isn't
+configured it says so honestly rather than faking a result either way; if configured, it queries
+`certificates_public` and shows only the safe fields, or an honest "No certificate found." **Not
+execution-tested against a live database** -- the same outstanding limitation as every other
+Supabase table in this codebase (see "Known limitations" and "If you pick this up next" below).
+
+`/certificates`, `/certificates/[type]/[targetId]`, and `/certificates/verify/[code]` are excluded
+from the sitemap and disallowed in `robots.txt`, matching the existing precedent for `/dashboard`,
+`/profile`, and `/study-studio`. Phase 6's `certificateEligible`/`finalAssessmentRequired` flags
+remain hard-locked `false` on every learning-path record -- this phase never touched them, and
+final assessments remain an entirely separate, unbuilt concept from completion certificates.
+
+**Testing**: 37 new Vitest tests (eligibility-boundary unit tests including the exact-threshold
+edge case, `issueCertificate` idempotency/eligibility/display-name-fallback store tests,
+`mergeCertificates` union/tie-break tests, dashboard/presentation integration tests) and 20 new
+focused Playwright tests (end-to-end course completion → issuance → view flow against a real
+small course, idempotent-refresh, guest disclosure, invalid-type 404, honest verify-route
+behavior with Supabase disabled, sitemap/robots exclusion).
+
+Commit: `feat: add honest completion certificates` (local only, not pushed).
+
 ## If you pick this up next
 
-**Immediate next step**: four commits sit locally, ahead of `origin/main` — `chore: remediate
-dependency security findings` (Phase 5E), `fix: use safe authentication navigation` (Phase 5F),
-`feat: add aptitude reasoning and career readiness` (Phase 6), and `feat: add integrated study
-studio` (Phase 7). Push them (after each one's own safety audit, mirroring every prior phase — none
-have been re-audited as a group) before starting further work.
+**Immediate next step**: as of this update, `origin/main` is at `009e1d8` (through Phase 7 plus the
+study-plan UTC/local timezone fix found during that phase's own push audit). Two further commits
+sit locally on top of it, not yet pushed: `feat: add tools and project studio` (Phase 8) and
+`feat: add honest completion certificates` (Phase 9). Push them (after their own safety audit,
+mirroring every prior phase) before starting further work.
 
 **Environment note for whoever runs this next**: on this Windows machine, `next build` (Turbopack)
 currently fails with a Windows Application Control policy blocking the native
@@ -2013,29 +2165,33 @@ Control policy for that binary or use `next build --webpack` / `next dev --webpa
 `webServer` command in `playwright.config.ts` uses the default (Turbopack) build and will need the
 same workaround until the policy is resolved.
 
-Recommended next step before any further feature phase, still outstanding from earlier phases:
-**provision a real Supabase project and execution-test the guest-to-account sync lifecycle end to
-end** (sign up, complete some lessons as a guest first, sign in, verify the merge; sign out and
-confirm nothing leaks; sign in as a second account on the same device and confirm the same) —
-including Phase 6's `practice_attempts` table and Phase 7's `study_plans`/`focus_minutes` tables
-(migrations `0003` and `0004`), none of which have been run against a real or local Postgres
-instance (no Docker in this environment). Everything is implemented and mock-tested, but "the mock
-behaves correctly" and "the real Postgres/RLS/auth stack behaves correctly" are different claims,
-and only the first has been verified in this build.
+Recommended next step before any further feature phase, still outstanding from every earlier
+phase: **provision a real Supabase project and execution-test the guest-to-account sync lifecycle
+end to end** (sign up, complete some lessons as a guest first, sign in, verify the merge; sign out
+and confirm nothing leaks; sign in as a second account on the same device and confirm the same) —
+including migrations `0003` (`practice_attempts`), `0004` (`study_plans`/`focus_minutes`), and now
+`0005` (`certificates`, plus the `certificates_public` view specifically -- its column-restriction
+and the RLS-bypass-via-view technique it relies on have never been checked against a real Postgres
+instance). None of these five migrations have been run against a real or local Postgres instance
+(no Docker in this environment). Everything is implemented and mock-tested, but "the mock behaves
+correctly" and "the real Postgres/RLS/auth stack behaves correctly" are different claims, and only
+the first has been verified in this build.
 
-Recommended next _phase_: with Phase 5 (all sub-phases), Phase 6, and Phase 7 now complete, the
-curriculum-expansion arc and a full learner-facing Study Studio are both closed out. The next
-natural phase is **Phase 8 (Tools Lab and Project Studio)**, large enough to warrant its own
-from-scratch planning pass the way this session did for Phase 3, Phase 4, Phase 6, and Phase 7.
-Other options, not started, listed here only as possibilities: mapping more of the remaining
-guide-only technologies (including automation-adjacent ones like Docker, Kubernetes, and GitHub
-Actions) to real courses as those courses get built; building the course-reviews system deferred in
-Phase 4 (item 39), once a moderation/abuse/ownership model is designed; or **Phase 9 (honest
-completion and skill-achievement certificates)**, which should wait until there is real assessment
-infrastructure to certify against. Whichever is chosen, re-run the full verified-green command list
-above before and after each coherent chunk of work, exactly as this session did, and do not add a
-navigation entry for any surface until its destination page is real and non-empty. Do not enable
-`certificateEligible` or `finalAssessmentRequired` on any path until Phase 9 actually exists.
+Recommended next _phase_: with Phase 5 (all sub-phases), Phase 6, Phase 7, Phase 8, and Phase 9 now
+complete, every numbered phase in this expansion's original plan is closed out except final
+deployment. The one remaining item from this plan is **final preview/production deployment and
+live smoke testing** — provisioning real Supabase and hosting projects, applying all five
+migrations in order, and re-verifying every sync/merge/certificate/verification claim above against
+the real stack, not a mock. Beyond that, options not started, listed here only as possibilities:
+mapping more of the remaining guide-only technologies (including automation-adjacent ones like
+Docker, Kubernetes, and GitHub Actions) to real courses as those courses get built; building the
+course-reviews system deferred in Phase 4 (item 39), once a moderation/abuse/ownership model is
+designed; or expanding the Skill Achievement certificate allowlist to the 5 currently-excluded
+courses, but only once each genuinely has an unambiguous single capstone project (adding one
+because a track happens to have _a_ project, when it's shared with 2-3 others, would repeat exactly
+the mistake this phase deliberately avoided). Whichever is chosen, re-run the full verified-green
+command list above before and after each coherent chunk of work, exactly as this session did, and
+do not add a navigation entry for any surface until its destination page is real and non-empty.
 
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 

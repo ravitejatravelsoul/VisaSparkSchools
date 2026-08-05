@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Certificates",
   description:
     "Check your certificate eligibility and issue honest, platform-issued Course Completion and Skill Achievement certificates.",
+  alternates: { canonical: `${siteConfig.url}/certificates` },
 };
 
 export default function CertificatesPage() {
