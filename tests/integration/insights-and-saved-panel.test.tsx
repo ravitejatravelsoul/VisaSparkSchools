@@ -4,6 +4,7 @@ import { InsightsPanel } from "@/components/study-studio/insights-panel";
 import { SavedLearningPanel } from "@/components/study-studio/saved-learning-panel";
 import { useProgressStore } from "@/lib/learning/store";
 import { createEmptyProgress } from "@/lib/learning/types";
+import { localDateKey } from "@/lib/learning/daily-goal";
 
 const LESSON_ID = "found-how-computers-run-code";
 
@@ -27,7 +28,13 @@ describe("InsightsPanel", () => {
   });
 
   it("shows real active study minutes once focus history exists", () => {
-    const todayKey = new Date().toISOString().slice(0, 10);
+    // Must match exactly how the component itself keys focusMinutesByDate --
+    // InsightsPanel computes "today" via localDateKey(now, profile.timezone),
+    // which resolves to the JS runtime's default timezone when timezone is
+    // null (the default), not UTC. Using `.toISOString().slice(0, 10)` here
+    // (a UTC-based key) would silently mismatch whenever the test runner's
+    // local date and UTC date differ at the moment the suite runs.
+    const todayKey = localDateKey(new Date(), null);
     useProgressStore.setState((s) => ({
       state: { ...s.state, focusMinutesByDate: { [todayKey]: 42 } },
     }));

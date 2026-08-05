@@ -592,7 +592,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       const schedule = buildSchedule(
         {
           lessonIds,
-          startDate: todayIso(),
+          startDate: localDateKey(new Date(), store.state.profile.timezone),
           preferredDaysOfWeek: input.preferredDaysOfWeek,
           minutesPerSession: input.minutesPerSession,
         },
@@ -634,7 +634,11 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
         updatedAt: new Date().toISOString(),
       };
       if (scheduleRelevantFieldChanged) {
-        updated.schedule = rebuildPlanSchedule(updated, store.state.lessonStatus, todayIso());
+        updated.schedule = rebuildPlanSchedule(
+          updated,
+          store.state.lessonStatus,
+          localDateKey(new Date(), store.state.profile.timezone),
+        );
       }
       const next = { ...store.state, studyPlans: { ...store.state.studyPlans, [id]: updated } };
       persist(next);
@@ -679,7 +683,11 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     set((store) => {
       const existing = store.state.studyPlans[id];
       if (!existing) return { state: store.state };
-      const schedule = rebuildPlanSchedule(existing, store.state.lessonStatus, todayIso());
+      const schedule = rebuildPlanSchedule(
+        existing,
+        store.state.lessonStatus,
+        localDateKey(new Date(), store.state.profile.timezone),
+      );
       const next = {
         ...store.state,
         studyPlans: {

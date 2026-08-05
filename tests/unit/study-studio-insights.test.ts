@@ -1,8 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { buildInsights } from "@/lib/study-studio/insights";
 import { createEmptyProgress } from "@/lib/learning/types";
+import { localDateKey } from "@/lib/learning/daily-goal";
 
 const NOW = new Date("2026-08-10T12:00:00.000Z");
+// range.endKey/startKey are computed internally via localDateKey (local
+// timezone, not UTC) -- derive the expected keys the same way instead of
+// hardcoding UTC-derived strings, so this test is correct on any machine.
+// Mirrors buildInsights' own startDate computation (setDate, not ms
+// subtraction) so this stays correct across DST boundaries too.
+const START_DATE = new Date(NOW.getTime());
+START_DATE.setDate(START_DATE.getDate() - 6);
+const END_KEY = localDateKey(NOW, null);
+const START_KEY = localDateKey(START_DATE, null);
 
 describe("buildInsights", () => {
   it("reports zero/empty for a learner with no data, and distinguishes that from having used a feature", () => {
@@ -141,7 +151,7 @@ describe("buildInsights", () => {
   it("range keys are inclusive and span exactly rangeDays", () => {
     const state = createEmptyProgress();
     const insights = buildInsights(state, NOW, null, 7);
-    expect(insights.range.endKey).toBe("2026-08-10");
-    expect(insights.range.startKey).toBe("2026-08-04");
+    expect(insights.range.endKey).toBe(END_KEY);
+    expect(insights.range.startKey).toBe(START_KEY);
   });
 });

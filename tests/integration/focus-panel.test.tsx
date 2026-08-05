@@ -3,6 +3,12 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { FocusPanel } from "@/components/study-studio/focus-panel";
 import { useProgressStore } from "@/lib/learning/store";
 import { createEmptyProgress } from "@/lib/learning/types";
+import { localDateKey } from "@/lib/learning/daily-goal";
+
+const FIXED_NOW = new Date("2026-08-10T10:00:00.000Z");
+// Derived the same way the store itself keys focusMinutesByDate (local
+// timezone, not UTC) -- see the identical note in focus-session-store.test.ts.
+const TODAY_KEY = localDateKey(FIXED_NOW, null);
 
 beforeEach(() => {
   window.localStorage.clear();
@@ -67,7 +73,7 @@ describe("FocusPanel", () => {
 describe("FocusPanel: active time only (not paused time)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-08-10T10:00:00.000Z"));
+    vi.setSystemTime(FIXED_NOW);
   });
   afterEach(() => {
     vi.useRealTimers();
@@ -81,6 +87,6 @@ describe("FocusPanel: active time only (not paused time)", () => {
     vi.advanceTimersByTime(10 * 60_000); // 10 minutes paused
     fireEvent.click(screen.getByRole("button", { name: /^finish$/i }));
 
-    expect(useProgressStore.getState().state.focusMinutesByDate["2026-08-10"]).toBe(1);
+    expect(useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY]).toBe(1);
   });
 });

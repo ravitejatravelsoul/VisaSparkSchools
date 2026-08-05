@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useProgressStore } from "@/lib/learning/store";
 import { allTracks, allCourses, getLessonsForCourse } from "@/lib/content/registry";
 import { buildSchedule, estimateCompletionDate, isTargetRealistic } from "@/lib/study-plan/planner";
+import { localDateKey } from "@/lib/learning/daily-goal";
 import type { StudyPlanState } from "@/lib/learning/types";
 import { Card, CardBody } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,10 +14,6 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const DAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export function StudyPlanPanel() {
   const hydrated = useProgressStore((s) => s.hydrated);
@@ -69,6 +66,7 @@ export function StudyPlanPanel() {
           key={plan.id}
           plan={plan}
           lessonStatus={state.lessonStatus}
+          timezone={state.profile.timezone}
           onEdit={() => setEditingId(plan.id)}
           onPause={() => pauseStudyPlan(plan.id)}
           onResume={() => resumeStudyPlan(plan.id)}
@@ -87,6 +85,7 @@ export function StudyPlanPanel() {
         <PlanForm
           existing={editingPlan}
           lessonStatus={state.lessonStatus}
+          timezone={state.profile.timezone}
           onCancel={() => {
             setShowForm(false);
             setEditingId(null);
@@ -108,6 +107,7 @@ export function StudyPlanPanel() {
 function PlanCard({
   plan,
   lessonStatus,
+  timezone,
   onEdit,
   onPause,
   onResume,
@@ -119,6 +119,7 @@ function PlanCard({
 }: {
   plan: StudyPlanState;
   lessonStatus: Record<string, string>;
+  timezone: string | null;
   onEdit: () => void;
   onPause: () => void;
   onResume: () => void;
@@ -133,8 +134,9 @@ function PlanCard({
   const totalCount = scheduledIds.length;
   const estimated = estimateCompletionDate(plan.schedule);
   const realistic = isTargetRealistic(estimated, plan.targetDate);
+  const todayKey = localDateKey(new Date(), timezone);
   const overdueCount = Object.entries(plan.schedule).filter(
-    ([date, ids]) => date < todayIso() && ids.some((id) => lessonStatus[id] !== "completed"),
+    ([date, ids]) => date < todayKey && ids.some((id) => lessonStatus[id] !== "completed"),
   ).length;
 
   return (
@@ -212,12 +214,14 @@ function PlanCard({
 function PlanForm({
   existing,
   lessonStatus,
+  timezone,
   onCancel,
   onCreate,
   onSave,
 }: {
   existing: StudyPlanState | null;
   lessonStatus: Record<string, string>;
+  timezone: string | null;
   onCancel: () => void;
   onCreate: (input: {
     title: string;
@@ -262,7 +266,12 @@ function PlanForm({
     );
     if (lessonIds.length === 0 || preferredDaysOfWeek.length === 0) return null;
     const schedule = buildSchedule(
-      { lessonIds, startDate: todayIso(), preferredDaysOfWeek, minutesPerSession },
+      {
+        lessonIds,
+        startDate: localDateKey(new Date(), timezone),
+        preferredDaysOfWeek,
+        minutesPerSession,
+      },
       lessonMinutesById,
     );
     const estimated = estimateCompletionDate(schedule);
@@ -272,7 +281,15 @@ function PlanForm({
       estimated,
       realistic: isTargetRealistic(estimated, openEnded ? null : targetDate || null),
     };
-  }, [courseSlugs, preferredDaysOfWeek, minutesPerSession, lessonStatus, openEnded, targetDate]);
+  }, [
+    courseSlugs,
+    preferredDaysOfWeek,
+    minutesPerSession,
+    lessonStatus,
+    openEnded,
+    targetDate,
+    timezone,
+  ]);
 
   const canSubmit =
     title.trim().length > 0 && courseSlugs.length > 0 && preferredDaysOfWeek.length > 0;
@@ -350,7 +367,7 @@ function PlanForm({
               <input
                 type="date"
                 value={targetDate}
-                min={todayIso()}
+                min={localDateKey(new Date(), timezone)}
                 onChange={(e) => setTargetDate(e.target.value)}
                 className="w-fit rounded-lg border border-(--color-border-strong) bg-(--color-canvas) px-3 py-1.5 text-sm"
               />

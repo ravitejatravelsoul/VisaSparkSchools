@@ -1,12 +1,22 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { useProgressStore } from "@/lib/learning/store";
 import { createEmptyProgress } from "@/lib/learning/types";
+import { localDateKey } from "@/lib/learning/daily-goal";
+
+const FIXED_NOW = new Date("2026-08-10T10:00:00.000Z");
+// The store keys focusMinutesByDate via localDateKey(now, profile.timezone),
+// which resolves to the test runner's default timezone when timezone is
+// null (the default) -- not UTC. Deriving the expected key the same way,
+// once, up front (before fake timers are installed) keeps this test correct
+// regardless of the machine's local timezone, instead of assuming FIXED_NOW's
+// UTC calendar date always matches the local one.
+const TODAY_KEY = localDateKey(FIXED_NOW, null);
 
 beforeEach(() => {
   window.localStorage.clear();
   useProgressStore.setState({ state: createEmptyProgress(), hydrated: true });
   vi.useFakeTimers();
-  vi.setSystemTime(new Date("2026-08-10T10:00:00.000Z"));
+  vi.setSystemTime(FIXED_NOW);
 });
 
 afterEach(() => {
@@ -86,19 +96,19 @@ describe("finishFocusSession", () => {
     useProgressStore.getState().finishFocusSession();
     const state = useProgressStore.getState().state;
     expect(state.activeFocusSession).toBeNull();
-    expect(state.focusMinutesByDate["2026-08-10"]).toBeGreaterThan(0);
+    expect(state.focusMinutesByDate[TODAY_KEY]).toBeGreaterThan(0);
   });
 
   it("accumulates minutes across multiple sessions on the same day", () => {
     useProgressStore.getState().startFocusSession({ mode: "untimed" });
     vi.advanceTimersByTime(60_000);
     useProgressStore.getState().finishFocusSession();
-    const afterFirst = useProgressStore.getState().state.focusMinutesByDate["2026-08-10"];
+    const afterFirst = useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY];
 
     useProgressStore.getState().startFocusSession({ mode: "untimed" });
     vi.advanceTimersByTime(60_000);
     useProgressStore.getState().finishFocusSession();
-    const afterSecond = useProgressStore.getState().state.focusMinutesByDate["2026-08-10"];
+    const afterSecond = useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY];
 
     expect(afterSecond).toBeGreaterThan(afterFirst);
   });
@@ -107,9 +117,9 @@ describe("finishFocusSession", () => {
     useProgressStore.getState().startFocusSession({ mode: "untimed" });
     vi.advanceTimersByTime(60_000);
     useProgressStore.getState().finishFocusSession();
-    const afterFirst = useProgressStore.getState().state.focusMinutesByDate["2026-08-10"];
+    const afterFirst = useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY];
     useProgressStore.getState().finishFocusSession();
-    expect(useProgressStore.getState().state.focusMinutesByDate["2026-08-10"]).toBe(afterFirst);
+    expect(useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY]).toBe(afterFirst);
   });
 
   it("counts only active (unpaused) time, never paused time", () => {
@@ -120,7 +130,7 @@ describe("finishFocusSession", () => {
     useProgressStore.getState().resumeFocusSession();
     useProgressStore.getState().finishFocusSession();
     // 60s active total should round to 1 minute, not include the paused 10 minutes.
-    expect(useProgressStore.getState().state.focusMinutesByDate["2026-08-10"]).toBe(1);
+    expect(useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY]).toBe(1);
   });
 
   it("logs a focus-session-completed activity event only when minutes were actually banked", () => {
@@ -140,7 +150,7 @@ describe("finishFocusSession", () => {
       .getState()
       .state.activity.filter((e) => e.type === "focus-session-completed");
     expect(events).toHaveLength(0);
-    expect(useProgressStore.getState().state.focusMinutesByDate["2026-08-10"]).toBeUndefined();
+    expect(useProgressStore.getState().state.focusMinutesByDate[TODAY_KEY]).toBeUndefined();
   });
 });
 
@@ -151,7 +161,7 @@ describe("cancelFocusSession", () => {
     useProgressStore.getState().cancelFocusSession();
     const state = useProgressStore.getState().state;
     expect(state.activeFocusSession).toBeNull();
-    expect(state.focusMinutesByDate["2026-08-10"]).toBeUndefined();
+    expect(state.focusMinutesByDate[TODAY_KEY]).toBeUndefined();
   });
 
   it("is a safe no-op with no active session", () => {
