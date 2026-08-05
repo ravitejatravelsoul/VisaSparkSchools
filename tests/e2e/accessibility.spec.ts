@@ -106,6 +106,18 @@ const routes = [
   "/study-studio?tab=focus",
   "/study-studio?tab=insights",
   "/study-studio?tab=saved",
+  // Phase 8: Tools Hub and Project Studio.
+  "/tools",
+  "/tools/json-formatter",
+  "/tools/regex-tester",
+  "/tools/text-diff",
+  "/tools/url-encoder",
+  "/tools/base64-converter",
+  "/tools/timestamp-converter",
+  "/tools/color-contrast-checker",
+  "/project-studio",
+  "/project-studio/personal-portfolio-page",
+  "/project-studio/git-collaboration-workflow",
 ];
 
 for (const route of routes) {

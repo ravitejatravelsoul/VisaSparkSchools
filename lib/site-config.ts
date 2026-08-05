@@ -53,6 +53,8 @@ export const footerLinks = {
     { href: "/courses", label: "Courses" },
     { href: "/projects", label: "Projects" },
     { href: "/playground", label: "Playground" },
+    { href: "/tools", label: "Tools" },
+    { href: "/project-studio", label: "Project Studio" },
   ],
   company: [
     { href: "/about", label: "About" },

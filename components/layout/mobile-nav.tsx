@@ -69,11 +69,38 @@ export function MobileNav() {
               <ul className="mt-1 flex flex-col gap-1">
                 <li>
                   <Link
+                    href="/tools"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"
+                  >
+                    Tools
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/study-studio"
                     onClick={() => setOpen(false)}
                     className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"
                   >
                     Study Studio
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/project-studio"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"
+                  >
+                    Project Studio
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/certificates"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-(--color-ink) hover:bg-(--color-surface-sunken)"
+                  >
+                    Certificates
                   </Link>
                 </li>
                 <li>

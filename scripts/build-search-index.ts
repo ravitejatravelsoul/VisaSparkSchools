@@ -12,6 +12,7 @@ import {
   getPublicLearningPaths,
   getCategoryById,
 } from "../lib/directory/registry";
+import { tools } from "../lib/tools/registry";
 import type { SearchDocument } from "../lib/search/types";
 
 export function buildIndex(): SearchDocument[] {
@@ -87,6 +88,18 @@ export function buildIndex(): SearchDocument[] {
       url: `/categories/${category.slug}`,
       trackTitle: "",
       keywords: category.searchKeywords,
+    });
+  }
+
+  for (const tool of tools) {
+    docs.push({
+      id: tool.id,
+      type: "tool",
+      title: tool.title,
+      description: tool.shortDescription,
+      url: `/tools/${tool.slug}`,
+      trackTitle: "",
+      keywords: tool.keywords,
     });
   }
 

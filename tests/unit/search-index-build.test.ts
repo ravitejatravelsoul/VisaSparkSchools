@@ -15,11 +15,11 @@ describe("search index generation (npm run content:search-index)", () => {
     expect(JSON.stringify(first)).toEqual(JSON.stringify(second));
   });
 
-  it("includes lessons, courses, projects, technologies, categories, and roadmaps", () => {
+  it("includes lessons, courses, projects, technologies, categories, roadmaps, and tools", () => {
     const index = buildIndex();
     const types = new Set(index.map((d) => d.type));
     expect(types).toEqual(
-      new Set(["lesson", "course", "project", "technology", "category", "learning-path"]),
+      new Set(["lesson", "course", "project", "technology", "category", "learning-path", "tool"]),
     );
   });
 

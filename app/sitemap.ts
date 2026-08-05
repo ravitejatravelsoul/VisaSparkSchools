@@ -6,6 +6,7 @@ import {
   getPublicTechnologies,
   getPublicLearningPaths,
 } from "@/lib/directory/registry";
+import { tools } from "@/lib/tools/registry";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
@@ -86,6 +87,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.5,
   }));
 
+  // Phase 8: Tools Hub -- real, public, indexable utility pages. Project
+  // Studio and the certificates dashboard are deliberately excluded (see
+  // app/robots.ts), matching Study Studio's precedent for personalized/
+  // app-like surfaces with no distinct SEO value of their own.
+  const toolRoutes = [
+    { url: `${base}/tools`, changeFrequency: "monthly" as const, priority: 0.6 },
+    ...tools.map((tool) => ({
+      url: `${base}/tools/${tool.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
+    })),
+  ];
+
   return [
     ...staticRoutes,
     ...trackRoutes,
@@ -96,5 +110,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...categoryRoutes,
     ...technologyRoutes,
     ...roadmapRoutes,
+    ...toolRoutes,
   ];
 }
