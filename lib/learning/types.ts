@@ -158,9 +158,39 @@ export interface ProfileState {
   updatedAt: string;
 }
 
+export type CertificateType = "course-completion" | "skill-achievement";
+
+/**
+ * A learner-issued certificate record (Phase 9). Immutable once issued --
+ * see lib/certificates/eligibility.ts for the eligibility rules and
+ * lib/learning/store.ts#issueCertificate for the deterministic, idempotent
+ * issuance action that creates these. Every descriptive field is a snapshot
+ * taken at issuance time and never re-read live, so a later course rename,
+ * requirement change, or profile display-name edit can never silently
+ * rewrite an already-issued certificate.
+ */
+export interface CertificateState {
+  /** Deterministic: `${type}:${targetId}` -- the same (type, course) pair can never issue a second, separate record. */
+  id: string;
+  type: CertificateType;
+  /** The course slug this certificate recognizes. */
+  targetId: string;
+  /** Snapshot of the course's title at issuance. */
+  targetTitle: string;
+  /** Snapshot of the learner's chosen display name at issuance ("Guest Learner" if none was set). */
+  displayName: string;
+  issuedAt: string;
+  /** Human-readable snapshot of the specific criteria that were true at issuance -- never recomputed later. */
+  criteriaSnapshot: string[];
+  /** A fixed marker for the eligibility ruleset version used at issuance, so a future change to the rules doesn't retroactively reinterpret an already-issued certificate. */
+  contentVersionRef: string;
+  /** Random, non-enumerable id used only for public verification lookups -- never derived from account data, never sequential. */
+  verificationCode: string;
+}
+
 /** The full shape persisted to localStorage (guest mode) or Supabase (signed in). */
 export interface ProgressState {
-  version: 5;
+  version: 6;
   lessonStatus: Record<string, LessonStatus>;
   exerciseAttempts: Record<string, ExerciseAttemptState>;
   quizResults: Record<string, QuizResultState>;
@@ -193,11 +223,13 @@ export interface ProgressState {
   /** newest first, capped at 50 */
   activity: ActivityEvent[];
   profile: ProfileState;
+  /** certificate id -> issued certificate record (Phase 9) */
+  certificates: Record<string, CertificateState>;
 }
 
 export function createEmptyProgress(): ProgressState {
   return {
-    version: 5,
+    version: 6,
     lessonStatus: {},
     exerciseAttempts: {},
     quizResults: {},
@@ -224,5 +256,6 @@ export function createEmptyProgress(): ProgressState {
       timezone: null,
       updatedAt: new Date(0).toISOString(),
     },
+    certificates: {},
   };
 }

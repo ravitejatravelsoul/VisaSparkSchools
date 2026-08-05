@@ -300,6 +300,56 @@ export interface Database {
         Update: { minutes?: number };
         Relationships: [];
       };
+      certificates: {
+        Row: {
+          id: string;
+          user_id: string;
+          cert_id: string;
+          cert_type: "course-completion" | "skill-achievement";
+          target_id: string;
+          target_title: string;
+          display_name: string;
+          issued_at: string;
+          criteria_snapshot: string[];
+          content_version_ref: string;
+          verification_code: string;
+        };
+        Insert: {
+          user_id: string;
+          cert_id: string;
+          cert_type: "course-completion" | "skill-achievement";
+          target_id: string;
+          target_title: string;
+          display_name: string;
+          issued_at: string;
+          criteria_snapshot: string[];
+          content_version_ref: string;
+          verification_code: string;
+        };
+        // Immutable once issued -- certificates are only ever inserted, never updated.
+        Update: Record<string, never>;
+        Relationships: [];
+      };
+      // Public, column-restricted VIEW over `certificates` (migration 0005)
+      // -- exposes only fields safe to show a third party verifying a
+      // certificate link, never user_id/id/cert_id. Modeled under `Tables`
+      // (not `Views`) purely for TypeScript convenience -- `.from()` queries
+      // a view identically to a table; Insert/Update are typed as
+      // unsatisfiable since the app only ever reads this view.
+      certificates_public: {
+        Row: {
+          cert_type: "course-completion" | "skill-achievement";
+          target_title: string;
+          display_name: string;
+          issued_at: string;
+          criteria_snapshot: string[];
+          content_version_ref: string;
+          verification_code: string;
+        };
+        Insert: Record<string, never>;
+        Update: Record<string, never>;
+        Relationships: [];
+      };
       daily_goals: {
         Row: { id: string; user_id: string; minutes: number; updated_at: string };
         Insert: { user_id: string; minutes: number };

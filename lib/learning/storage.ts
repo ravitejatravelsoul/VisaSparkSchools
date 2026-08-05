@@ -9,6 +9,7 @@ import {
   type StudyPlanState,
   type FocusSessionState,
   type ActivityEvent,
+  type CertificateState,
 } from "@/lib/learning/types";
 
 /** focusMinutesByDate keeps at most this many most-recent days -- bounded history, never unbounded. */
@@ -49,7 +50,7 @@ export function perUserStorageKey(userId: string): string {
  * (not deleted) as a recoverable backup rather than removed immediately.
  */
 const LEGACY_STORAGE_KEY = "codewise:progress";
-const CURRENT_VERSION = 5;
+const CURRENT_VERSION = 6;
 
 function isBrowser() {
   return typeof window !== "undefined";
@@ -155,12 +156,40 @@ function migrate(parsed: unknown): ProgressState {
         itemIds: [],
       },
       profile: { ...empty.profile, ...(data.profile as object | undefined) },
+      certificates: (data.certificates as ProgressState["certificates"]) ?? {},
     } as ProgressState;
   }
 
-  // v4 -> v5 (Phase 7): every field already matches the current shape except
-  // the new Study Studio fields, which didn't exist yet -- keep everything
-  // else exactly as v4's own "current version" branch would have.
+  // v5 -> v6 (Phase 8 + Phase 9): every field already matches the current
+  // shape except `certificates`, which didn't exist yet. Phase 8 (Tools Hub,
+  // Project Studio) added no new persisted fields at all -- it reuses
+  // projectProgress/notes/bookmarks unchanged -- so v5 is exactly v6 minus
+  // certificates.
+  if (data.version === 5) {
+    return {
+      ...empty,
+      ...data,
+      version: CURRENT_VERSION,
+      notes: migrateNotes(data.notes),
+      practiceAttempts: (data.practiceAttempts as ProgressState["practiceAttempts"]) ?? {},
+      studyPlans: (data.studyPlans as ProgressState["studyPlans"]) ?? {},
+      activeFocusSession: (data.activeFocusSession as ProgressState["activeFocusSession"]) ?? null,
+      focusMinutesByDate: pruneFocusMinutes(
+        (data.focusMinutesByDate as ProgressState["focusMinutesByDate"]) ?? {},
+      ),
+      todayDismissed: (data.todayDismissed as ProgressState["todayDismissed"]) ?? {
+        date: "",
+        itemIds: [],
+      },
+      profile: { ...empty.profile, ...(data.profile as object | undefined) },
+      certificates: {},
+    } as ProgressState;
+  }
+
+  // v4 -> v6: every field already matches the current shape except the
+  // Study Studio fields (Phase 7) and certificates (Phase 9), none of which
+  // existed yet -- keep everything else exactly as v4's own "current
+  // version" branch would have.
   if (data.version === 4) {
     return {
       ...empty,
@@ -173,13 +202,14 @@ function migrate(parsed: unknown): ProgressState {
       focusMinutesByDate: {},
       todayDismissed: { date: "", itemIds: [] },
       profile: { ...empty.profile, ...(data.profile as object | undefined) },
+      certificates: {},
     } as ProgressState;
   }
 
-  // v3 -> v5 (Phase 6 + Phase 7 fields both missing): every field already
-  // matches the current shape except practiceAttempts and the Study Studio
-  // fields, none of which existed yet -- keep everything else exactly as
-  // v3's own "current version" branch would have.
+  // v3 -> v6 (Phase 6, 7, and 9 fields all missing): every field already
+  // matches the current shape except practiceAttempts, the Study Studio
+  // fields, and certificates, none of which existed yet -- keep everything
+  // else exactly as v3's own "current version" branch would have.
   if (data.version === 3) {
     return {
       ...empty,
@@ -192,10 +222,11 @@ function migrate(parsed: unknown): ProgressState {
       focusMinutesByDate: {},
       todayDismissed: { date: "", itemIds: [] },
       profile: { ...empty.profile, ...(data.profile as object | undefined) },
+      certificates: {},
     } as ProgressState;
   }
 
-  // Any older version (1, 2, or missing): reconstruct a safe v5 shape,
+  // Any older version (1, 2, or missing): reconstruct a safe v6 shape,
   // keeping every field that still matches and defaulting the rest --
   // never crash or drop unrelated data just because one shape changed.
   return {
@@ -222,6 +253,7 @@ function migrate(parsed: unknown): ProgressState {
     focusMinutesByDate: {},
     todayDismissed: { date: "", itemIds: [] },
     activity: [],
+    certificates: {},
   };
 }
 
@@ -363,6 +395,27 @@ function mergeFocusMinutesByDate(
     merged[date] = Math.max(merged[date] ?? 0, minutes);
   }
   return pruneFocusMinutes(merged);
+}
+
+/**
+ * Certificates are immutable once issued and keyed by a deterministic id
+ * (`${type}:${targetId}`), so a genuine id collision only happens if the
+ * *same* certificate was independently issued on two devices before they
+ * ever synced (each with its own random `verificationCode`). Keep whichever
+ * side issued first -- this is what "cannot create duplicates through
+ * refresh or multiple tabs" actually requires: exactly one canonical record
+ * per id, chosen deterministically, never a coin-flip.
+ */
+function mergeCertificates(
+  a: Record<string, CertificateState>,
+  b: Record<string, CertificateState>,
+): Record<string, CertificateState> {
+  const merged: Record<string, CertificateState> = { ...a };
+  for (const [id, cert] of Object.entries(b)) {
+    const existing = merged[id];
+    merged[id] = !existing || cert.issuedAt < existing.issuedAt ? cert : existing;
+  }
+  return merged;
 }
 
 function mergeActivity(a: ActivityEvent[], b: ActivityEvent[]): ActivityEvent[] {
@@ -519,6 +572,8 @@ export function mergeProgress(local: ProgressState, remote: ProgressState): Prog
   merged.todayDismissed = local.todayDismissed;
 
   merged.activity = mergeActivity(local.activity, remote.activity);
+
+  merged.certificates = mergeCertificates(local.certificates, remote.certificates);
 
   // Preferences: last-write-wins as a whole object, using the explicit
   // `updatedAt` stamp each `setProfile` call sets -- avoids stitching

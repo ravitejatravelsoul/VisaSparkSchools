@@ -118,6 +118,8 @@ const routes = [
   "/project-studio",
   "/project-studio/personal-portfolio-page",
   "/project-studio/git-collaboration-workflow",
+  // Phase 9: honest completion certificates.
+  "/certificates",
 ];
 
 for (const route of routes) {

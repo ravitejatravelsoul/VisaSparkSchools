@@ -11,11 +11,16 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
           snapshot it for a guest-to-account merge -- see AuthProvider's docstring. */}
       <ProgressHydrator />
       <AuthProvider />
-      <Header />
+      {/* Hidden when printing (e.g. a certificate) -- site chrome has no place on a printed page. */}
+      <div className="print:hidden">
+        <Header />
+      </div>
       <main id="main-content" className="flex-1">
         {children}
       </main>
-      <Footer />
+      <div className="print:hidden">
+        <Footer />
+      </div>
     </>
   );
 }

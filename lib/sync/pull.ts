@@ -37,6 +37,7 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     focusMinutes,
     activity,
     profile,
+    certificates,
   ] = await Promise.all([
     supabase.from("lesson_progress").select("*").eq("user_id", userId),
     supabase.from("exercise_attempts").select("*").eq("user_id", userId),
@@ -56,6 +57,7 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     supabase.from("focus_minutes").select("*").eq("user_id", userId),
     supabase.from("activity_log").select("*").eq("user_id", userId),
     supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+    supabase.from("certificates").select("*").eq("user_id", userId),
   ]);
 
   throwOnAnyError([
@@ -77,6 +79,7 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
     focusMinutes,
     activity,
     profile,
+    certificates,
   ]);
 
   const state = createEmptyProgress();
@@ -195,6 +198,20 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
 
   for (const row of focusMinutes.data ?? []) {
     state.focusMinutesByDate[row.date] = row.minutes;
+  }
+
+  for (const row of certificates.data ?? []) {
+    state.certificates[row.cert_id] = {
+      id: row.cert_id,
+      type: row.cert_type,
+      targetId: row.target_id,
+      targetTitle: row.target_title,
+      displayName: row.display_name,
+      issuedAt: row.issued_at,
+      criteriaSnapshot: row.criteria_snapshot,
+      contentVersionRef: row.content_version_ref,
+      verificationCode: row.verification_code,
+    };
   }
 
   state.activity = (activity.data ?? [])

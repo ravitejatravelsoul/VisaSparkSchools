@@ -323,4 +323,69 @@ describe("mergeProgress (guest -> account merge)", () => {
     const merged = mergeProgress(local, remote);
     expect(merged.profile.learningGoal).toBe("Get a job in frontend");
   });
+
+  it("certificates: union by id -- a certificate issued on only one side survives the merge", () => {
+    const local = createEmptyProgress();
+    local.certificates["course-completion:how-computing-works"] = {
+      id: "course-completion:how-computing-works",
+      type: "course-completion",
+      targetId: "how-computing-works",
+      targetTitle: "How Computing & the Web Work",
+      displayName: "Ada",
+      issuedAt: "2026-08-01T00:00:00.000Z",
+      criteriaSnapshot: ["All required lessons in this course are completed."],
+      contentVersionRef: "v1",
+      verificationCode: "local-code",
+    };
+    const remote = createEmptyProgress();
+    remote.certificates["skill-achievement:python-fundamentals"] = {
+      id: "skill-achievement:python-fundamentals",
+      type: "skill-achievement",
+      targetId: "python-fundamentals",
+      targetTitle: "Python Fundamentals",
+      displayName: "Ada",
+      issuedAt: "2026-08-02T00:00:00.000Z",
+      criteriaSnapshot: ["All required lessons in this course are completed."],
+      contentVersionRef: "v1",
+      verificationCode: "remote-code",
+    };
+
+    const merged = mergeProgress(local, remote);
+    expect(Object.keys(merged.certificates)).toHaveLength(2);
+    expect(merged.certificates["course-completion:how-computing-works"]).toBeDefined();
+    expect(merged.certificates["skill-achievement:python-fundamentals"]).toBeDefined();
+  });
+
+  it("certificates: the same id issued independently on both sides before ever syncing keeps whichever was issued first, never both and never a coin-flip", () => {
+    const id = "course-completion:how-computing-works";
+    const earlier = {
+      id,
+      type: "course-completion" as const,
+      targetId: "how-computing-works",
+      targetTitle: "How Computing & the Web Work",
+      displayName: "Ada",
+      issuedAt: "2026-08-01T00:00:00.000Z",
+      criteriaSnapshot: ["All required lessons in this course are completed."],
+      contentVersionRef: "v1",
+      verificationCode: "device-a-code",
+    };
+    const later = {
+      ...earlier,
+      issuedAt: "2026-08-05T00:00:00.000Z",
+      verificationCode: "device-b-code",
+    };
+
+    const local = createEmptyProgress();
+    local.certificates[id] = later;
+    const remote = createEmptyProgress();
+    remote.certificates[id] = earlier;
+
+    const merged = mergeProgress(local, remote);
+    expect(Object.keys(merged.certificates)).toHaveLength(1);
+    expect(merged.certificates[id].verificationCode).toBe("device-a-code");
+
+    // Re-running the merge with the already-merged result must stay stable (idempotent).
+    const mergedAgain = mergeProgress(merged, remote);
+    expect(mergedAgain.certificates[id].verificationCode).toBe("device-a-code");
+  });
 });

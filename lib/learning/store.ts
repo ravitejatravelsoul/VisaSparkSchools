@@ -8,7 +8,15 @@ import {
   type ActivityEvent,
   type StudyPlanState,
   type FocusSessionState,
+  type CertificateState,
+  type CertificateType,
 } from "@/lib/learning/types";
+import {
+  buildCertificateId,
+  getCourseCompletionEligibility,
+  getSkillAchievementEligibility,
+  ELIGIBILITY_RULESET_VERSION,
+} from "@/lib/certificates/eligibility";
 import {
   loadProgressFrom,
   saveProgressTo,
@@ -282,6 +290,8 @@ interface ProgressStore {
   startRoadmap: (pathId: string) => void;
   toggleRoadmapStep: (pathId: string, stepId: string) => void;
   toggleProjectMilestone: (projectId: string, milestoneId: string) => void;
+  /** Deterministic, idempotent: returns the certificate id whether it was just issued or already existed, or null if the learner isn't eligible yet. */
+  issueCertificate: (type: CertificateType, targetId: string) => string | null;
   setProfile: (
     patch: Partial<
       Pick<
@@ -1032,6 +1042,53 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       persist(next);
       return { state: next };
     });
+  },
+
+  issueCertificate: (type, targetId) => {
+    let result: string | null = null;
+    set((store) => {
+      const id = buildCertificateId(type, targetId);
+      // Idempotent: refresh, a second tab, or issuing again after the
+      // requirements happen to still hold must never create a second
+      // record for the same (type, target) pair -- just report the
+      // existing one back.
+      const existing = store.state.certificates[id];
+      if (existing) {
+        result = id;
+        return { state: store.state };
+      }
+
+      const eligibility =
+        type === "course-completion"
+          ? getCourseCompletionEligibility(targetId, store.state)
+          : getSkillAchievementEligibility(targetId, store.state);
+      const course = getCourseBySlug(targetId);
+      if (!eligibility.eligible || !course) {
+        result = null;
+        return { state: store.state };
+      }
+
+      const now = new Date().toISOString();
+      const cert: CertificateState = {
+        id,
+        type,
+        targetId,
+        targetTitle: course.title,
+        displayName: store.state.profile.displayName?.trim() || "VisaSparkSchools Learner",
+        issuedAt: now,
+        criteriaSnapshot: eligibility.met,
+        contentVersionRef: ELIGIBILITY_RULESET_VERSION,
+        verificationCode: generateId("vcode"),
+      };
+      const next = {
+        ...store.state,
+        certificates: { ...store.state.certificates, [id]: cert },
+      };
+      persist(next);
+      result = id;
+      return { state: next };
+    });
+    return result;
   },
 
   setProfile: (patch) => {

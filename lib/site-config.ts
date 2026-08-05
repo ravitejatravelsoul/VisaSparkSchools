@@ -55,6 +55,7 @@ export const footerLinks = {
     { href: "/playground", label: "Playground" },
     { href: "/tools", label: "Tools" },
     { href: "/project-studio", label: "Project Studio" },
+    { href: "/certificates", label: "Certificates" },
   ],
   company: [
     { href: "/about", label: "About" },

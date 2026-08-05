@@ -68,12 +68,12 @@ describe("loadProgress brand-rename migration (CodeWise -> VisaSparkSchools)", (
   });
 });
 
-describe("v3 -> v5 migration (Phase 6: practiceAttempts)", () => {
+describe("v3 -> v6 migration (Phase 6: practiceAttempts)", () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
 
-  it("upgrades stored v3 data to v5, defaulting practiceAttempts to {} and preserving everything else", () => {
+  it("upgrades stored v3 data to v6, defaulting practiceAttempts/certificates to {} and preserving everything else", () => {
     const v3 = {
       ...createEmptyProgress(),
       version: 3,
@@ -82,31 +82,34 @@ describe("v3 -> v5 migration (Phase 6: practiceAttempts)", () => {
       enrollments: { "html-css-fundamentals": { enrolledAt: "2026-01-01T00:00:00.000Z" } },
     };
     delete (v3 as { practiceAttempts?: unknown }).practiceAttempts;
+    delete (v3 as { certificates?: unknown }).certificates;
     window.localStorage.setItem(NEW_KEY, JSON.stringify(v3));
 
     const state = loadProgress();
-    expect(state.version).toBe(5);
+    expect(state.version).toBe(6);
     expect(state.dailyGoalMinutes).toBe(42);
     expect(state.bookmarks).toEqual(["html-document-structure"]);
     expect(state.enrollments["html-css-fundamentals"]).toBeDefined();
     expect(state.practiceAttempts).toEqual({});
     expect(state.studyPlans).toEqual({});
+    expect(state.certificates).toEqual({});
   });
 
-  it("older/unversioned data reconstructs safely with an empty practiceAttempts map", () => {
+  it("older/unversioned data reconstructs safely with an empty practiceAttempts/certificates map", () => {
     window.localStorage.setItem(NEW_KEY, JSON.stringify({ dailyGoalMinutes: 15 }));
     const state = loadProgress();
-    expect(state.version).toBe(5);
+    expect(state.version).toBe(6);
     expect(state.practiceAttempts).toEqual({});
+    expect(state.certificates).toEqual({});
   });
 });
 
-describe("v4 -> v5 migration (Phase 7: Study Studio)", () => {
+describe("v4 -> v6 migration (Phase 7: Study Studio)", () => {
   beforeEach(() => {
     window.localStorage.clear();
   });
 
-  it("upgrades stored v4 data to v5, defaulting every new Study Studio field and preserving everything else", () => {
+  it("upgrades stored v4 data to v6, defaulting every new Study Studio field and certificates, preserving everything else", () => {
     const v4 = {
       ...createEmptyProgress(),
       version: 4,
@@ -125,24 +128,45 @@ describe("v4 -> v5 migration (Phase 7: Study Studio)", () => {
       "activeFocusSession",
       "focusMinutesByDate",
       "todayDismissed",
+      "certificates",
     ]) {
       delete (v4 as Record<string, unknown>)[key];
     }
     window.localStorage.setItem(NEW_KEY, JSON.stringify(v4));
 
     const state = loadProgress();
-    expect(state.version).toBe(5);
+    expect(state.version).toBe(6);
     expect(state.dailyGoalMinutes).toBe(42);
     expect(state.practiceAttempts["quantitative-aptitude"]).toBeDefined();
     expect(state.studyPlans).toEqual({});
     expect(state.activeFocusSession).toBeNull();
     expect(state.focusMinutesByDate).toEqual({});
     expect(state.todayDismissed).toEqual({ date: "", itemIds: [] });
+    expect(state.certificates).toEqual({});
   });
 
-  it("reads current v5 data (including Study Studio fields) straight through unchanged", () => {
+  it("prunes focusMinutesByDate entries older than the retention window on load", () => {
+    const v6 = {
+      ...createEmptyProgress(),
+      focusMinutesByDate: { "2020-01-01": 999, "2026-08-09": 25 },
+    };
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(v6));
+    const state = loadProgress();
+    expect(state.focusMinutesByDate["2020-01-01"]).toBeUndefined();
+    expect(state.focusMinutesByDate["2026-08-09"]).toBe(25);
+  });
+});
+
+describe("v5 -> v6 migration (Phase 9: certificates)", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("upgrades stored v5 data to v6, defaulting certificates to {} and preserving Study Studio fields", () => {
     const v5 = {
       ...createEmptyProgress(),
+      version: 5,
+      dailyGoalMinutes: 42,
       studyPlans: {
         "plan-1": {
           id: "plan-1",
@@ -167,23 +191,41 @@ describe("v4 -> v5 migration (Phase 7: Study Studio)", () => {
       focusMinutesByDate: { "2026-08-09": 25 },
       todayDismissed: { date: "2026-08-09", itemIds: ["review:some-lesson"] },
     };
+    delete (v5 as Record<string, unknown>).certificates;
     window.localStorage.setItem(NEW_KEY, JSON.stringify(v5));
 
     const state = loadProgress();
+    expect(state.version).toBe(6);
+    expect(state.dailyGoalMinutes).toBe(42);
     expect(state.studyPlans["plan-1"]).toEqual(v5.studyPlans["plan-1"]);
     expect(state.activeFocusSession).toEqual(v5.activeFocusSession);
     expect(state.focusMinutesByDate).toEqual({ "2026-08-09": 25 });
     expect(state.todayDismissed).toEqual(v5.todayDismissed);
+    expect(state.certificates).toEqual({});
   });
 
-  it("prunes focusMinutesByDate entries older than the retention window on load", () => {
-    const v5 = {
+  it("reads current v6 data (including certificates) straight through unchanged", () => {
+    const v6 = {
       ...createEmptyProgress(),
-      focusMinutesByDate: { "2020-01-01": 999, "2026-08-09": 25 },
+      certificates: {
+        "course-completion:how-computing-works": {
+          id: "course-completion:how-computing-works",
+          type: "course-completion",
+          targetId: "how-computing-works",
+          targetTitle: "How Computing & the Web Work",
+          displayName: "Ada",
+          issuedAt: "2026-08-10T00:00:00.000Z",
+          criteriaSnapshot: ["All required lessons in this course are completed."],
+          contentVersionRef: "v1",
+          verificationCode: "abc123",
+        },
+      },
     };
-    window.localStorage.setItem(NEW_KEY, JSON.stringify(v5));
+    window.localStorage.setItem(NEW_KEY, JSON.stringify(v6));
+
     const state = loadProgress();
-    expect(state.focusMinutesByDate["2020-01-01"]).toBeUndefined();
-    expect(state.focusMinutesByDate["2026-08-09"]).toBe(25);
+    expect(state.certificates["course-completion:how-computing-works"]).toEqual(
+      v6.certificates["course-completion:how-computing-works"],
+    );
   });
 });

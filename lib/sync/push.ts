@@ -120,6 +120,19 @@ export async function pushProgress(
     minutes,
   }));
 
+  const certificateRows = Object.values(state.certificates).map((c) => ({
+    user_id: userId,
+    cert_id: c.id,
+    cert_type: c.type,
+    target_id: c.targetId,
+    target_title: c.targetTitle,
+    display_name: c.displayName,
+    issued_at: c.issuedAt,
+    criteria_snapshot: c.criteriaSnapshot,
+    content_version_ref: c.contentVersionRef,
+    verification_code: c.verificationCode,
+  }));
+
   const activityRows = state.activity.map((event) => ({
     user_id: userId,
     event_id: event.id,
@@ -190,6 +203,16 @@ export async function pushProgress(
       : Promise.resolve({ error: null }),
     focusMinutesRows.length
       ? supabase.from("focus_minutes").upsert(focusMinutesRows, { onConflict: "user_id,date" })
+      : Promise.resolve({ error: null }),
+    // Certificates are immutable once issued (see migration 0005's header
+    // comment) -- ignoreDuplicates so a repeat push after an id already
+    // exists remotely never overwrites its content, matching the same
+    // pattern used for bookmarks/project_milestone_completions below.
+    certificateRows.length
+      ? supabase.from("certificates").upsert(certificateRows, {
+          onConflict: "user_id,cert_id",
+          ignoreDuplicates: true,
+        })
       : Promise.resolve({ error: null }),
     activityRows.length
       ? supabase

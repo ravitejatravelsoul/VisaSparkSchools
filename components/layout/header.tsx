@@ -38,6 +38,11 @@ export function Header() {
               Study Studio
             </LinkButton>
           </span>
+          <span className="hidden lg:inline-flex">
+            <LinkButton href="/certificates" variant="secondary" size="sm">
+              Certificates
+            </LinkButton>
+          </span>
           <span className="hidden sm:inline-flex">
             <LinkButton href="/dashboard" variant="secondary" size="sm">
               Dashboard
