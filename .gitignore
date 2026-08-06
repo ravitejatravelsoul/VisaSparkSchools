@@ -43,6 +43,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# supabase CLI local link/session state -- may include a pooler connection
+# string with embedded credentials; machine-local, never meaningful to commit
+/supabase/.temp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
