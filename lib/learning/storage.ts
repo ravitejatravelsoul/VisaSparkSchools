@@ -41,6 +41,33 @@ export const STORAGE_KEY = "visasparkschools:progress";
 export function perUserStorageKey(userId: string): string {
   return `visasparkschools:progress:${userId}`;
 }
+
+/**
+ * Tiny, synchronously-readable pointer to the most recently signed-in
+ * account on this device. The progress store's very first hydration runs
+ * before Supabase's async auth check resolves (see lib/learning/store.ts'
+ * module-scope `activeStorageKey` init), so without this pointer that first
+ * hydration always defaults to the shared guest key -- which is empty (or
+ * gone) for a returning signed-in learner, since it's cleared once their
+ * data is safely folded into their per-account key. That produced a real
+ * flash of empty progress (and a snapshot the sync lifecycle could echo
+ * back) on every single page load for a signed-in learner, not just the
+ * first one. Written on a successful sync, cleared on sign-out -- see
+ * lib/sync/orchestrator.ts.
+ */
+const LAST_USER_ID_KEY = "visasparkschools:last-user-id";
+
+export function getLastUserId(): string | null {
+  if (!isBrowser()) return null;
+  return window.localStorage.getItem(LAST_USER_ID_KEY);
+}
+
+export function setLastUserId(userId: string | null) {
+  if (!isBrowser()) return;
+  if (userId) window.localStorage.setItem(LAST_USER_ID_KEY, userId);
+  else window.localStorage.removeItem(LAST_USER_ID_KEY);
+}
+
 /**
  * Storage key used before the CodeWise -> VisaSparkSchools rename. Guest
  * progress is a learner's real study history, so renaming the key must

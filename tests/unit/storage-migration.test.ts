@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { loadProgress, saveProgress } from "@/lib/learning/storage";
+import { loadProgress, saveProgress, getLastUserId, setLastUserId } from "@/lib/learning/storage";
 import { createEmptyProgress } from "@/lib/learning/types";
 
 const NEW_KEY = "visasparkschools:progress";
@@ -65,6 +65,27 @@ describe("loadProgress brand-rename migration (CodeWise -> VisaSparkSchools)", (
     saveProgress({ ...createEmptyProgress(), dailyGoalMinutes: 10 });
     expect(window.localStorage.getItem(NEW_KEY)).not.toBeNull();
     expect(window.localStorage.getItem(LEGACY_KEY)).toBeNull();
+  });
+});
+
+describe("getLastUserId / setLastUserId (last-signed-in-account pointer)", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("returns null when no account has ever synced on this device", () => {
+    expect(getLastUserId()).toBeNull();
+  });
+
+  it("remembers the id passed to setLastUserId", () => {
+    setLastUserId("user-1");
+    expect(getLastUserId()).toBe("user-1");
+  });
+
+  it("clears the pointer when set to null, e.g. on sign-out", () => {
+    setLastUserId("user-1");
+    setLastUserId(null);
+    expect(getLastUserId()).toBeNull();
   });
 });
 

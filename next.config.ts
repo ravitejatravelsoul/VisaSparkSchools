@@ -21,8 +21,18 @@ import type { NextConfig } from "next";
  *   to reconstruct cross-environment stack traces for debugging. React never
  *   calls eval() in production, so production keeps the stricter policy
  *   (`'wasm-unsafe-eval'` only, for Pyodide/sql.js) with no security change.
+ * - `connect-src` additionally allow-lists `NEXT_PUBLIC_SUPABASE_URL` itself
+ *   (not a wildcard `https://*.supabase.co`) when that env var is set, so
+ *   the browser's own auth/database/storage requests to this specific
+ *   project aren't blocked -- least privilege, matching every other entry
+ *   here. A deployment with Supabase unconfigured gets no Supabase entry at
+ *   all, since no such request would ever be made in that mode. Found and
+ *   fixed after this project's first-ever live browser test against a real
+ *   Supabase project surfaced every auth/sync call being silently blocked.
  */
 const isDev = process.env.NODE_ENV !== "production";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+const isValidSupabaseUrl = supabaseUrl && /^https:\/\/[a-z0-9.-]+$/i.test(supabaseUrl);
 
 const CSP = [
   "default-src 'self'",
@@ -30,7 +40,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "img-src 'self' data: blob:",
   "font-src 'self' data: https://cdn.jsdelivr.net",
-  "connect-src 'self' https://cdn.jsdelivr.net",
+  `connect-src 'self' https://cdn.jsdelivr.net${isValidSupabaseUrl ? ` ${supabaseUrl}` : ""}`,
   "worker-src 'self' blob:",
   "frame-src 'self'",
   "object-src 'none'",

@@ -88,6 +88,24 @@ describe("AuthProvider / sync orchestrator", () => {
     expect(window.localStorage.getItem(perUserStorageKey("user-1"))).not.toBeNull();
   });
 
+  it("a successful sync remembers the account so a future reload can hydrate straight from its cache, and sign-out forgets it", async () => {
+    // Regression test: without this pointer, every hard page load's very
+    // first (synchronous) hydration defaulted to the shared guest key --
+    // empty for a returning signed-in learner, since it's cleared once
+    // synced -- producing a real flash of empty progress, and worse, an
+    // empty snapshot the sync lifecycle could echo straight back. See
+    // getLastUserId's doc comment in lib/learning/storage.ts.
+    render(<AuthProvider />);
+    authCallback!("SIGNED_IN", { user: { id: "user-1", email: null } });
+    resolveSync("user-1");
+    await vi.waitFor(() => expect(useSyncStatusStore.getState().status).toBe("synced"));
+
+    expect(window.localStorage.getItem("visasparkschools:last-user-id")).toBe("user-1");
+
+    authCallback!("SIGNED_OUT", null);
+    expect(window.localStorage.getItem("visasparkschools:last-user-id")).toBeNull();
+  });
+
   it("sign-out reverts to the guest key and clears the session -- the signed-in account's data never leaks through", async () => {
     render(<AuthProvider />);
     authCallback!("SIGNED_IN", { user: { id: "user-1", email: null } });
@@ -106,6 +124,33 @@ describe("AuthProvider / sync orchestrator", () => {
     // cleared at sign-in), so post-signout state is a fresh guest state --
     // account A's dailyGoalMinutes: 99 must not be visible here.
     expect(useProgressStore.getState().state.dailyGoalMinutes).toBe(20);
+  });
+
+  it("a local mutation made while the initial sync is still in flight is not clobbered once the sync resolves", async () => {
+    // Regression test: every hard page load re-fires handleSignedIn for an
+    // already-signed-in learner (see its doc comment), kicking off a fresh
+    // pull/merge/push round trip. If the learner keeps working while that
+    // round trip is in flight -- e.g. completing a lesson right after
+    // loading the page -- the sync used to resolve with a snapshot taken
+    // *before* that mutation and blindly overwrite the live store with it,
+    // silently reverting the learner's newest progress. The fix merges the
+    // sync result with whatever the live store holds at resolution time
+    // instead of replacing it outright.
+    render(<AuthProvider />);
+    authCallback!("SIGNED_IN", { user: { id: "user-1", email: null } });
+
+    // The learner completes a lesson while the sync from the line above is
+    // still pending -- this mutation happens strictly after the snapshot
+    // the mocked syncGuestToAccount captured.
+    useProgressStore.getState().completeLesson("lesson-a");
+    expect(useProgressStore.getState().state.lessonStatus["lesson-a"]).toBe("completed");
+
+    resolveSync("user-1");
+    await vi.waitFor(() => expect(useSyncStatusStore.getState().status).toBe("synced"));
+
+    expect(useProgressStore.getState().state.lessonStatus["lesson-a"]).toBe("completed");
+    const cached = JSON.parse(window.localStorage.getItem(perUserStorageKey("user-1"))!);
+    expect(cached.lessonStatus["lesson-a"]).toBe("completed");
   });
 
   it("a stale sync response from a previous sign-in is discarded if a different account signs in first", async () => {

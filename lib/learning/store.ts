@@ -22,6 +22,8 @@ import {
   saveProgressTo,
   STORAGE_KEY,
   pruneFocusMinutes,
+  perUserStorageKey,
+  getLastUserId,
 } from "@/lib/learning/storage";
 import { calculateLessonMasteryContribution, averageMastery } from "@/lib/learning/mastery";
 import { addDays, nextIntervalDays, type ReviewResult } from "@/lib/learning/review-schedule";
@@ -311,7 +313,12 @@ interface ProgressStore {
  * into the shared guest key (and therefore visible to a future guest
  * session or a different account) while they're signed in.
  */
-let activeStorageKey: string = STORAGE_KEY;
+function initialStorageKey(): string {
+  const lastUserId = getLastUserId();
+  return lastUserId ? perUserStorageKey(lastUserId) : STORAGE_KEY;
+}
+
+let activeStorageKey: string = initialStorageKey();
 
 export function setActiveStorageKey(key: string) {
   activeStorageKey = key;

@@ -8,8 +8,10 @@ import {
   loadProgressFrom,
   saveProgressTo,
   clearProgressAt,
+  mergeProgress,
   STORAGE_KEY,
   perUserStorageKey,
+  setLastUserId,
 } from "@/lib/learning/storage";
 import { useSessionStore } from "@/lib/auth/session-store";
 import { useSyncStatusStore } from "@/lib/sync/sync-status-store";
@@ -55,6 +57,7 @@ export function handleSignOut() {
   useSessionStore.getState().setSession(null);
   useSyncStatusStore.getState().reset();
   setActiveStorageKey(STORAGE_KEY);
+  setLastUserId(null);
   useProgressStore.getState().replaceState(loadProgressFrom(STORAGE_KEY));
 }
 
@@ -104,12 +107,30 @@ function runSync(supabase: Client, userId: string, snapshot: ProgressState, toke
       if (generation !== token) return; // stale: a sign-out/switch happened meanwhile
       const key = perUserStorageKey(userId);
       setActiveStorageKey(key);
-      saveProgressTo(key, merged);
+      // Remember this device's active account so the *next* page load's
+      // very first (synchronous, pre-auth-check) hydration reads this
+      // per-account cache instead of defaulting to the shared guest key --
+      // see getLastUserId's doc comment in lib/learning/storage.ts. Only set
+      // after a successful sync, mirroring setActiveStorageKey above: before
+      // the first successful sync, a reload must still see the guest key
+      // (there's nothing else to see yet).
+      setLastUserId(userId);
+      // This sync's own pull/merge/push round trip can take long enough for
+      // the learner to keep working in the meantime (e.g. completing another
+      // lesson right after a page load re-kicks this cycle -- see
+      // handleSignedIn's doc comment on why this reruns every mount). The
+      // live store may already hold newer local mutations than the
+      // `snapshot` this chain started from, so fold the current live state
+      // in with the same monotonic merge rather than blindly overwriting it
+      // -- otherwise a slow sync silently rolls back progress made during
+      // its own request. See tests/unit/sync-lifecycle.test.ts.
+      const finalState = mergeProgress(useProgressStore.getState().state, merged);
+      saveProgressTo(key, finalState);
       // The guest key's contents are now safely folded into this account --
       // clear it so they can never be folded into a *different* account
       // that signs in later on this device.
       clearProgressAt(STORAGE_KEY);
-      useProgressStore.getState().replaceState(merged);
+      useProgressStore.getState().replaceState(finalState);
       useSyncStatusStore.getState().setSynced(new Date().toISOString());
     })
     .catch((error: unknown) => {
