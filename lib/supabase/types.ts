@@ -330,26 +330,6 @@ export interface Database {
         Update: Record<string, never>;
         Relationships: [];
       };
-      // Public, column-restricted VIEW over `certificates` (migration 0005)
-      // -- exposes only fields safe to show a third party verifying a
-      // certificate link, never user_id/id/cert_id. Modeled under `Tables`
-      // (not `Views`) purely for TypeScript convenience -- `.from()` queries
-      // a view identically to a table; Insert/Update are typed as
-      // unsatisfiable since the app only ever reads this view.
-      certificates_public: {
-        Row: {
-          cert_type: "course-completion" | "skill-achievement";
-          target_title: string;
-          display_name: string;
-          issued_at: string;
-          criteria_snapshot: string[];
-          content_version_ref: string;
-          verification_code: string;
-        };
-        Insert: Record<string, never>;
-        Update: Record<string, never>;
-        Relationships: [];
-      };
       daily_goals: {
         Row: { id: string; user_id: string; minutes: number; updated_at: string };
         Insert: { user_id: string; minutes: number };
@@ -380,6 +360,23 @@ export interface Database {
       increment_tutor_usage: {
         Args: { p_user_id: string; p_allowance: number };
         Returns: { allowed: boolean; remaining: number }[];
+      };
+      // Migration 0006: narrow, SECURITY DEFINER lookup replacing the
+      // certificates_public view (an auto-updatable security-definer view
+      // was a real, confirmed write vulnerability -- see that migration's
+      // header comment). Exact verification_code match only, at most one
+      // row, the same seven safe fields the view used to expose.
+      verify_certificate: {
+        Args: { p_verification_code: string };
+        Returns: {
+          cert_type: "course-completion" | "skill-achievement";
+          target_title: string;
+          display_name: string;
+          issued_at: string;
+          criteria_snapshot: string[];
+          content_version_ref: string;
+          verification_code: string;
+        }[];
       };
     };
     Enums: Record<string, never>;

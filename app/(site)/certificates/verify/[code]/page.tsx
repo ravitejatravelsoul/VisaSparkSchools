@@ -34,23 +34,24 @@ export default async function VerifyCertificatePage({ params }: { params: Params
     );
   }
 
-  // Uses the anon-key server client against certificates_public (migration
-  // 0005), a column-restricted view granted to anon -- no session/sign-in
-  // required to verify a certificate someone shared with you.
+  // Uses the anon-key server client to call verify_certificate (migration
+  // 0006), a narrow SECURITY DEFINER function -- no session/sign-in
+  // required to verify a certificate someone shared with you. Replaced the
+  // original certificates_public view (migration 0005): an auto-updatable
+  // security-definer view turned out to allow anonymous writes and bulk
+  // enumeration -- see migration 0006's header comment.
   const supabase = await getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("certificates_public")
-    .select("*")
-    .eq("verification_code", code)
-    .maybeSingle();
+  const { data: rows, error } = await supabase.rpc("verify_certificate", {
+    p_verification_code: code,
+  });
 
-  const found = !error && data;
+  const data = !error ? rows?.[0] : undefined;
 
   return (
     <Container className="max-w-xl py-10">
       <h1 className="text-2xl font-bold text-(--color-ink)">Certificate verification</h1>
 
-      {found ? (
+      {data ? (
         <div className="mt-6 rounded-xl border border-(--color-border) p-6">
           <Alert tone="success" title="This certificate is genuine">
             Independently verified against {siteConfig.name}&rsquo;s records.
