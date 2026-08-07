@@ -29,20 +29,26 @@ import type { NextConfig } from "next";
  *   all, since no such request would ever be made in that mode. Found and
  *   fixed after this project's first-ever live browser test against a real
  *   Supabase project surfaced every auth/sync call being silently blocked.
+ * - `script-src`/`frame-src` additionally allow-list
+ *   `https://challenges.cloudflare.com` (Cloudflare Turnstile's widget
+ *   script and its challenge iframe) only when
+ *   `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is configured, same least-privilege,
+ *   same-conditional-entry pattern as the Supabase URL above.
  */
 const isDev = process.env.NODE_ENV !== "production";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
 const isValidSupabaseUrl = supabaseUrl && /^https:\/\/[a-z0-9.-]+$/i.test(supabaseUrl);
+const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""} https://cdn.jsdelivr.net`,
+  `script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval'" : ""} https://cdn.jsdelivr.net${turnstileEnabled ? " https://challenges.cloudflare.com" : ""}`,
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "img-src 'self' data: blob:",
   "font-src 'self' data: https://cdn.jsdelivr.net",
-  `connect-src 'self' https://cdn.jsdelivr.net${isValidSupabaseUrl ? ` ${supabaseUrl}` : ""}`,
+  `connect-src 'self' https://cdn.jsdelivr.net${isValidSupabaseUrl ? ` ${supabaseUrl}` : ""}${turnstileEnabled ? " https://challenges.cloudflare.com" : ""}`,
   "worker-src 'self' blob:",
-  "frame-src 'self'",
+  `frame-src 'self'${turnstileEnabled ? " https://challenges.cloudflare.com" : ""}`,
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",

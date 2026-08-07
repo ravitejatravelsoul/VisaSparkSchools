@@ -628,6 +628,10 @@ function isEmptyProfile(profile: ProgressState["profile"]): boolean {
     profile.displayName === null &&
     profile.learningGoal === null &&
     profile.currentRoadmapId === null &&
-    profile.timezone === null
+    profile.timezone === null &&
+    profile.firstName === null &&
+    profile.lastName === null &&
+    profile.phoneE164 === null &&
+    profile.learnerLevel === null
   );
 }

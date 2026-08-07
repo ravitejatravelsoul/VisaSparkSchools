@@ -149,12 +149,25 @@ export interface FocusSessionState {
   runningSince: string | null;
 }
 
+/**
+ * Self-described experience level, collected at sign-up. Personalization
+ * only -- see lib/profile/learner-level.ts's doc comment for why this must
+ * never gate course/lesson/certificate access.
+ */
+export type LearnerLevel = "new" | "basics" | "small-projects" | "experienced";
+
 export interface ProfileState {
   displayName: string | null;
   learningGoal: string | null;
   currentRoadmapId: string | null;
   /** IANA timezone (e.g. "America/Los_Angeles"); null means "use the browser's timezone". */
   timezone: string | null;
+  /** Certificate recipient name fields -- see docs/product-expansion/DECISIONS.md. */
+  firstName: string | null;
+  lastName: string | null;
+  /** E.164 format (e.g. "+14155551234"); optional, never used for SMS auth. */
+  phoneE164: string | null;
+  learnerLevel: LearnerLevel | null;
   updatedAt: string;
 }
 
@@ -254,6 +267,10 @@ export function createEmptyProgress(): ProgressState {
       learningGoal: null,
       currentRoadmapId: null,
       timezone: null,
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: new Date(0).toISOString(),
     },
     certificates: {},

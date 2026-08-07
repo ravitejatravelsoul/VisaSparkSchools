@@ -1,0 +1,130 @@
+<!--
+  VisaSparkSchools ("VS Schools") signup confirmation email.
+
+  Install: Supabase dashboard -> Authentication -> Email Templates ->
+  "Confirm signup" -> paste this file's contents as the template body, and
+  set the subject to: Confirm your email for VS Schools
+
+  Uses only Supabase's documented template variables:
+    {{ .SiteURL }}    -- the project's configured Site URL
+    {{ .TokenHash }}  -- the verification token this link proves
+    {{ .Data }}       -- the raw_user_meta_data map (first_name, if present)
+
+  The confirmation link points at this app's own /auth/callback route (not
+  Supabase's default hosted verify redirect) so the app can show an
+  explicit "you're verified" state and hand off to the originally
+  requested page -- see app/auth/callback/route.ts and
+  docs/product-expansion/RELEASE_CONFIGURATION.md.
+
+  No tracking pixel, no external script, no secret value. Email-safe HTML:
+  table-based layout, inline styles only, no external stylesheet.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm your email for VS Schools</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f5f7;
+      font-family:
+        -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial,
+        sans-serif;
+    "
+  >
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #f4f5f7; padding: 32px 16px"
+    >
+      <tr>
+        <td align="center">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              max-width: 480px;
+              background-color: #ffffff;
+              border-radius: 12px;
+              overflow: hidden;
+            "
+          >
+            <tr>
+              <td style="background-color: #0f172a; padding: 24px 32px">
+                <span style="color: #ffffff; font-size: 18px; font-weight: 700">VS Schools</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 32px">
+                <h1 style="margin: 0 0 16px; font-size: 20px; color: #0f172a">
+                  Welcome to VisaSparkSchools
+                </h1>
+                <p style="margin: 0 0 16px; font-size: 15px; line-height: 1.6; color: #334155">
+                  {{ if .Data.first_name }}Hi {{ .Data.first_name }},{{ else }}Hi,{{ end }} thanks
+                  for signing up. VS Schools offers independent technology courses, practice, study
+                  abroad guidance, and verifiable completion certificates — start with any course,
+                  in any order.
+                </p>
+                <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #334155">
+                  Confirm your email to activate your account:
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="border-radius: 8px; background-color: #16a34a">
+                      <a
+                        href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=%2Fdashboard"
+                        style="
+                          display: inline-block;
+                          padding: 12px 24px;
+                          font-size: 15px;
+                          font-weight: 600;
+                          color: #ffffff;
+                          text-decoration: none;
+                        "
+                        >Confirm my email</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin: 24px 0 0; font-size: 13px; line-height: 1.6; color: #64748b">
+                  Or paste this link into your browser:<br />
+                  <a
+                    href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=%2Fdashboard"
+                    style="color: #2563eb; word-break: break-all"
+                    >{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash
+                    }}&type=email&next=%2Fdashboard</a
+                  >
+                </p>
+                <p style="margin: 24px 0 0; font-size: 13px; line-height: 1.6; color: #64748b">
+                  If you didn&#39;t create a VS Schools account, you can safely ignore this email —
+                  no account will be created. For your security, don&#39;t share this link with
+                  anyone.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="
+                  padding: 20px 32px;
+                  background-color: #f8fafc;
+                  font-size: 12px;
+                  color: #94a3b8;
+                "
+              >
+                VS Schools · <a href="{{ .SiteURL }}" style="color: #94a3b8">{{ .SiteURL }}</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

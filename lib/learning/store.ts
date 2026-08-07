@@ -28,6 +28,8 @@ import {
 import { calculateLessonMasteryContribution, averageMastery } from "@/lib/learning/mastery";
 import { addDays, nextIntervalDays, type ReviewResult } from "@/lib/learning/review-schedule";
 import { localDateKey } from "@/lib/learning/daily-goal";
+import { normalizeName } from "@/lib/profile/name";
+import { isLearnerLevel } from "@/lib/profile/learner-level";
 import { buildSchedule, type StudySchedule } from "@/lib/study-plan/planner";
 import {
   allLessons,
@@ -298,7 +300,14 @@ interface ProgressStore {
     patch: Partial<
       Pick<
         ProgressState["profile"],
-        "displayName" | "learningGoal" | "currentRoadmapId" | "timezone"
+        | "displayName"
+        | "learningGoal"
+        | "currentRoadmapId"
+        | "timezone"
+        | "firstName"
+        | "lastName"
+        | "phoneE164"
+        | "learnerLevel"
       >
     >,
   ) => void;
@@ -1076,12 +1085,24 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       }
 
       const now = new Date().toISOString();
+      // Snapshotted once, here, and never re-read afterward -- see
+      // docs/product-expansion/DECISIONS.md ("Profile and certificate name
+      // handling"). Prefers the real first+last name collected at sign-up
+      // (required for every authenticated learner, who is now the only kind
+      // of learner who can reach this action at all -- see Phase 4's
+      // auth-gated issuance UI), falling back to the older free-text
+      // displayName field for any pre-existing profile that predates it.
+      const fullName = [store.state.profile.firstName, store.state.profile.lastName]
+        .filter((part): part is string => Boolean(part?.trim()))
+        .join(" ")
+        .trim();
       const cert: CertificateState = {
         id,
         type,
         targetId,
         targetTitle: course.title,
-        displayName: store.state.profile.displayName?.trim() || "VisaSparkSchools Learner",
+        displayName:
+          fullName || store.state.profile.displayName?.trim() || "VisaSparkSchools Learner",
         issuedAt: now,
         criteriaSnapshot: eligibility.met,
         contentVersionRef: ELIGIBILITY_RULESET_VERSION,
@@ -1118,6 +1139,35 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       !isValidTimezone(sanitized.timezone)
     ) {
       delete sanitized.timezone;
+    }
+    if (sanitized.firstName !== null && sanitized.firstName !== undefined) {
+      const normalized = normalizeName(sanitized.firstName);
+      if (normalized.length === 0) delete sanitized.firstName;
+      else sanitized.firstName = normalized;
+    }
+    if (sanitized.lastName !== null && sanitized.lastName !== undefined) {
+      const normalized = normalizeName(sanitized.lastName);
+      if (normalized.length === 0) delete sanitized.lastName;
+      else sanitized.lastName = normalized;
+    }
+    if (
+      "phoneE164" in sanitized &&
+      sanitized.phoneE164 !== null &&
+      sanitized.phoneE164 !== undefined &&
+      !/^\+[1-9]\d{1,14}$/.test(sanitized.phoneE164)
+    ) {
+      // Defensive re-check even though callers (the profile form) already
+      // validate/normalize via lib/profile/phone.ts before calling this --
+      // this action must never persist a malformed value regardless of caller.
+      delete sanitized.phoneE164;
+    }
+    if (
+      "learnerLevel" in sanitized &&
+      sanitized.learnerLevel !== null &&
+      sanitized.learnerLevel !== undefined &&
+      !isLearnerLevel(sanitized.learnerLevel)
+    ) {
+      delete sanitized.learnerLevel;
     }
     set((store) => {
       const next = {

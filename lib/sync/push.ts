@@ -226,6 +226,10 @@ export async function pushProgress(
         learning_goal: state.profile.learningGoal,
         current_roadmap_id: state.profile.currentRoadmapId,
         timezone: state.profile.timezone,
+        first_name: state.profile.firstName,
+        last_name: state.profile.lastName,
+        phone_e164: state.profile.phoneE164,
+        learner_level: state.profile.learnerLevel,
         // Explicitly required: an upsert's ON CONFLICT DO UPDATE only
         // touches columns present in the payload, so omitting this left the
         // row's updated_at frozen at whatever it was after the very first

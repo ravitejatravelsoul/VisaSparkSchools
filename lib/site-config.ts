@@ -24,6 +24,9 @@ export const siteConfig = {
   },
   /** Name shown on completion certificates once that feature ships (docs/CERTIFICATES.md). */
   certificateIssuer: "VisaSparkSchools",
+  /** Brand wording used specifically on the certificate document itself -- see docs/product-expansion/DECISIONS.md. */
+  certificateBrand: "VS Schools",
+  certificateSignatory: { name: "Naga Malleswararao Boddu", title: "CEO, VS Schools" },
   brand: {
     logo: "/brand/logo.svg",
     logoDark: "/brand/logo-dark.svg",
@@ -78,4 +81,11 @@ export const featureFlags = {
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   ),
   aiTutorEnabled: process.env.NEXT_PUBLIC_AI_TUTOR_ENABLED === "true",
+  turnstileEnabled: Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY),
 } as const;
+
+/** Public Turnstile site key -- see docs/product-expansion/RELEASE_CONFIGURATION.md; the secret is never in this repo. */
+export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+/** Real URL provided by the owner in Vercel; unset means the CTA renders a safe non-broken "coming soon" state instead of a guessed link. */
+export const visaSparkUrl = process.env.NEXT_PUBLIC_VISASPARK_URL;

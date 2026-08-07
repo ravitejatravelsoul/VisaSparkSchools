@@ -109,3 +109,22 @@ export function MoonIcon(props: SVGProps<SVGSVGElement>) {
     </Base>
   );
 }
+
+export function EyeIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </Base>
+  );
+}
+
+export function EyeOffIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="M3 3l18 18" />
+      <path d="M10.58 5.11A9.7 9.7 0 0 1 12 5c6.5 0 10 7 10 7a15.6 15.6 0 0 1-3.29 4.14M6.5 6.63C3.87 8.34 2 12 2 12s3.5 7 10 7a9.9 9.9 0 0 0 4.15-.9" />
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+    </Base>
+  );
+}

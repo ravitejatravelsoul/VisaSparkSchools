@@ -231,6 +231,10 @@ export async function pullProgress(supabase: Client, userId: string): Promise<Pr
       learningGoal: profile.data.learning_goal,
       currentRoadmapId: profile.data.current_roadmap_id,
       timezone: profile.data.timezone,
+      firstName: profile.data.first_name,
+      lastName: profile.data.last_name,
+      phoneE164: profile.data.phone_e164,
+      learnerLevel: profile.data.learner_level as ProgressState["profile"]["learnerLevel"],
       updatedAt: profile.data.updated_at,
     };
   }

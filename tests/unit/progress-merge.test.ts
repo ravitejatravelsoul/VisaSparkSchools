@@ -176,6 +176,10 @@ describe("mergeProgress (guest -> account merge)", () => {
       learningGoal: null,
       currentRoadmapId: null,
       timezone: null,
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: "2026-01-01T00:00:00.000Z",
     };
     const remote = createEmptyProgress();
@@ -184,6 +188,10 @@ describe("mergeProgress (guest -> account merge)", () => {
       learningGoal: "Get a job",
       currentRoadmapId: "backend-developer",
       timezone: "America/Chicago",
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: "2026-01-05T00:00:00.000Z",
     };
 
@@ -309,6 +317,10 @@ describe("mergeProgress (guest -> account merge)", () => {
       learningGoal: "Get a job in frontend",
       currentRoadmapId: null,
       timezone: null,
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: "2026-01-01T00:00:00.000Z",
     };
     const remote = createEmptyProgress();
@@ -317,6 +329,10 @@ describe("mergeProgress (guest -> account merge)", () => {
       learningGoal: null,
       currentRoadmapId: null,
       timezone: null,
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: "2026-01-05T00:00:00.000Z", // newer, but empty
     };
 

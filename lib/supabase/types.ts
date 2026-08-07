@@ -13,6 +13,10 @@ export interface Database {
           learning_goal: string | null;
           current_roadmap_id: string | null;
           timezone: string | null;
+          first_name: string | null;
+          last_name: string | null;
+          phone_e164: string | null;
+          learner_level: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -22,6 +26,10 @@ export interface Database {
           learning_goal?: string | null;
           current_roadmap_id?: string | null;
           timezone?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone_e164?: string | null;
+          learner_level?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -29,6 +37,10 @@ export interface Database {
           learning_goal?: string | null;
           current_roadmap_id?: string | null;
           timezone?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          phone_e164?: string | null;
+          learner_level?: string | null;
         };
         Relationships: [];
       };

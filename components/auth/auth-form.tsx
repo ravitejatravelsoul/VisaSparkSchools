@@ -10,7 +10,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ArrowRightIcon } from "@/components/ui/icons";
 
-type Mode = "sign-in" | "sign-up" | "reset";
+type Mode = "sign-in" | "reset";
 
 const COPY: Record<Mode, { title: string; cta: string; footer: React.ReactNode }> = {
   "sign-in": {
@@ -25,18 +25,6 @@ const COPY: Record<Mode, { title: string; cta: string; footer: React.ReactNode }
         ·{" "}
         <Link href="/reset-password" className="underline">
           Forgot password?
-        </Link>
-      </p>
-    ),
-  },
-  "sign-up": {
-    title: "Create your account",
-    cta: "Sign up",
-    footer: (
-      <p className="text-sm text-(--color-ink-muted)">
-        Already have an account?{" "}
-        <Link href="/sign-in" className="underline">
-          Sign in
         </Link>
       </p>
     ),
@@ -86,6 +74,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (status === "loading") return; // double-submit guard
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
     setStatus("loading");
@@ -98,24 +87,19 @@ export function AuthForm({ mode }: { mode: Mode }) {
       return;
     }
 
-    const action =
-      mode === "sign-up"
-        ? supabase.auth.signUp({ email, password })
-        : supabase.auth.signInWithPassword({ email, password });
-
-    const { error } = await action;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setStatus("error");
       setMessage(error.message);
     } else {
       setStatus("done");
-      // As with sign-out (see AccountNav), the guest-to-account sync
-      // lifecycle (lib/sync/orchestrator.ts's handleSignedIn) is driven by
-      // AuthProvider's onAuthStateChange listener firing independently of
-      // this navigation, not by a page reload -- it already starts as soon
-      // as Supabase's sign-in call resolves and fires that event, which
-      // happens before this .then()-equivalent continuation runs. A full
-      // reload was never required for the sync to run correctly.
+      // The guest-to-account sync lifecycle (lib/sync/orchestrator.ts's
+      // handleSignedIn) is driven by AuthProvider's onAuthStateChange
+      // listener firing independently of this navigation, not by a page
+      // reload -- it already starts as soon as Supabase's sign-in call
+      // resolves and fires that event, which happens before this
+      // .then()-equivalent continuation runs. A full reload was never
+      // required for the sync to run correctly.
       router.push("/dashboard");
     }
   };

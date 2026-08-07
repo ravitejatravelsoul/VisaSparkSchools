@@ -3,13 +3,17 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AuthForm } from "@/components/auth/auth-form";
 
 /**
- * Regression test for Phase 5F: a successful sign-in/sign-up used to
- * navigate via `window.location.href = "/dashboard"` (a full page reload),
- * which ESLint's `@next/next/no-location-assign-relative-destination` rule
+ * Regression test for Phase 5F: a successful sign-in used to navigate via
+ * `window.location.href = "/dashboard"` (a full page reload), which
+ * ESLint's `@next/next/no-location-assign-relative-destination` rule
  * correctly flags for an internal Next.js destination. Fixed to use
- * `useRouter().push("/dashboard")` instead -- these tests assert the
- * router is called only on success, with the right destination, and never
- * on a failed attempt or in Supabase-disabled (guest) mode.
+ * `useRouter().push("/dashboard")` instead -- these tests assert the router
+ * is called only on success, with the right destination, and never on a
+ * failed attempt or in Supabase-disabled (guest) mode.
+ *
+ * Sign-up moved to a dedicated component (components/auth/sign-up-form.tsx,
+ * see tests/integration/sign-up-form.test.tsx) as part of the expanded
+ * onboarding flow -- AuthForm now only handles sign-in and password reset.
  */
 
 vi.mock("@/lib/site-config", async (importOriginal) => {
@@ -23,12 +27,10 @@ vi.mock("next/navigation", () => ({
 }));
 
 const signInWithPassword = vi.fn();
-const signUp = vi.fn();
 vi.mock("@/lib/supabase/browser", () => ({
   getSupabaseBrowserClient: () => ({
     auth: {
       signInWithPassword: (...args: unknown[]) => signInWithPassword(...args),
-      signUp: (...args: unknown[]) => signUp(...args),
     },
   }),
 }));
@@ -36,7 +38,6 @@ vi.mock("@/lib/supabase/browser", () => ({
 beforeEach(() => {
   push.mockClear();
   signInWithPassword.mockReset();
-  signUp.mockReset();
 });
 
 function fillAndSubmit(email: string, password: string) {
@@ -64,17 +65,5 @@ describe("AuthForm", () => {
 
     await waitFor(() => expect(screen.getByText("Invalid credentials")).toBeInTheDocument());
     expect(push).not.toHaveBeenCalled();
-  });
-
-  it("navigates to /dashboard after a successful sign-up too", async () => {
-    signUp.mockResolvedValue({ error: null });
-    render(<AuthForm mode="sign-up" />);
-
-    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "new@example.test" } });
-    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "password123" } });
-    fireEvent.click(screen.getByRole("button", { name: "Sign up" }));
-
-    await waitFor(() => expect(signUp).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/dashboard"));
   });
 });

@@ -44,6 +44,10 @@ describe("syncGuestToAccount (guest -> account sync lifecycle)", () => {
       learningGoal: "Get a job",
       currentRoadmapId: "some-path",
       timezone: "America/Chicago",
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: "2026-01-01T00:00:00.000Z",
     };
 
@@ -143,6 +147,10 @@ describe("syncGuestToAccount (guest -> account sync lifecycle)", () => {
       learningGoal: "Get a job",
       currentRoadmapId: null,
       timezone: null,
+      firstName: null,
+      lastName: null,
+      phoneE164: null,
+      learnerLevel: null,
       updatedAt: "2030-01-01T00:00:00.000Z",
     };
     await syncGuestToAccount(client(fake), USER_ID, edited);

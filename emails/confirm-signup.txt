@@ -1,0 +1,14 @@
+Welcome to VisaSparkSchools
+
+{{ if .Data.first_name }}Hi {{ .Data.first_name }},{{ else }}Hi,{{ end }} thanks for signing up.
+VS Schools offers independent technology courses, practice, study abroad guidance, and
+verifiable completion certificates -- start with any course, in any order.
+
+Confirm your email to activate your account:
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email&next=%2Fdashboard
+
+If you didn't create a VS Schools account, you can safely ignore this email -- no account will
+be created. For your security, don't share this link with anyone.
+
+VS Schools
+{{ .SiteURL }}
