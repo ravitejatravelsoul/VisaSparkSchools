@@ -145,4 +145,18 @@ describe("ExamPracticeHub", () => {
     fireEvent.click(screen.getByRole("tab", { name: "Speaking" }));
     expect(screen.getByRole("button", { name: /start speaking/i })).toBeInTheDocument();
   });
+
+  it("hides the Speaking tab entirely for an exam with no speaking component (e.g. GRE)", () => {
+    render(
+      <ExamPracticeHub
+        courseSlug="gre-general-test-preparation"
+        courseTitle="GRE General Test Preparation"
+        questions={[]}
+        modules={modules()}
+        writingTasks={writingTasks}
+        speakingTasks={[]}
+      />,
+    );
+    expect(screen.queryByRole("tab", { name: "Speaking" })).not.toBeInTheDocument();
+  });
 });

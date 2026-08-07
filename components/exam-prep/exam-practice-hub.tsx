@@ -14,12 +14,6 @@ import { cn } from "@/lib/utils/cn";
 
 type View = "hub" | "diagnostic" | "section" | "writing" | "speaking";
 
-const TABS: { id: View; label: string }[] = [
-  { id: "hub", label: "Practice questions" },
-  { id: "writing", label: "Writing" },
-  { id: "speaking", label: "Speaking" },
-];
-
 /**
  * Reuses the existing, well-tested PracticeSession engine (untimed/timed
  * modes, retry-incorrect, per-topic breakdown, progress persistence -- see
@@ -49,10 +43,19 @@ export function ExamPracticeHub({
   const sectionMap = buildSectionMap(modules);
   const activeSection = modules.find((m) => m.id === sectionModuleId);
 
+  // Not every exam has a speaking component (e.g. the GRE General Test is
+  // Verbal/Quantitative/Analytical Writing only) -- hide the tab entirely
+  // rather than showing an empty/fabricated speaking practice area.
+  const tabs: { id: View; label: string }[] = [
+    { id: "hub", label: "Practice questions" },
+    { id: "writing", label: "Writing" },
+    ...(speakingTasks.length > 0 ? [{ id: "speaking" as const, label: "Speaking" }] : []),
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div role="tablist" aria-label="Exam practice area" className="flex flex-wrap gap-1">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const selected =
             view === tab.id || (tab.id === "hub" && (view === "diagnostic" || view === "section"));
           return (

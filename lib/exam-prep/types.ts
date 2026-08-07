@@ -66,7 +66,13 @@ export const examPrepMetaSchema = z.object({
   lastReviewed: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   officialSources: z.array(referenceSchema).min(1),
   writingTasks: z.array(writingTaskSchema).min(2),
-  speakingTasks: z.array(speakingTaskSchema).min(2),
+  /**
+   * Empty for exams with no speaking component at all (e.g. the GRE General
+   * Test -- Verbal/Quantitative/Analytical Writing only). Never fabricate a
+   * speaking task for an exam that doesn't have one; the UI hides the
+   * Speaking tab entirely when this is empty (see ExamPracticeHub).
+   */
+  speakingTasks: z.array(speakingTaskSchema).default([]),
 });
 export type ExamPrepMeta = z.infer<typeof examPrepMetaSchema>;
 export type ExamPrepMetaInput = z.input<typeof examPrepMetaSchema>;
