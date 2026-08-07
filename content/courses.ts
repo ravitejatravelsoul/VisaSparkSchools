@@ -1354,4 +1354,257 @@ export const courses: CourseInput[] = [
       },
     ],
   },
+  {
+    id: "gre-general-test-preparation",
+    slug: "gre-general-test-preparation",
+    trackSlug: "exam-preparation",
+    title: "GRE General Test Preparation",
+    description:
+      "Independent preparation for the GRE General Test's Verbal Reasoning, Quantitative Reasoning, and Analytical Writing sections, with original practice passages and self-review writing tasks.",
+    order: 1,
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    audience:
+      "Learners preparing to take the GRE General Test for graduate-school admission, at any starting point.",
+    learningOutcomes: [
+      "Describe the GRE's five-section format, section-level adaptive scoring, and the 130-170/0-6 scoring scales",
+      "Apply section-specific strategies across Text Completion, Sentence Equivalence, Reading Comprehension, Quantitative Comparison, and data analysis",
+      "Complete a self-assessed diagnostic, section practice, and a mixed mock test, and self-review a timed Analytical Writing response against real GRE-style criteria",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: [],
+    modules: [
+      {
+        id: "gre-test-overview-and-adaptive-format",
+        title: "Test Overview & Adaptive Format",
+        summary:
+          "The GRE's five-section structure, timing, and the section-level adaptive scoring mechanism.",
+        lessonSlugs: ["gre-test-overview-and-format", "gre-scoring-and-adaptive-testing"],
+      },
+      {
+        id: "gre-verbal-reasoning",
+        title: "Verbal Reasoning",
+        summary:
+          "Text Completion, Sentence Equivalence, Reading Comprehension, and critical-reasoning strategy with original practice passages and arguments.",
+        lessonSlugs: [
+          "gre-verbal-text-completion",
+          "gre-verbal-sentence-equivalence",
+          "gre-verbal-reading-comprehension",
+          "gre-verbal-critical-reasoning",
+        ],
+      },
+      {
+        id: "gre-quantitative-reasoning",
+        title: "Quantitative Reasoning",
+        summary:
+          "Arithmetic and algebra, geometry, data analysis, and the GRE-specific Quantitative Comparison format.",
+        lessonSlugs: [
+          "gre-quant-arithmetic-and-algebra",
+          "gre-quant-geometry",
+          "gre-quant-data-analysis",
+          "gre-quant-comparison-strategy",
+        ],
+      },
+      {
+        id: "gre-analytical-writing",
+        title: "Analytical Writing",
+        summary:
+          "Structuring the Analyze an Issue task, plus test-day pacing and section-level adaptivity strategy.",
+        lessonSlugs: ["gre-writing-analyze-an-issue", "gre-test-day-strategy-and-pacing"],
+      },
+    ],
+  },
+  {
+    id: "pte-academic-preparation",
+    slug: "pte-academic-preparation",
+    trackSlug: "exam-preparation",
+    title: "PTE Academic Preparation",
+    description:
+      "Independent preparation for PTE Academic's Speaking & Writing, Reading, and Listening parts, with original practice content and self-review writing/speaking tasks.",
+    order: 2,
+    difficulty: "beginner",
+    estimatedHours: 8,
+    audience:
+      "Learners preparing to take PTE Academic for study-abroad, work, or immigration purposes, at any starting English level.",
+    learningOutcomes: [
+      "Describe PTE Academic's three-part, ~2-hour format and its 10-90 integrated scoring scale",
+      "Apply task-specific strategies across Speaking (Read Aloud, Describe Image, Retell Lecture), Writing (Summarize Written Text, Essay), Reading, and Listening",
+      "Complete a self-assessed diagnostic, section practice, and a mixed mock test, and self-review a timed Writing and Speaking response against real PTE-style criteria",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: [],
+    modules: [
+      {
+        id: "pte-overview-strategy",
+        title: "Test Overview & Strategy",
+        summary: "Format, integrated scoring, and how to build a realistic study plan.",
+        lessonSlugs: ["pte-test-format-overview", "pte-scoring-and-study-plan"],
+      },
+      {
+        id: "pte-speaking-module",
+        title: "Speaking",
+        summary:
+          "Read Aloud, Repeat Sentence, Describe Image, Retell Lecture, Answer Short Question, and the Personal Introduction.",
+        lessonSlugs: [
+          "pte-speaking-read-aloud-repeat-sentence",
+          "pte-speaking-describe-image-retell-lecture",
+          "pte-speaking-answer-short-question-personal-intro",
+        ],
+      },
+      {
+        id: "pte-writing-module",
+        title: "Writing",
+        summary: "Summarize Written Text's one-sentence constraint, and Write Essay's structure.",
+        lessonSlugs: ["pte-writing-summarize-written-text", "pte-writing-write-essay"],
+      },
+      {
+        id: "pte-reading-module",
+        title: "Reading",
+        summary: "Multiple Choice, Re-order Paragraphs, and Fill in the Blanks.",
+        lessonSlugs: [
+          "pte-reading-multiple-choice-reorder-paragraphs",
+          "pte-reading-fill-in-the-blanks",
+        ],
+      },
+      {
+        id: "pte-listening-module",
+        title: "Listening",
+        summary:
+          "Summarize Spoken Text, Fill in the Blanks, Highlight Correct Summary, Multiple Choice, and Select Missing Word.",
+        lessonSlugs: [
+          "pte-listening-summarize-spoken-text",
+          "pte-listening-fill-in-blanks-highlight-summary",
+          "pte-listening-multiple-choice-select-missing-word",
+        ],
+      },
+    ],
+  },
+  {
+    id: "toefl-ibt-preparation",
+    slug: "toefl-ibt-preparation",
+    trackSlug: "exam-preparation",
+    title: "TOEFL iBT Preparation",
+    description:
+      "Independent preparation for TOEFL iBT's current Reading, Listening, Speaking, and Writing format, including the January 2026 scoring and task-type changes, with original practice content and self-review writing/speaking tasks.",
+    order: 3,
+    difficulty: "beginner",
+    estimatedHours: 8,
+    audience:
+      "Learners preparing to take TOEFL iBT for study-abroad admission, at any starting English level.",
+    learningOutcomes: [
+      "Describe TOEFL iBT's current ~90-minute, four-section, adaptive Reading/Listening format and the 1-6 CEFR-aligned scoring scale (with its transitional 0-120 comparable score)",
+      "Apply section-specific strategies across Reading, Listening, the current Listen and Repeat / Take an Interview speaking tasks, and the current Build a Sentence / Write an Email / Write for an Academic Discussion writing tasks",
+      "Complete a self-assessed diagnostic, section practice, and a mixed mock test, and self-review a timed Writing and Speaking response against real TOEFL-style criteria",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: [],
+    modules: [
+      {
+        id: "toefl-overview-scoring",
+        title: "Test Overview & Scoring",
+        summary:
+          "Format, section timing, adaptive testing, and the current 1-6 CEFR-aligned scoring scale.",
+        lessonSlugs: ["toefl-test-format-overview", "toefl-scoring-scale-and-score-reports"],
+      },
+      {
+        id: "toefl-reading-module",
+        title: "Reading",
+        summary:
+          "The Reading task types, adaptive difficulty, and main idea/detail/inference practice.",
+        lessonSlugs: [
+          "toefl-reading-format-and-strategy",
+          "toefl-reading-practice-academic-passage",
+        ],
+      },
+      {
+        id: "toefl-listening-module",
+        title: "Listening",
+        summary: "The Listening task types, adaptive difficulty, and note-taking practice.",
+        lessonSlugs: [
+          "toefl-listening-format-and-strategy",
+          "toefl-listening-practice-academic-talk",
+        ],
+      },
+      {
+        id: "toefl-speaking-module",
+        title: "Speaking",
+        summary:
+          "Listen and Repeat, Take an Interview, and delivery/pronunciation strategy for a zero-prep-time format.",
+        lessonSlugs: [
+          "toefl-speaking-listen-and-repeat",
+          "toefl-speaking-take-an-interview",
+          "toefl-speaking-delivery-and-pronunciation",
+        ],
+      },
+      {
+        id: "toefl-writing-module",
+        title: "Writing",
+        summary:
+          "Build a Sentence, Write an Email, Write for an Academic Discussion, and time management.",
+        lessonSlugs: [
+          "toefl-writing-build-a-sentence-and-email",
+          "toefl-writing-for-academic-discussion",
+          "toefl-writing-strategy-and-time-management",
+        ],
+      },
+    ],
+  },
+  {
+    id: "go-programming",
+    slug: "go-programming",
+    trackSlug: "go",
+    title: "Go Programming",
+    description:
+      "A simple, statically-typed, compiled language built for concurrency and fast builds -- from syntax fundamentals through goroutines, channels, and testing.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    audience:
+      "Learners with some prior programming experience (in any language) who want a fast, practical introduction to Go for backend services, CLIs, or cloud tooling.",
+    learningOutcomes: [
+      "Read and predict the behavior of real Go programs covering variables, control flow, functions, and Go's basic collection types",
+      "Explain Go's distinctive features: multiple return values, implicit interface satisfaction, and the (result, error) idiom",
+      "Describe how goroutines and channels provide safe concurrency, and write a basic Go test using the standard `testing` package",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["go"],
+    modules: [
+      {
+        id: "go-fundamentals",
+        title: "Go Fundamentals",
+        summary: "The toolchain, variables and types, and control flow.",
+        lessonSlugs: [
+          "go-introduction-and-toolchain",
+          "go-variables-types-and-constants",
+          "go-control-flow",
+        ],
+      },
+      {
+        id: "go-functions-collections",
+        title: "Functions & Collections",
+        summary: "Multiple return values, slices, and maps.",
+        lessonSlugs: ["go-functions-and-multiple-returns", "go-slices-and-arrays", "go-maps"],
+      },
+      {
+        id: "go-structs-interfaces-errors",
+        title: "Structs, Interfaces & Errors",
+        summary: "Custom types with methods, implicit interfaces, and idiomatic error handling.",
+        lessonSlugs: ["go-structs-and-methods", "go-interfaces", "go-error-handling"],
+      },
+      {
+        id: "go-concurrency-and-structure",
+        title: "Concurrency & Project Structure",
+        summary: "Goroutines and channels, packages and visibility, and testing with go test.",
+        lessonSlugs: [
+          "go-goroutines-and-channels",
+          "go-packages-and-visibility",
+          "go-testing-with-go-test",
+        ],
+      },
+    ],
+  },
 ];

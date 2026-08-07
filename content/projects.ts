@@ -1795,4 +1795,71 @@ export const projects: Project[] = [
     ],
     references: [],
   },
+  {
+    id: "go-cli-task-tracker",
+    slug: "go-cli-task-tracker",
+    title: "Go CLI Task Tracker",
+    description:
+      "Design (on paper/in guided steps, since this platform can't execute Go) a command-line task tracker in Go, applying structs, methods, slices, maps, and Go's error-handling idiom.",
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    isCapstone: true,
+    trackSlugs: ["go"],
+    prerequisiteLessonIds: [
+      "go-structs-and-methods",
+      "go-maps",
+      "go-slices-and-arrays",
+      "go-error-handling",
+    ],
+    objectives: [
+      "Design a `Task` struct and a `TaskStore` type with methods for adding, completing, and listing tasks",
+      "Use a slice or map as the underlying storage and handle a 'task not found' case with Go's (result, error) idiom",
+      "Parse basic command-line arguments to drive add/list/complete actions",
+      "Write at least one `_test.go` test file covering the core add/complete behavior",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the Task type and storage",
+        description:
+          "Define a Task struct and a TaskStore holding tasks, with methods to add and list them.",
+        checklist: [
+          "Task struct has at minimum an ID, Title, and Done field",
+          "TaskStore has an Add(title string) method returning the created Task",
+          "TaskStore has a List() method returning all tasks",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Complete a task with proper error handling",
+        description:
+          "Add a Complete(id int) error method that marks a task done, returning an error if the id doesn't exist.",
+        checklist: [
+          "Complete returns a non-nil error for an unknown id, following the (result, error) idiom",
+          "Calling code checks the error with `if err != nil` before assuming success",
+        ],
+      },
+      {
+        id: "m3",
+        title: "A minimal command-line interface",
+        description:
+          "Read os.Args to support at least `add <title>`, `list`, and `complete <id>` commands.",
+        checklist: [
+          "Running with no recognized command prints a usage message instead of panicking",
+          "Each command calls the corresponding TaskStore method and prints a clear result",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Write a test file",
+        description: "Add a _test.go file testing the core Add/Complete behavior with go test.",
+        checklist: [
+          "At least one TestXxx(t *testing.T) function exists",
+          "The test covers both a successful Complete and an unknown-id error case",
+          "Test failures use t.Errorf, not a halting assertion",
+        ],
+      },
+    ],
+    references: [{ label: "How to Write Go Code", url: "https://go.dev/doc/code" }],
+  },
 ];

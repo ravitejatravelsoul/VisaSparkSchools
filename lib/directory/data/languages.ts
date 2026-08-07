@@ -425,7 +425,11 @@ export const languageTechnologies: TechnologyInput[] = [
       "Packages and modules",
     ],
     example: {
-      language: "javascript",
+      // No "go" option exists in runnerLanguageSchema (Go has no safe
+      // in-browser execution -- see RUNNER_CAPABILITY_MATRIX.md), and this
+      // is real Go syntax, not JavaScript -- "none" is the honest label
+      // rather than mislabeling it for syntax highlighting purposes.
+      language: "none",
       code: `func greet(name string) string {\n    return "Hello, " + name + "!"\n}\n\nfunc main() {\n    fmt.Println(greet("world"))\n}`,
       explanation:
         "Go has no exceptions for ordinary error handling -- functions typically return an explicit error value the caller must check, a deliberate design choice for predictability.",
@@ -435,7 +439,8 @@ export const languageTechnologies: TechnologyInput[] = [
       "Command-line tools",
       "Concurrent backend systems",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Go Programming course"],
+    courseId: "go-programming",
     projectIdeas: ["A concurrent web scraper using goroutines and channels"],
     references: [{ label: "Go official documentation", url: "https://go.dev/doc/" }],
     searchKeywords: ["golang", "concurrency", "goroutines"],

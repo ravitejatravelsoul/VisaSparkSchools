@@ -59,3 +59,37 @@ test("Mixed mock test tile links to the course's existing timed practice route",
   await expect(page).toHaveURL(/\/courses\/ielts-preparation\/practice$/);
   await expect(page.getByRole("heading", { name: /Practice: IELTS Preparation/i })).toBeVisible();
 });
+
+const OTHER_EXAM_COURSES = [
+  { slug: "gre-general-test-preparation", abbreviation: "GRE" },
+  { slug: "pte-academic-preparation", abbreviation: "PTE Academic" },
+  { slug: "toefl-ibt-preparation", abbreviation: "TOEFL iBT" },
+];
+
+for (const { slug, abbreviation } of OTHER_EXAM_COURSES) {
+  test(`${abbreviation} exam practice hub loads and starts a real diagnostic session`, async ({
+    page,
+  }) => {
+    await page.goto(`/courses/${slug}/exam-practice`);
+    await expect(page.getByRole("heading", { name: `${abbreviation} practice` })).toBeVisible();
+    await page.getByRole("button", { name: /start diagnostic/i }).click();
+    await page.getByRole("button", { name: /^start practice$/i }).click();
+    await expect(page.locator("fieldset legend").first()).toBeVisible();
+  });
+}
+
+test("GRE exam practice hub has no Speaking tab (GRE has no speaking section)", async ({
+  page,
+}) => {
+  await page.goto("/courses/gre-general-test-preparation/exam-practice");
+  await expect(page.getByRole("tab", { name: "Speaking" })).toHaveCount(0);
+  await expect(page.getByRole("tab", { name: "Writing" })).toBeVisible();
+});
+
+test("Go course page renders lessons and links to a real lesson page", async ({ page }) => {
+  await page.goto("/courses/go-programming");
+  await expect(page.getByRole("heading", { name: "Go Programming" })).toBeVisible();
+  await page.getByRole("link", { name: /Introduction to Go and the Toolchain/ }).click();
+  await expect(page).toHaveURL(/\/courses\/go-programming\/go-introduction-and-toolchain$/);
+  await expect(page.getByText("Not executed")).toBeVisible();
+});

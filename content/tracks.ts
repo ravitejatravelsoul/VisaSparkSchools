@@ -149,4 +149,12 @@ export const tracks: Track[] = [
       "Independent, self-paced preparation for the English-proficiency and graduate-admissions tests most study-abroad applications require: IELTS, PTE Academic, TOEFL iBT, and the GRE General Test.",
     order: 18,
   },
+  {
+    id: "go",
+    slug: "go",
+    title: "Go Programming",
+    description:
+      "A simple, statically-typed, compiled language built for concurrency and fast builds -- widely used for backend services, CLIs, and cloud infrastructure tooling.",
+    order: 19,
+  },
 ];

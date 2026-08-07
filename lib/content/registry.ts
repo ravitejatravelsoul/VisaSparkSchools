@@ -23,6 +23,10 @@ import { quantitativeAptitudeLessons } from "@/content/lessons/quantitative-apti
 import { careerAndGdPreparationLessons } from "@/content/lessons/career-and-gd-preparation";
 import { logicalAnalyticalReasoningLessons } from "@/content/lessons/logical-analytical-reasoning";
 import { ieltsLessons } from "@/content/lessons/ielts";
+import { goLessons } from "@/content/lessons/go";
+import { greLessons } from "@/content/lessons/gre";
+import { pteLessons } from "@/content/lessons/pte";
+import { toeflLessons } from "@/content/lessons/toefl";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -55,6 +59,10 @@ export const allLessons: Lesson[] = [
   ...careerAndGdPreparationLessons,
   ...logicalAnalyticalReasoningLessons,
   ...ieltsLessons,
+  ...goLessons,
+  ...greLessons,
+  ...pteLessons,
+  ...toeflLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);
