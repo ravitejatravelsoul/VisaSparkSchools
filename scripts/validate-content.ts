@@ -261,13 +261,16 @@ for (const lesson of allLessons) {
   }
 }
 
-// --- Lesson shape consistency (Phase 6): example/guidedExercise/
-// independentExercise became optional on lessonSchema so exam-preparation
-// lessons (reading/listening/writing, no meaningful code example) don't have
-// to fabricate one. This is NOT a general relaxation of the quality bar --
-// every course outside this explicit allow-list must still provide all
-// three, and every exam-prep lesson must consistently omit all three rather
-// than mixing shapes. ---
+// --- Lesson shape consistency (Phase 6/7/8): example/guidedExercise/
+// independentExercise became optional on lessonSchema so a lesson can use
+// one of two other legitimate content shapes instead: an exam-prep lesson
+// (reading/listening/writing -- no meaningful code example at all) or a
+// guided-output lab (Phase 8: languages with no safe in-browser execution --
+// see docs/product-expansion/RUNNER_CAPABILITY_MATRIX.md). This is NOT a
+// general relaxation of the quality bar -- every OTHER lesson still must
+// provide all three code fields, an exam-prep lesson must omit all three
+// (never mix in a guidedOutputLab either), and a guided-output-lab lesson
+// must have exactly the lab, not the three code fields. ---
 const EXAM_PREP_COURSE_SLUGS = new Set<string>(EXAM_PREP_SLUGS_TUPLE);
 for (const lesson of allLessons) {
   const isExamPrep = EXAM_PREP_COURSE_SLUGS.has(lesson.courseSlug);
@@ -277,14 +280,21 @@ for (const lesson of allLessons) {
   const hasAllCodeFields = Boolean(
     lesson.example && lesson.guidedExercise && lesson.independentExercise,
   );
-  if (isExamPrep && hasAnyCodeFields) {
+  const hasGuidedOutputLab = Boolean(lesson.guidedOutputLab);
+
+  if (isExamPrep && (hasAnyCodeFields || hasGuidedOutputLab)) {
     fail(
-      `Lesson "${lesson.slug}" belongs to an exam-prep course but declares example/guidedExercise/independentExercise -- exam-prep lessons must omit all three, not mix content shapes.`,
+      `Lesson "${lesson.slug}" belongs to an exam-prep course but declares example/guidedExercise/independentExercise/guidedOutputLab -- exam-prep lessons must omit all of these, not mix content shapes.`,
     );
   }
-  if (!isExamPrep && !hasAllCodeFields) {
+  if (!isExamPrep && hasAnyCodeFields && !hasAllCodeFields) {
     fail(
-      `Lesson "${lesson.slug}" is missing example/guidedExercise/independentExercise -- only courses in EXAM_PREP_COURSE_SLUGS may omit these.`,
+      `Lesson "${lesson.slug}" declares some but not all of example/guidedExercise/independentExercise -- provide all three, or omit all three in favor of a guidedOutputLab.`,
+    );
+  }
+  if (!isExamPrep && !hasAllCodeFields && !hasGuidedOutputLab) {
+    fail(
+      `Lesson "${lesson.slug}" has neither a full example/guidedExercise/independentExercise set nor a guidedOutputLab -- every non-exam-prep lesson needs one real interactive content shape.`,
     );
   }
 }
