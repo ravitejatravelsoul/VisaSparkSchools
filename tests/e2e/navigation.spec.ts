@@ -17,9 +17,9 @@ test("homepage to course to lesson navigation", async ({ page }) => {
 
   // Scope to the card whose *heading* (course title) is this course, not just
   // any link whose flattened accessible name happens to contain the string --
-  // catalog cards also show a "Recommended first: <course>" line (Phase 5A),
-  // so a plain substring/regex match on link name can hit a different card
-  // that merely recommends this course as a prerequisite.
+  // catalog cards also show a "Helpful before you begin (optional): <course>"
+  // line, so a plain substring/regex match on link name can hit a different
+  // card that merely recommends this course as an (advisory) prerequisite.
   await page
     .getByRole("link")
     .filter({ has: page.getByRole("heading", { name: "HTML & CSS Fundamentals" }) })

@@ -93,7 +93,7 @@ test("sign-in page explains accounts aren't configured, and guest mode still wor
   await page.goto("/sign-in");
   await expect(page.getByText(/aren't configured for this deployment/i)).toBeVisible();
   await page.getByRole("link", { name: /continue as a guest/i }).click();
-  await expect(page).toHaveURL(/\/paths$/);
+  await expect(page).toHaveURL(/\/courses$/);
 });
 
 test("keyboard-only user can tab to and activate the skip link", async ({ page }) => {

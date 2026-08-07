@@ -33,6 +33,47 @@ Supabase (optional, not provisioned in this beta)
    never a service-role key
 ```
 
+## Learning model: independent courses
+
+Every course is independently learnable. A learner may open, learn, complete, and earn a Course
+Completion certificate for any course directly -- no course requires finishing a different course
+first.
+
+- **Topics** (`content/tracks.ts`, learner-facing routes at `/topics` and `/topics/[trackSlug]`,
+  renamed from `/paths` -- see below) are an organizational grouping only: which subject area a
+  course belongs to, and a display-sort `order`. A topic is never a gate, a numbered step, or a
+  completion requirement.
+- **Course-to-course prerequisites** (`Course.prerequisiteCourseSlugs`/`nextCourseSlugs`) are
+  advisory. The course detail page shows them as "Helpful before you begin (optional)" with a
+  direct link, never as a lock -- `components/course/course-progress-actions.tsx`'s "Start this
+  course" action has no prerequisite check of any kind.
+- **Lesson order inside one course** (`Course.modules[].lessonSlugs`, `Lesson.order`) is real and
+  intentional -- lessons within a course build on each other, and `getAdjacentLessons` /
+  `CourseNavDesktop`/`CourseNavMobile` only ever sequence lessons _within_ their own course
+  (`lib/content/registry.ts#getLessonsForCourse`). This within-course ordering is not the thing
+  that was wrong; the earlier `/paths` presentation wrongly extended that same "numbered, in order"
+  motif _across_ unrelated courses/topics.
+- **Course Completion certificates** (`lib/certificates/eligibility.ts#getCourseCompletionEligibility`)
+  depend only on the selected course's own required lessons (`isCourseComplete`). Course A's
+  eligibility can never be affected by Course B's progress -- there is no cross-course read in that
+  function at all.
+- **Skill Achievement certificates** stay stricter and evidence-based, and are not enabled for
+  every course -- only courses listed in `SKILL_ACHIEVEMENT_COURSES` (a small, hand-curated map to
+  one real capstone project each) require lessons + a passing practice score + a completed project.
+  A course absent from that map only ever offers Course Completion.
+- **Roadmaps** (`/roadmaps`, `lib/directory/learning-paths.ts`) are optional, explicitly-labeled
+  recommendations ("a suggested order to learn in, not a certifiable, assessed course path") --
+  starting, following, or ignoring one never blocks any course, lesson, project, or certificate.
+
+**Route history**: `/paths` and `/paths/[trackSlug]` were renamed to `/topics` and
+`/topics/[trackSlug]` because the old presentation (a numbered `<ol>` of `StepMarker`s connected by
+a vertical line, captioned "Learning paths — one connected path, in order") falsely told learners
+every subject had to be completed sequentially. `next.config.ts`'s `redirects()` permanently
+redirects the old URLs so existing links/bookmarks keep working. The underlying `Track` type,
+`content/tracks.ts`, and `trackSlug` fields were kept as-is (renaming them would have been
+unnecessary, risky churn for a purely organizational/display concept) -- only the learner-facing
+route, copy, and visual treatment changed.
+
 ## Folder layout
 
 ```
@@ -457,6 +498,6 @@ just the architectural shape.
 ## Why params/searchParams are awaited
 
 Next.js 16 makes route `params` an async value. Every dynamic route in this app
-(`app/(site)/courses/[courseSlug]/...`, `paths/[trackSlug]`, `projects/[projectSlug]`) awaits
+(`app/(site)/courses/[courseSlug]/...`, `topics/[trackSlug]`, `projects/[projectSlug]`) awaits
 `params` before use — omitting this silently resolves to `undefined` and made every dynamic page
 404 in early development (caught by the Playwright navigation test, see PROJECT_STATUS.md).

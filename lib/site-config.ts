@@ -49,7 +49,7 @@ export const footerLinks = {
     { href: "/categories", label: "Categories" },
     { href: "/technologies", label: "Technologies" },
     { href: "/roadmaps", label: "Roadmaps" },
-    { href: "/paths", label: "Learning Paths" },
+    { href: "/topics", label: "Topics" },
     { href: "/courses", label: "Courses" },
     { href: "/projects", label: "Projects" },
     { href: "/playground", label: "Playground" },

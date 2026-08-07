@@ -36,7 +36,7 @@ describe("static pages set a correct, self-referencing canonical URL", () => {
     ["/courses", () => import("@/app/(site)/courses/page"), `${siteConfig.url}/courses`],
     ["/faq", () => import("@/app/(site)/faq/page"), `${siteConfig.url}/faq`],
     ["/learn", () => import("@/app/(site)/learn/page"), `${siteConfig.url}/learn`],
-    ["/paths", () => import("@/app/(site)/paths/page"), `${siteConfig.url}/paths`],
+    ["/topics", () => import("@/app/(site)/topics/page"), `${siteConfig.url}/topics`],
     ["/playground", () => import("@/app/(site)/playground/page"), `${siteConfig.url}/playground`],
     ["/privacy", () => import("@/app/(site)/privacy/page"), `${siteConfig.url}/privacy`],
     ["/projects", () => import("@/app/(site)/projects/page"), `${siteConfig.url}/projects`],
@@ -97,11 +97,11 @@ describe("dynamic detail pages set a canonical URL matching their own real slug"
     expect(canonicalOf(result)).toBe(`${siteConfig.url}/projects/${project.slug}`);
   });
 
-  it("a track/path page canonicalizes to /paths/<slug>", async () => {
-    const { generateMetadata } = await import("@/app/(site)/paths/[trackSlug]/page");
+  it("a topic page canonicalizes to /topics/<slug>", async () => {
+    const { generateMetadata } = await import("@/app/(site)/topics/[trackSlug]/page");
     const track = allTracks[0];
     const result = await generateMetadata({ params: Promise.resolve({ trackSlug: track.slug }) });
-    expect(canonicalOf(result)).toBe(`${siteConfig.url}/paths/${track.slug}`);
+    expect(canonicalOf(result)).toBe(`${siteConfig.url}/topics/${track.slug}`);
   });
 
   it("every Phase 5C course's overview and first lesson canonicalize correctly (spot check for new content)", async () => {

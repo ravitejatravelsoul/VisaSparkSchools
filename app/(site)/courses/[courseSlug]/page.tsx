@@ -94,7 +94,7 @@ export default async function CourseOverviewPage({ params }: { params: Params })
       <Breadcrumbs
         items={[
           { label: "Courses", href: "/courses" },
-          ...(track ? [{ label: track.title, href: `/paths/${track.slug}` }] : []),
+          ...(track ? [{ label: track.title, href: `/topics/${track.slug}` }] : []),
           { label: course.title },
         ]}
       />
@@ -117,7 +117,7 @@ export default async function CourseOverviewPage({ params }: { params: Params })
 
       {prerequisiteCourses.length > 0 && (
         <p className="mt-4 text-sm text-(--color-ink-muted)">
-          Recommended before this course:{" "}
+          Helpful before you begin (optional -- you can start this course now):{" "}
           {prerequisiteCourses.map((p, i) => (
             <span key={p.slug}>
               <Link
@@ -223,7 +223,10 @@ export default async function CourseOverviewPage({ params }: { params: Params })
 
       {nextCourses.length > 0 && (
         <section className="mt-10">
-          <SectionHeader title="Continue your path" />
+          <SectionHeader
+            title="Where to go next"
+            description="Optional -- these build well on what you just learned, but any course can come next."
+          />
           <div className="grid gap-4 sm:grid-cols-2">
             {nextCourses.map((next) => (
               <Link key={next.slug} href={`/courses/${next.slug}`} className="group">

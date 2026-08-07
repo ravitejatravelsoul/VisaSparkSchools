@@ -68,6 +68,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    // /paths was renamed to /topics when the product model changed from "one
+    // compulsory sequential path" to "independent topics, each an
+    // organizational grouping of independently-startable courses" -- these
+    // permanent redirects keep old bookmarks/links/search results working.
+    return [
+      { source: "/paths", destination: "/topics", permanent: true },
+      { source: "/paths/:trackSlug", destination: "/topics/:trackSlug", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

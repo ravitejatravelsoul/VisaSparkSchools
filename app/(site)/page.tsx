@@ -1,11 +1,9 @@
-import type { CSSProperties } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { StepMarker } from "@/components/ui/step-marker";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { trackAccent } from "@/lib/ui/track-accent";
 import { accentClasses } from "@/lib/ui/category-accent";
@@ -69,37 +67,37 @@ export default function HomePage() {
               {siteConfig.description}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <LinkButton href="/paths" size="lg">
-                Start learning
+              <LinkButton href="/courses" size="lg">
+                Browse courses
               </LinkButton>
               <LinkButton href="/playground" variant="secondary" size="lg">
                 Try the playground
               </LinkButton>
             </div>
             <p className="mt-4 text-sm text-(--color-ink-faint)">
-              No account required to start. Your progress is saved on this device — sign up any time
-              to sync it.
+              Start with any course. Recommended prerequisites can help, but they never block you.
+              No account required — your progress is saved on this device, and you can sign up any
+              time to sync it.
             </p>
           </div>
 
           <Card className="animate-fade-up">
             <CardBody>
               <p className="mb-4 text-sm font-semibold tracking-wide text-(--color-ink-faint) uppercase">
-                The path
+                Explore topics
               </p>
-              <ol className="path-track flex flex-col gap-4">
-                <span
-                  className="path-track-line"
-                  style={{ "--track-line-left": "0.875rem" } as CSSProperties}
-                  aria-hidden="true"
-                />
-                {allTracks.map((track, i) => (
-                  <li key={track.slug} className="relative flex items-center gap-3">
-                    <StepMarker status="not-started" index={i + 1} />
-                    <span className="text-sm font-medium">{track.title}</span>
+              <ul className="flex flex-wrap gap-2">
+                {allTracks.map((track) => (
+                  <li key={track.slug}>
+                    <Link
+                      href={`/topics/${track.slug}`}
+                      className="inline-flex items-center rounded-full border border-(--color-border-strong) bg-(--color-surface) px-3 py-1.5 text-sm font-medium text-(--color-ink) transition-colors duration-[var(--motion-fast)] hover:border-(--color-brand) hover:text-(--color-brand-strong)"
+                    >
+                      {track.title}
+                    </Link>
                   </li>
                 ))}
-              </ol>
+              </ul>
             </CardBody>
           </Card>
         </Container>
@@ -129,16 +127,20 @@ export default function HomePage() {
 
       <section className="border-t border-(--color-border) bg-(--color-surface) py-14">
         <Container>
-          <div className="mb-8 flex items-end justify-between">
-            <h2 className="text-2xl font-bold">Learning paths</h2>
+          <div className="mb-2 flex items-end justify-between">
+            <h2 className="text-2xl font-bold">Choose a topic</h2>
             <Link
-              href="/paths"
+              href="/topics"
               className="inline-flex items-center gap-1 text-sm font-medium text-(--color-brand-strong) hover:underline"
             >
-              View all paths
+              View all topics
               <ArrowRightIcon width={14} height={14} />
             </Link>
           </div>
+          <p className="mb-8 max-w-2xl text-sm text-(--color-ink-muted)">
+            Every topic below is independent. Open any course directly — nothing here needs to be
+            completed in order.
+          </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {allTracks.map((track) => {
               const courses = getCoursesForTrack(track.slug);
@@ -148,7 +150,7 @@ export default function HomePage() {
               );
               const accent = accentClasses(trackAccent(track.slug));
               return (
-                <Link key={track.slug} href={`/paths/${track.slug}`} className="group">
+                <Link key={track.slug} href={`/topics/${track.slug}`} className="group">
                   <Card interactive className="h-full overflow-hidden">
                     <span aria-hidden="true" className={cn("block h-1", accent.bar)} />
                     <CardBody>

@@ -31,7 +31,7 @@ describe("AuthForm (Supabase disabled)", () => {
     expect(screen.queryByLabelText("Email")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /continue as a guest/i })).toHaveAttribute(
       "href",
-      "/paths",
+      "/courses",
     );
     expect(push).not.toHaveBeenCalled();
   });

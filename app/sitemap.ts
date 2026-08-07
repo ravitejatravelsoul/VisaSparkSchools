@@ -12,7 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
   const staticRoutes = [
     "",
-    "/paths",
+    "/topics",
     "/courses",
     "/projects",
     "/playground",
@@ -34,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   const trackRoutes = allTracks.map((track) => ({
-    url: `${base}/paths/${track.slug}`,
+    url: `${base}/topics/${track.slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));

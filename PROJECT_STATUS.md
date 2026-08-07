@@ -2193,6 +2193,87 @@ the mistake this phase deliberately avoided). Whichever is chosen, re-run the fu
 command list above before and after each coherent chunk of work, exactly as this session did, and
 do not add a navigation entry for any surface until its destination page is real and non-empty.
 
+## Product-model correction: independent courses, not one sequential path
+
+Starting checkpoint: `main` and `origin/main` both at `ba67016`, clean tree, production already
+deployed separately via Vercel CLI, Supabase migrations 0001–0006 live and synchronized.
+
+**The problem.** The homepage captioned a numbered `<ol>` of every track "The path," connected by a
+vertical line (the `.path-track`/`StepMarker` "pathway motif," see `docs/DESIGN_SYSTEM.md`), with
+"Start learning" as the primary CTA into `/paths`. `/paths` itself said outright: "VisaSparkSchools
+is one connected path, in order: each track builds on the last." The About page repeated the same
+claim ("The curriculum is one connected path..."). None of this matched the platform's actual
+behavior — there was no code-level gating anywhere (`CourseProgressActions`'s "Start this course"
+has no prerequisite check; `getCourseCompletionEligibility` only ever reads the target course's own
+`isCourseComplete`; every lesson route statically generates and renders with no completion check) —
+but the presentation actively told learners they had to complete unrelated subjects (e.g. HTML/CSS)
+before starting something like Selenium WebDriver Automation, which is false.
+
+**The audit.** Searched the whole repo for `path`/`track order`/`prerequisite`/`locked`/certificate-
+eligibility logic and inspected homepage, `/paths` + `/paths/[trackSlug]`, `/courses` + detail
+pages, header/footer/breadcrumbs, dashboard, Study Studio, search + the generated search index,
+`lib/certificates/eligibility.ts`, `lib/learning/completion.ts`, `lib/content/registry.ts`,
+sitemap/robots/JSON-LD, and the existing test suite. Findings: the _behavior_ was already correct
+almost everywhere (course-progress-actions, the course/lesson pages, `getCourseCompletionEligibility`
+never had any cross-course dependency, `/roadmaps` was already honestly labeled "a suggested order
+to learn in, not a certifiable, assessed course path"); the defect was entirely in _presentation_ —
+the homepage, `/paths`, the About page, and every place that linked to `/paths` with "Learning
+Paths" copy.
+
+**The fix.** See "Learning model: independent courses" in `docs/ARCHITECTURE.md` for the durable
+reference; summary here:
+
+- `/paths` and `/paths/[trackSlug]` renamed to `/topics`/`/topics/[trackSlug]` (`git mv`, history
+  preserved). `next.config.ts` gained a `redirects()` block permanently redirecting the old URLs.
+- Homepage: the numbered/connected-line track list replaced with a plain wrapped list of topic
+  chips ("Explore topics"); the below-fold grid renamed "Choose a topic" with explicit "nothing
+  here needs to be completed in order" copy; primary CTA changed from "Start learning" → `/paths`
+  to "Browse courses" → `/courses`, with new copy: "Start with any course. Recommended
+  prerequisites can help, but they never block you."
+- `/topics` (formerly `/paths`) index page: numbered `<ol>`/`StepMarker`/connecting-line replaced
+  with a plain card grid (matching `/categories`' existing non-sequential pattern); copy changed
+  from "one connected path, in order" to "Start with any course in any topic."
+  `/topics/[trackSlug]` unchanged behaviorally (it already listed courses with direct "Start
+  course" links and no gating) beyond its breadcrumb/canonical URLs.
+- Course detail page: "Recommended before this course" → "Helpful before you begin (optional --
+  you can start this course now)"; "Continue your path" → "Where to go next" with an explicit
+  "any course can come next" description.
+- `/courses`: converted to a real filterable catalog (`components/course/course-catalog-client.tsx`,
+  topic + difficulty dropdowns) per the brief's "provide filtering ... where practical."
+- About page's "one connected path" claim rewritten to "independent topics you can start in any
+  order... every course earns its own certificate."
+- Footer link, `AuthForm`'s guest-mode "Continue as a guest" link, sitemap, and the generated
+  search index (`scripts/build-search-index.ts` now emits a `"topic"` document type pointing at
+  `/topics/[slug]`, alongside the pre-existing `"category"` type) all updated to match.
+- `.path-track`/`StepMarker` motif itself was **not** removed — it's still correct for genuinely
+  ordered content (a single roadmap's own steps, a single course's own lesson-nav sidebar);
+  `docs/DESIGN_SYSTEM.md` now says explicitly it must never relate different courses/topics to
+  each other.
+- Certificates: no code change was needed (`getCourseCompletionEligibility`/
+  `getSkillAchievementEligibility` were already per-course-only) — added regression tests instead
+  (`tests/unit/certificate-eligibility.test.ts`: every course independently qualifies for its own
+  Course Completion certificate off only its own lessons, including a course with a real
+  prerequisite whose prerequisite course is left completely untouched).
+
+**Testing.** `tests/e2e/independent-courses.spec.ts` (new): homepage has no numbered/"one connected
+path" language; `/paths` and `/paths/<slug>` redirect to `/topics`; a learner opens Selenium
+WebDriver Automation (prerequisite: Java Programming Foundations) directly with zero prior progress
+and starts it immediately; completing every lesson in one course leaves an unrelated course's
+progress and certificate eligibility untouched; a course outside `SKILL_ACHIEVEMENT_COURSES` shows
+only a Course Completion card (never a false Skill Achievement card), while a mapped course shows
+both; the footer's "Topics" link and `/sitemap.xml` use `/topics`, never `/paths`.
+`tests/unit/independent-courses-routing.test.ts` (new): the redirects are registered correctly and
+the sitemap/search index reflect the corrected routes. Existing tests referencing `/paths` (unit:
+`canonical-urls.test.ts`; integration: `auth-form-guest-mode.test.tsx`; e2e: `accessibility.spec.ts`,
+`mobile-and-modes.spec.ts`, `navigation.spec.ts`) updated to `/topics`/`/courses`. Full suite: 592/592
+Vitest, 237/239 Playwright (chromium) — the 2 non-passes are a pre-existing, environment-only
+mismatch unrelated to this change (this dev machine's `.env.local` has real Supabase credentials
+configured from an earlier deployment session, so two tests asserting "Supabase not configured"
+guest copy correctly no longer apply locally; CI has no `.env.local` and will see the expected
+guest-mode copy).
+
+Commit: `feat: make courses independently discoverable`.
+
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 
 The CodeWise build (prior to this expansion) reported: production build/typecheck/lint/format/

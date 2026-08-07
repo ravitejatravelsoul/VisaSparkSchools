@@ -68,7 +68,7 @@ export default async function LessonPage({ params }: { params: Params }) {
       <LessonViewTracker lessonId={lesson.id} />
       <Breadcrumbs
         items={[
-          ...(track ? [{ label: track.title, href: "/paths" }] : []),
+          ...(track ? [{ label: track.title, href: `/topics/${track.slug}` }] : []),
           { label: course.title, href: `/courses/${course.slug}` },
           { label: lesson.title },
         ]}

@@ -79,6 +79,18 @@ export function buildIndex(): SearchDocument[] {
     });
   }
 
+  for (const track of allTracks) {
+    docs.push({
+      id: track.id,
+      type: "topic",
+      title: track.title,
+      description: track.description,
+      url: `/topics/${track.slug}`,
+      trackTitle: "",
+      keywords: [],
+    });
+  }
+
   for (const category of getPublicCategories()) {
     docs.push({
       id: category.id,

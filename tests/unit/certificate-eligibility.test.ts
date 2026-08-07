@@ -90,6 +90,47 @@ describe("getCourseCompletionEligibility", () => {
     expect(result.met.length).toBeGreaterThan(0);
     expect(result.unmet).toEqual([]);
   });
+
+  /**
+   * Product-model regression: courses are independently learnable, so a
+   * course's own Course Completion certificate must depend only on that
+   * course's own required lessons -- never on any other course's progress,
+   * even a course listed as a "recommended" prerequisite. Picks a course
+   * that genuinely has a prerequisiteCourseSlugs entry so this isn't
+   * vacuously true.
+   */
+  it("a course with a recommended prerequisite is fully eligible on its own, with the prerequisite course untouched", () => {
+    const course = allCourses.find((c) => c.prerequisiteCourseSlugs.length > 0);
+    expect(course, "expected at least one course with a prerequisite for this test").toBeDefined();
+
+    const state = createEmptyProgress();
+    // The "recommended" prerequisite course(s) have zero progress -- not
+    // started, not even enrolled.
+    for (const prereqSlug of course!.prerequisiteCourseSlugs) {
+      expect(state.lessonStatus).not.toHaveProperty(prereqSlug);
+    }
+
+    for (const lesson of getLessonsForCourse(course!.slug)) {
+      state.lessonStatus[lesson.id] = "completed";
+    }
+
+    const result = getCourseCompletionEligibility(course!.slug, state);
+    expect(result.eligible).toBe(true);
+    expect(result.unmet).toEqual([]);
+  });
+
+  it("every course independently qualifies for its own Course Completion certificate once its own lessons are done", () => {
+    for (const course of allCourses) {
+      const state = createEmptyProgress();
+      for (const lesson of getLessonsForCourse(course.slug)) {
+        state.lessonStatus[lesson.id] = "completed";
+      }
+      expect(
+        getCourseCompletionEligibility(course.slug, state).eligible,
+        `${course.slug} should be eligible once only its own lessons are complete`,
+      ).toBe(true);
+    }
+  });
 });
 
 describe("getSkillAchievementEligibility", () => {

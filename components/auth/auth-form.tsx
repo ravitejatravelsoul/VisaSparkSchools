@@ -73,7 +73,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             Supabase is configured, this page becomes a working sign-in form.
           </p>
           <Link
-            href="/paths"
+            href="/courses"
             className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-(--color-brand-strong) hover:underline"
           >
             Continue as a guest

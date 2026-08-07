@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: track.title,
     description: track.description,
-    alternates: { canonical: `${siteConfig.url}/paths/${track.slug}` },
+    alternates: { canonical: `${siteConfig.url}/topics/${track.slug}` },
   };
 }
 
@@ -45,8 +45,11 @@ export default async function TrackDetailPage({ params }: { params: Params }) {
 
   return (
     <Container className="py-10">
-      <Breadcrumbs items={[{ label: "Learning paths", href: "/paths" }, { label: track.title }]} />
-      <PageHeader title={track.title} description={track.description} />
+      <Breadcrumbs items={[{ label: "Topics", href: "/topics" }, { label: track.title }]} />
+      <PageHeader
+        title={track.title}
+        description={`${track.description} Each course below is independent -- start with whichever one fits what you want to learn.`}
+      />
 
       <div className="mt-8 flex flex-col gap-4">
         {courses.map((course) => {

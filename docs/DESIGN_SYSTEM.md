@@ -105,8 +105,13 @@ accent, never a full card background.
 
 ## The pathway motif (`.path-track` / `.path-track-line`, `StepMarker`)
 
-A thin vertical line drawn behind a column of `StepMarker`s, used for genuinely ordered, step-based
-content: `/paths`, `/roadmaps/[slug]`, and the lesson page's course-navigation sidebar. Usage:
+A thin vertical line drawn behind a column of `StepMarker`s, used only for content that is
+genuinely, internally ordered: a single roadmap's own steps (`/roadmaps/[slug]`) and a single
+course's own lesson list (the lesson page's course-navigation sidebar, `/courses/[courseSlug]`).
+It is deliberately **not** used to relate different courses/topics to each other -- `/topics` (née
+`/paths`) and the homepage's topic list are independent, unordered choices, not steps, so they
+render as a plain wrapped list/grid with no line and no step numbers. See "Learning model:
+independent courses" in `docs/ARCHITECTURE.md` for why that distinction matters. Usage:
 
 ```tsx
 <ol className="path-track flex flex-col gap-4">
@@ -135,8 +140,8 @@ order — renders _above_ ordinary in-flow (`position: static`) siblings, regard
 If each step is wrapped in its own opaque `Card`, that card must be `position: relative` (even
 without an explicit `z-index`) so it moves into the same "positioned" paint layer as the line and,
 being later in DOM order, paints over it — otherwise the line visibly cuts across each card instead
-of hiding behind it. (Rows with no background of their own, like the homepage's plain path list,
-don't need this — there's nothing for the line to visually collide with.)
+of hiding behind it. (Rows with no background of their own don't need this — there's nothing for
+the line to visually collide with.)
 
 ## CLS discipline
 

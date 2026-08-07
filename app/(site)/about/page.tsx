@@ -19,9 +19,11 @@ export default function AboutPage() {
           watching someone else build one.
         </p>
         <p>
-          The curriculum is one connected path: computing and web fundamentals, HTML and CSS,
-          JavaScript, Python, Git, APIs and SQL, and finally large language models, embeddings,
-          retrieval-augmented generation, and AI agents. Every lesson pairs a plain-language
+          The curriculum covers independent topics you can start in any order: computing and web
+          fundamentals, HTML and CSS, JavaScript, Python, Git, APIs and SQL, and large language
+          models, embeddings, retrieval-augmented generation, and AI agents, among others. Every
+          course earns its own certificate on completion, and recommended prerequisites are just
+          that — recommendations, never a requirement. Every lesson pairs a plain-language
           explanation with a working, editable example and exercises checked deterministically — not
           by string-matching your answer, but by actually running your code.
         </p>
