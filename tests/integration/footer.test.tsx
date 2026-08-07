@@ -26,4 +26,12 @@ describe("Footer", () => {
     expect(screen.getByRole("link", { name: "Terms" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Accessibility" })).toBeInTheDocument();
   });
+
+  it("links to the Study Abroad directory", () => {
+    render(<Footer />);
+    expect(screen.getByRole("link", { name: "Study Abroad" })).toHaveAttribute(
+      "href",
+      "/study-abroad",
+    );
+  });
 });

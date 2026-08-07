@@ -14,6 +14,7 @@ import {
   getTechnologyBySlug,
 } from "../lib/directory/registry";
 import { validateDirectory } from "../lib/directory/validate";
+import { countryRoadmaps } from "../lib/study-abroad/registry";
 
 let errorCount = 0;
 
@@ -465,6 +466,111 @@ for (const issue of validateDirectory()) {
 ok(
   `Directory-checked ${allCategories.length} categories, ${allTechnologies.length} technologies, ${allLearningPaths.length} learning paths.`,
 );
+
+// --- Study Abroad (Phase 5): countryRoadmaps already ran every record
+// through countryRoadmapSchema at import time (lib/study-abroad/registry.ts
+// parses eagerly, same precedent as the directory registry above), so a
+// malformed roadmap or a missing/duplicate/misordered step throws before we
+// get here. This section covers what a schema alone can't express: that
+// "official sources" really are official, and that no country's content has
+// drifted into a hardcoded fee/date or a guarantee/authority claim. ---
+{
+  // Exact hostnames (or their subdomains) verified as real government/
+  // education-ministry sources when each country's content was written --
+  // see docs/product-expansion/DECISIONS.md's "Study-abroad content
+  // sourcing" note. Adding a country later means adding its verified
+  // domain(s) here too, not just writing the content.
+  const ALLOWED_OFFICIAL_HOSTS = [
+    "studyinthestates.dhs.gov",
+    "uscis.gov",
+    "travel.state.gov",
+    "canada.ca",
+    "gov.uk",
+    "homeaffairs.gov.au",
+    "studyaustralia.gov.au",
+    "study-in-germany.de",
+    "auswaertiges-amt.de",
+    "citizensinformation.ie",
+    "irishimmigration.ie",
+  ];
+  const isAllowedHost = (url: string) => {
+    let host: string;
+    try {
+      host = new URL(url).hostname.toLowerCase();
+    } catch {
+      return false;
+    }
+    return ALLOWED_OFFICIAL_HOSTS.some(
+      (allowed) => host === allowed || host.endsWith(`.${allowed}`),
+    );
+  };
+
+  const GUARANTEE_PHRASES = [
+    /\bguarantee[sd]?\b/i,
+    /\bwill be (admitted|approved|accepted)\b/i,
+    /\b100% (chance|success)\b/i,
+  ];
+  const AUTHORITY_CLAIM_PHRASES = [
+    /\bwe are (a |an )?(government|university|official|legal)\b/i,
+    /\bvisasparkschools is (a |an )?(government|university|licensed (immigration|legal))\b/i,
+  ];
+  // A bare currency figure ($1,234 / £1,234 / €1,234) presented as fact --
+  // every fee/amount in this content must be phrased generally instead
+  // (e.g. "check the current official amount") since these change and the
+  // content is dated by lastReviewed, not a live feed.
+  const HARDCODED_CURRENCY = /[$£€]\s?\d[\d,]*/;
+
+  const seenSlugs = new Set<string>();
+  for (const country of countryRoadmaps) {
+    if (seenSlugs.has(country.countrySlug)) {
+      fail(`[study-abroad] Duplicate countrySlug "${country.countrySlug}".`);
+    }
+    seenSlugs.add(country.countrySlug);
+
+    if (Number.isNaN(new Date(country.lastReviewed).getTime())) {
+      fail(`[study-abroad] "${country.countryName}" has an unparseable lastReviewed date.`);
+    }
+
+    for (const source of country.officialSources) {
+      if (!isAllowedHost(source.url)) {
+        fail(
+          `[study-abroad] "${country.countryName}" official source "${source.label}" (${source.url}) is not on the verified official-domain allow-list.`,
+        );
+      }
+    }
+    for (const step of country.steps) {
+      for (const link of step.officialSourceLinks) {
+        if (!isAllowedHost(link.url)) {
+          fail(
+            `[study-abroad] "${country.countryName}" step "${step.stepId}" source link "${link.label}" (${link.url}) is not on the verified official-domain allow-list.`,
+          );
+        }
+      }
+    }
+
+    const countryText = JSON.stringify(country);
+    for (const pattern of GUARANTEE_PHRASES) {
+      if (pattern.test(countryText)) {
+        fail(
+          `[study-abroad] "${country.countryName}" content matches a guarantee-language pattern (${pattern}) -- admission/visa/scholarship outcomes must never be guaranteed.`,
+        );
+      }
+    }
+    for (const pattern of AUTHORITY_CLAIM_PHRASES) {
+      if (pattern.test(countryText)) {
+        fail(
+          `[study-abroad] "${country.countryName}" content matches an authority-claim pattern (${pattern}) -- this platform must never claim to be a government, university, or licensed legal/immigration body.`,
+        );
+      }
+    }
+    if (HARDCODED_CURRENCY.test(countryText)) {
+      fail(
+        `[study-abroad] "${country.countryName}" content contains a hardcoded currency figure -- fees/amounts must be phrased generally (e.g. "check the current official amount") since they change and this content is dated, not live.`,
+      );
+    }
+  }
+  ok(`Study Abroad-checked ${countryRoadmaps.length} country roadmaps (23 steps each).`);
+}
 
 console.log("");
 if (errorCount > 0) {

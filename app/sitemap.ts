@@ -7,6 +7,7 @@ import {
   getPublicLearningPaths,
 } from "@/lib/directory/registry";
 import { tools } from "@/lib/tools/registry";
+import { countryRoadmaps } from "@/lib/study-abroad/registry";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
@@ -21,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/categories",
     "/technologies",
     "/roadmaps",
+    "/study-abroad",
     "/about",
     "/faq",
     "/privacy",
@@ -100,6 +102,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  const studyAbroadRoutes = countryRoadmaps.map((country) => ({
+    url: `${base}/study-abroad/${country.countrySlug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+  }));
+
   return [
     ...staticRoutes,
     ...trackRoutes,
@@ -111,5 +119,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...technologyRoutes,
     ...roadmapRoutes,
     ...toolRoutes,
+    ...studyAbroadRoutes,
   ];
 }

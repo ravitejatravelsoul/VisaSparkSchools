@@ -15,7 +15,7 @@ describe("search index generation (npm run content:search-index)", () => {
     expect(JSON.stringify(first)).toEqual(JSON.stringify(second));
   });
 
-  it("includes lessons, courses, projects, technologies, categories, topics, roadmaps, and tools", () => {
+  it("includes lessons, courses, projects, technologies, categories, topics, roadmaps, tools, and study-abroad countries", () => {
     const index = buildIndex();
     const types = new Set(index.map((d) => d.type));
     expect(types).toEqual(
@@ -28,6 +28,7 @@ describe("search index generation (npm run content:search-index)", () => {
         "topic",
         "learning-path",
         "tool",
+        "study-abroad",
       ]),
     );
   });

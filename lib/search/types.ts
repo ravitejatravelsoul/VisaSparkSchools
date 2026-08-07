@@ -8,7 +8,8 @@ export interface SearchDocument {
     | "category"
     | "topic"
     | "learning-path"
-    | "tool";
+    | "tool"
+    | "study-abroad";
   title: string;
   description: string;
   url: string;

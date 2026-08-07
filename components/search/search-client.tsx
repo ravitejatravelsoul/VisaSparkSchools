@@ -20,6 +20,7 @@ const TYPE_LABELS: Record<SearchDocument["type"], string> = {
   topic: "Topic",
   "learning-path": "Roadmap",
   tool: "Tool",
+  "study-abroad": "Study Abroad",
 };
 
 export function SearchClient() {
@@ -87,6 +88,7 @@ export function SearchClient() {
           <option value="topic">Topics</option>
           <option value="learning-path">Roadmaps</option>
           <option value="tool">Tools</option>
+          <option value="study-abroad">Study Abroad</option>
         </select>
         <select
           value={difficultyFilter}

@@ -43,6 +43,7 @@ export const navLinks = [
   { href: "/courses", label: "Courses" },
   { href: "/projects", label: "Projects" },
   { href: "/playground", label: "Playground" },
+  { href: "/study-abroad", label: "Study Abroad" },
   { href: "/search", label: "Search" },
 ] as const;
 
@@ -56,6 +57,7 @@ export const footerLinks = {
     { href: "/courses", label: "Courses" },
     { href: "/projects", label: "Projects" },
     { href: "/playground", label: "Playground" },
+    { href: "/study-abroad", label: "Study Abroad" },
     { href: "/tools", label: "Tools" },
     { href: "/project-studio", label: "Project Studio" },
     { href: "/certificates", label: "Certificates" },

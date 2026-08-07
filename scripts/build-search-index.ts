@@ -13,6 +13,7 @@ import {
   getCategoryById,
 } from "../lib/directory/registry";
 import { tools } from "../lib/tools/registry";
+import { countryRoadmaps } from "../lib/study-abroad/registry";
 import type { SearchDocument } from "../lib/search/types";
 
 export function buildIndex(): SearchDocument[] {
@@ -112,6 +113,18 @@ export function buildIndex(): SearchDocument[] {
       url: `/tools/${tool.slug}`,
       trackTitle: "",
       keywords: tool.keywords,
+    });
+  }
+
+  for (const country of countryRoadmaps) {
+    docs.push({
+      id: `study-abroad-${country.countrySlug}`,
+      type: "study-abroad",
+      title: `Study in ${country.countryName}`,
+      description: country.summary,
+      url: `/study-abroad/${country.countrySlug}`,
+      trackTitle: "Study Abroad",
+      keywords: [country.countryName, "study abroad", "student visa", ...country.degreeLevels],
     });
   }
 
