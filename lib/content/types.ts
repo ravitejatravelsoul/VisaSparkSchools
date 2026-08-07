@@ -194,18 +194,28 @@ export const lessonSchema = z.object({
   visual: z
     .object({ kind: z.enum(["diagram", "table"]), title: z.string(), description: z.string() })
     .optional(),
-  example: codeExampleSchema,
+  /**
+   * Optional as of Phase 6 (exam-preparation courses): a reading/listening/
+   * writing lesson has no meaningful "code example" or "code exercise" to
+   * force here. Every other course (all courses not in
+   * scripts/validate-content.ts's EXAM_PREP_COURSE_SLUGS) is still required
+   * by that validator to provide all three -- this schema-level optionality
+   * exists only so the type is honest, not to relax the bar for technical
+   * courses. Every read site (lib/learning/store.ts's mastery computation,
+   * app/(site)/courses/[courseSlug]/[lessonSlug]/page.tsx's rendering) was
+   * updated to guard for absence -- see the "Blast Radius Report" that
+   * preceded this change for the full list of sites.
+   */
+  example: codeExampleSchema.optional(),
   editableExample: codeExampleSchema.optional(),
-  guidedExercise: exerciseSchema,
-  independentExercise: exerciseSchema,
+  guidedExercise: exerciseSchema.optional(),
+  independentExercise: exerciseSchema.optional(),
   /**
    * Optional: for lessons whose real work happens outside the browser (a
    * React component, an Express route, ...). Additive to, never a
-   * replacement for, guidedExercise/independentExercise -- every lesson
-   * still has a real, browser-executable exercise reinforcing the
-   * underlying JS/TS concepts, so lib/learning/store.ts's mastery/
-   * completion logic (which reads guidedExercise.id/independentExercise.id
-   * unconditionally) needed no changes for this feature.
+   * replacement for, guidedExercise/independentExercise -- every non-exam-prep
+   * lesson still has a real, browser-executable exercise reinforcing the
+   * underlying JS/TS concepts.
    */
   guidedLocalLab: guidedLocalLabSchema.optional(),
   /**

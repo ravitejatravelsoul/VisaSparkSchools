@@ -260,9 +260,48 @@ for (const lesson of allLessons) {
   }
 }
 
-// --- Exercise sanity: guided/independent tests reference ids the harness actually reports ---
+// --- Lesson shape consistency (Phase 6): example/guidedExercise/
+// independentExercise became optional on lessonSchema so exam-preparation
+// lessons (reading/listening/writing, no meaningful code example) don't have
+// to fabricate one. This is NOT a general relaxation of the quality bar --
+// every course outside this explicit allow-list must still provide all
+// three, and every exam-prep lesson must consistently omit all three rather
+// than mixing shapes. ---
+const EXAM_PREP_COURSE_SLUGS = new Set<string>([
+  "ielts-preparation",
+  "pte-academic-preparation",
+  "toefl-ibt-preparation",
+  "gre-general-test-preparation",
+]);
 for (const lesson of allLessons) {
-  for (const exercise of [lesson.guidedExercise, lesson.independentExercise]) {
+  const isExamPrep = EXAM_PREP_COURSE_SLUGS.has(lesson.courseSlug);
+  const hasAnyCodeFields = Boolean(
+    lesson.example || lesson.guidedExercise || lesson.independentExercise,
+  );
+  const hasAllCodeFields = Boolean(
+    lesson.example && lesson.guidedExercise && lesson.independentExercise,
+  );
+  if (isExamPrep && hasAnyCodeFields) {
+    fail(
+      `Lesson "${lesson.slug}" belongs to an exam-prep course but declares example/guidedExercise/independentExercise -- exam-prep lessons must omit all three, not mix content shapes.`,
+    );
+  }
+  if (!isExamPrep && !hasAllCodeFields) {
+    fail(
+      `Lesson "${lesson.slug}" is missing example/guidedExercise/independentExercise -- only courses in EXAM_PREP_COURSE_SLUGS may omit these.`,
+    );
+  }
+}
+
+// --- Exercise sanity: guided/independent tests reference ids the harness actually reports ---
+// Exam-prep lessons (Phase 6) legitimately have neither -- filtered out here
+// rather than at the loop's callers, so this stays the one place that knows
+// "no exercise" is valid for that course category.
+for (const lesson of allLessons) {
+  const exercises = [lesson.guidedExercise, lesson.independentExercise].filter(
+    (e): e is NonNullable<typeof e> => Boolean(e),
+  );
+  for (const exercise of exercises) {
     const testIds = new Set(exercise.tests.map((t) => t.id));
     if (testIds.size !== exercise.tests.length) {
       fail(`Lesson "${lesson.slug}" exercise "${exercise.id}" has duplicate test ids.`);

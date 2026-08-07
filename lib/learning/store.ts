@@ -141,8 +141,13 @@ function isValidTimezone(tz: string): boolean {
 }
 
 function computeLessonContribution(state: ProgressState, lesson: Lesson): number {
-  const guided = state.exerciseAttempts[lesson.guidedExercise.id];
-  const independent = state.exerciseAttempts[lesson.independentExercise.id];
+  // Exam-prep lessons (Phase 6) have no guidedExercise/independentExercise --
+  // undefined here reads as "not solved" rather than throwing, so mastery for
+  // a shared skill tag never crashes on a lesson that legitimately has none.
+  const guided = lesson.guidedExercise ? state.exerciseAttempts[lesson.guidedExercise.id] : undefined;
+  const independent = lesson.independentExercise
+    ? state.exerciseAttempts[lesson.independentExercise.id]
+    : undefined;
   const quiz = state.quizResults[lesson.id];
   return calculateLessonMasteryContribution({
     lessonCompleted: state.lessonStatus[lesson.id] === "completed",
@@ -436,7 +441,7 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       };
       const next = { ...store.state, exerciseAttempts: nextAttempts };
       const owningLesson = allLessons.find(
-        (l) => l.guidedExercise.id === exerciseId || l.independentExercise.id === exerciseId,
+        (l) => l.guidedExercise?.id === exerciseId || l.independentExercise?.id === exerciseId,
       );
       if (owningLesson) recomputeSkills(next, owningLesson.skills);
       persist(next);

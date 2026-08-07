@@ -139,8 +139,12 @@ async function checkExercise(
 async function main() {
   const exercises: { lessonId: string; exercise: Exercise }[] = [];
   for (const lesson of allLessons) {
-    exercises.push({ lessonId: lesson.id, exercise: lesson.guidedExercise });
-    exercises.push({ lessonId: lesson.id, exercise: lesson.independentExercise });
+    // Exam-prep lessons (Phase 6) have neither guidedExercise nor
+    // independentExercise -- nothing to push for those.
+    if (lesson.guidedExercise) exercises.push({ lessonId: lesson.id, exercise: lesson.guidedExercise });
+    if (lesson.independentExercise) {
+      exercises.push({ lessonId: lesson.id, exercise: lesson.independentExercise });
+    }
   }
 
   const runnable = exercises.filter((e) => BROWSER_LANGUAGES.has(e.exercise.language));

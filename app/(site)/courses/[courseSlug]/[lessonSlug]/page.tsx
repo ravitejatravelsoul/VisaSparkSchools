@@ -17,6 +17,7 @@ import { Markdown } from "@/components/lesson/markdown";
 import { ExampleBlock } from "@/components/lesson/example-block";
 import { ExercisePanel } from "@/components/lesson/exercise-panel";
 import { GuidedLocalLabPanel } from "@/components/lesson/guided-local-lab-panel";
+import { GuidedOutputPanel } from "@/components/runners/guided-output-panel";
 import { Quiz } from "@/components/lesson/quiz";
 import { CourseNavDesktop, CourseNavMobile } from "@/components/lesson/course-nav";
 import { BookmarkButton } from "@/components/lesson/bookmark-button";
@@ -137,9 +138,11 @@ export default async function LessonPage({ params }: { params: Params }) {
             )}
           </Section>
 
-          <Section title="Example" narrow={false}>
-            <ExampleBlock id={`${lesson.id}-example`} example={lesson.example} />
-          </Section>
+          {lesson.example && (
+            <Section title="Example" narrow={false}>
+              <ExampleBlock id={`${lesson.id}-example`} example={lesson.example} />
+            </Section>
+          )}
 
           {lesson.editableExample && (
             <Section title="Try it yourself" narrow={false}>
@@ -147,17 +150,27 @@ export default async function LessonPage({ params }: { params: Params }) {
             </Section>
           )}
 
-          <Section title="Guided exercise" narrow={false}>
-            <ExercisePanel exercise={lesson.guidedExercise} />
-          </Section>
+          {lesson.guidedExercise && (
+            <Section title="Guided exercise" narrow={false}>
+              <ExercisePanel exercise={lesson.guidedExercise} />
+            </Section>
+          )}
 
-          <Section title="Independent exercise" narrow={false}>
-            <ExercisePanel exercise={lesson.independentExercise} />
-          </Section>
+          {lesson.independentExercise && (
+            <Section title="Independent exercise" narrow={false}>
+              <ExercisePanel exercise={lesson.independentExercise} />
+            </Section>
+          )}
 
           {lesson.guidedLocalLab && (
             <Section title="Guided local lab" narrow={false}>
               <GuidedLocalLabPanel lab={lesson.guidedLocalLab} />
+            </Section>
+          )}
+
+          {lesson.guidedOutputLab && (
+            <Section title="Guided lab" narrow={false}>
+              <GuidedOutputPanel lab={lesson.guidedOutputLab} />
             </Section>
           )}
 

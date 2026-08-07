@@ -91,7 +91,9 @@ describe("lessonSchema", () => {
 
   it("fills in defaulted fields like sqlOrderSensitive", () => {
     const result = lessonSchema.parse(validLessonInput());
-    expect(result.guidedExercise.sqlOrderSensitive).toBe(false);
+    // validLessonInput() always provides guidedExercise -- schema optionality
+    // (Phase 6: exam-prep lessons) doesn't apply to this fixture.
+    expect(result.guidedExercise!.sqlOrderSensitive).toBe(false);
     expect(result.prerequisites).toEqual([]);
   });
 
@@ -430,7 +432,7 @@ describe("the real content registry", () => {
       const lesson = allLessons.find((l) => l.slug === slug);
       expect(lesson).toBeDefined();
       if (!lesson) continue;
-      expect(lesson.guidedExercise.language).toBe("sql");
+      expect(lesson.guidedExercise?.language).toBe("sql");
       expect(lesson.explanation.toLowerCase()).toContain("sqlite");
     }
   });
@@ -450,8 +452,8 @@ describe("the real content registry", () => {
       if (!lesson) continue;
       // These lessons must not attach a real "sql" runner exercise, since SQLite
       // cannot honestly demonstrate PostgreSQL-specific behavior.
-      expect(lesson.guidedExercise.language).not.toBe("sql");
-      expect(lesson.independentExercise.language).not.toBe("sql");
+      expect(lesson.guidedExercise?.language).not.toBe("sql");
+      expect(lesson.independentExercise?.language).not.toBe("sql");
     }
   });
 
@@ -525,7 +527,7 @@ describe("the real content registry", () => {
     expect(shellLessons.length).toBe(14);
     for (const lesson of shellLessons) {
       for (const exercise of [lesson.guidedExercise, lesson.independentExercise]) {
-        expect(exercise.prompt.toLowerCase()).toMatch(
+        expect(exercise?.prompt.toLowerCase()).toMatch(
           /this models .+ -- (no real|no shell|it does not execute)/,
         );
       }
