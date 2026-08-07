@@ -1,12 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProgressStore } from "@/lib/learning/store";
 import { useSessionStore } from "@/lib/auth/session-store";
 import { featureFlags, siteConfig } from "@/lib/site-config";
 import { buildCertificateId } from "@/lib/certificates/eligibility";
+import { buildVerificationUrl } from "@/lib/certificates/verification-url";
+import { generateVerificationQrDataUrl } from "@/lib/certificates/qr";
 import type { CertificateType } from "@/lib/learning/types";
-import { Button } from "@/components/ui/button";
+import { Button, LinkButton } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CopyButton } from "@/components/tools/tool-shell";
@@ -26,11 +29,34 @@ export function CertificatePresentation({
   const hydrated = useProgressStore((s) => s.hydrated);
   const state = useProgressStore((s) => s.state);
   const userId = useSessionStore((s) => s.userId);
-
-  if (!hydrated) return <Skeleton className="h-96 w-full" />;
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const id = buildCertificateId(type, targetId);
   const cert = state.certificates[id];
+  const isSyncedAndVerifiable = Boolean(userId) && featureFlags.supabaseEnabled;
+  const verifyUrl =
+    cert && isSyncedAndVerifiable ? buildVerificationUrl(cert.verificationCode) : null;
+
+  useEffect(() => {
+    if (!verifyUrl) {
+      // Clears a stale QR image if verifiability changes while this page
+      // stays mounted (e.g. signing out while viewing your own certificate).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setQrDataUrl(null);
+      return;
+    }
+    let cancelled = false;
+    generateVerificationQrDataUrl(verifyUrl).then((url) => {
+      if (!cancelled) setQrDataUrl(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [verifyUrl]);
+
+  if (!hydrated) return <Skeleton className="h-96 w-full" />;
 
   if (!cert) {
     return (
@@ -42,10 +68,34 @@ export function CertificatePresentation({
     );
   }
 
-  const isSyncedAndVerifiable = Boolean(userId) && featureFlags.supabaseEnabled;
-  const verifyUrl = isSyncedAndVerifiable
-    ? `${siteConfig.url}/certificates/verify/${cert.verificationCode}`
-    : null;
+  const downloadPdf = async () => {
+    setDownloadError(null);
+    setDownloading(true);
+    try {
+      const res = await fetch(`/api/certificates/${type}/${targetId}/pdf`);
+      if (!res.ok) {
+        setDownloadError(
+          res.status === 401
+            ? "Sign in to download this certificate as a PDF."
+            : "This certificate couldn't be downloaded right now -- if you just issued it, wait a moment for it to sync and try again.",
+        );
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `vs-schools-certificate-${type}-${targetId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setDownloadError("Network error -- please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,23 +103,33 @@ export function CertificatePresentation({
         <Button type="button" onClick={() => window.print()}>
           Print / Save as PDF
         </Button>
+        {isSyncedAndVerifiable ? (
+          <Button type="button" variant="secondary" onClick={downloadPdf} disabled={downloading}>
+            {downloading ? "Preparing PDF…" : "Download PDF"}
+          </Button>
+        ) : (
+          <LinkButton href="/sign-in?next=%2Fcertificates" variant="secondary">
+            Sign in to download a PDF
+          </LinkButton>
+        )}
       </div>
+      {downloadError && (
+        <Alert tone="danger" className="print:hidden">
+          {downloadError}
+        </Alert>
+      )}
 
       {!isSyncedAndVerifiable && (
-        <Alert
-          tone="warning"
-          title="Locally stored, not independently verifiable"
-          className="print:hidden"
-        >
+        <Alert tone="warning" title="Not yet independently verifiable" className="print:hidden">
           {!userId
-            ? "You issued this certificate as a guest. It's stored only in this browser and cannot be verified by anyone else. Sign in and it will sync to your account."
+            ? "This certificate is stored only in this browser and cannot be verified by anyone else yet. Sign in to make it permanent and independently verifiable."
             : "This deployment doesn't have Supabase configured, so this certificate can't be independently verified."}
         </Alert>
       )}
 
       <div className="rounded-2xl border-4 border-double border-(--color-brand) bg-(--color-surface) p-10 text-center print:border-black">
         <p className="text-sm tracking-widest text-(--color-ink-faint) uppercase">
-          {siteConfig.name}
+          {siteConfig.certificateBrand}
         </p>
         <h1 className="mt-4 text-3xl font-bold text-(--color-ink)">{TYPE_LABEL[cert.type]}</h1>
         <p className="mt-6 text-sm text-(--color-ink-muted)">This certifies that</p>
@@ -100,16 +160,38 @@ export function CertificatePresentation({
           </ul>
         </div>
 
-        <div className="mt-8 border-t border-(--color-border) pt-4 text-xs text-(--color-ink-faint)">
-          <p>Certificate ID: {cert.id}</p>
+        <div className="mt-10 flex flex-wrap items-end justify-between gap-6 text-left">
+          <div>
+            <p className="border-t border-(--color-border) pt-2 text-sm font-semibold text-(--color-ink)">
+              {siteConfig.certificateSignatory.name}
+            </p>
+            <p className="text-xs text-(--color-ink-faint)">
+              {siteConfig.certificateSignatory.title}
+            </p>
+          </div>
+          {qrDataUrl && (
+            <div className="flex flex-col items-center gap-1">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a data: URL, not an optimizable remote/static asset */}
+              <img
+                src={qrDataUrl}
+                alt={`QR code linking to the public verification page for this certificate`}
+                width={100}
+                height={100}
+              />
+              <p className="text-[10px] text-(--color-ink-faint)">Scan to verify</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 border-t border-(--color-border) pt-4 text-xs text-(--color-ink-faint)">
+          <p>Verification code: {cert.verificationCode}</p>
           <p>Requirements version: {cert.contentVersionRef}</p>
         </div>
 
         <Alert tone="neutral" className="mt-6 text-left">
-          This is a {siteConfig.name} platform-issued learning record recognizing real completed
-          work. It is{" "}
-          <strong>not an accredited degree, license, or professional certification</strong>, and
-          does not represent an independently proctored or invigilated assessment.
+          This credential confirms completion within {siteConfig.certificateBrand} and{" "}
+          <strong>is not a university degree or vendor certification</strong>, and does not
+          represent an independently proctored or invigilated assessment.
         </Alert>
       </div>
 

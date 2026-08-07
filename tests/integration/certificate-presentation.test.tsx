@@ -40,19 +40,28 @@ describe("CertificatePresentation", () => {
     ).toBeInTheDocument();
   });
 
-  it("always shows the non-accreditation disclaimer", () => {
+  it("always shows the non-accreditation disclaimer with VS Schools issuer wording", () => {
     issue("how-computing-works");
     render(<CertificatePresentation type="course-completion" targetId="how-computing-works" />);
     expect(
-      screen.getByText(/not an accredited degree, license, or professional certification/i),
+      screen.getByText(/is not a university degree or vendor certification/i),
     ).toBeInTheDocument();
+    expect(screen.getByText(/completion within/i)).toBeInTheDocument();
   });
 
-  it("discloses local-only, unverifiable storage for a guest", () => {
+  it("shows the CEO signatory line", () => {
     issue("how-computing-works");
     render(<CertificatePresentation type="course-completion" targetId="how-computing-works" />);
-    expect(screen.getByText(/not independently verifiable/i)).toBeInTheDocument();
+    expect(screen.getByText("Naga Malleswararao Boddu")).toBeInTheDocument();
+    expect(screen.getByText("CEO, VS Schools")).toBeInTheDocument();
+  });
+
+  it("discloses local-only, unverifiable storage for a guest, with a sign-in path to fix it", () => {
+    issue("how-computing-works");
+    render(<CertificatePresentation type="course-completion" targetId="how-computing-works" />);
+    expect(screen.getByText(/not yet independently verifiable/i)).toBeInTheDocument();
     expect(screen.queryByText(/Public verification link/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /sign in to download a pdf/i })).toBeInTheDocument();
   });
 
   it("shows the correct certificate type label for skill-achievement", () => {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mergeProgress } from "@/lib/learning/storage";
 import { createEmptyProgress } from "@/lib/learning/types";
+import { getLessonsForCourse } from "@/lib/content/registry";
 
 describe("mergeProgress (guest -> account merge)", () => {
   it("keeps the more advanced lesson status per lesson, from either side", () => {
@@ -340,8 +341,14 @@ describe("mergeProgress (guest -> account merge)", () => {
     expect(merged.profile.learningGoal).toBe("Get a job in frontend");
   });
 
-  it("certificates: union by id -- a certificate issued on only one side survives the merge", () => {
+  it("certificates: union by id -- a genuinely-earned certificate issued on only one side survives the merge", () => {
+    // Regression coverage for the "no local certificate can be promoted
+    // without server eligibility validation" fix: a local-only certificate
+    // only survives the merge if the merged progress actually backs it.
     const local = createEmptyProgress();
+    for (const lesson of getLessonsForCourse("how-computing-works")) {
+      local.lessonStatus[lesson.id] = "completed";
+    }
     local.certificates["course-completion:how-computing-works"] = {
       id: "course-completion:how-computing-works",
       type: "course-completion",
@@ -353,6 +360,10 @@ describe("mergeProgress (guest -> account merge)", () => {
       contentVersionRef: "v1",
       verificationCode: "local-code",
     };
+    // Remote-issued certificates are always trusted regardless of whether
+    // this merge's local snapshot happens to carry the backing progress --
+    // they already made it to the server through a prior, separately
+    // validated issuance (e.g. issued on a different device).
     const remote = createEmptyProgress();
     remote.certificates["skill-achievement:python-fundamentals"] = {
       id: "skill-achievement:python-fundamentals",
@@ -370,6 +381,29 @@ describe("mergeProgress (guest -> account merge)", () => {
     expect(Object.keys(merged.certificates)).toHaveLength(2);
     expect(merged.certificates["course-completion:how-computing-works"]).toBeDefined();
     expect(merged.certificates["skill-achievement:python-fundamentals"]).toBeDefined();
+  });
+
+  it("certificates: a local-only certificate with no real backing progress is silently dropped, never promoted", () => {
+    const local = createEmptyProgress();
+    // No lessons actually completed -- this certificate is fabricated/stale
+    // (e.g. hand-edited localStorage, or a pre-existing local certificate
+    // from before sign-in was required to issue one).
+    local.certificates["course-completion:how-computing-works"] = {
+      id: "course-completion:how-computing-works",
+      type: "course-completion",
+      targetId: "how-computing-works",
+      targetTitle: "How Computing & the Web Work",
+      displayName: "Ada",
+      issuedAt: "2026-08-01T00:00:00.000Z",
+      criteriaSnapshot: ["All required lessons in this course are completed."],
+      contentVersionRef: "v1",
+      verificationCode: "untrusted-local-code",
+    };
+    const remote = createEmptyProgress();
+
+    const merged = mergeProgress(local, remote);
+    expect(merged.certificates["course-completion:how-computing-works"]).toBeUndefined();
+    expect(Object.keys(merged.certificates)).toHaveLength(0);
   });
 
   it("certificates: the same id issued independently on both sides before ever syncing keeps whichever was issued first, never both and never a coin-flip", () => {

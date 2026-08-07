@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ArrowRightIcon } from "@/components/ui/icons";
+import { safeRedirectPath } from "@/lib/auth/safe-redirect";
 
 type Mode = "sign-in" | "reset";
 
@@ -42,8 +43,9 @@ const COPY: Record<Mode, { title: string; cta: string; footer: React.ReactNode }
   },
 };
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
   const router = useRouter();
+  const destination = safeRedirectPath(next);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -100,7 +102,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       // resolves and fires that event, which happens before this
       // .then()-equivalent continuation runs. A full reload was never
       // required for the sync to run correctly.
-      router.push("/dashboard");
+      router.push(destination);
     }
   };
 

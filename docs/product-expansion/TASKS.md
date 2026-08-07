@@ -51,24 +51,41 @@ verification evidence is missing.
 
 ## Phase 3 — Dashboard guest/auth split
 
-| ID   | Description                            | Status  | Evidence |
-| ---- | -------------------------------------- | ------- | -------- |
-| P3.1 | Signed-out dashboard gate              | pending |          |
-| P3.2 | Signed-in dashboard behavior audit/fix | pending |          |
-| P3.3 | Tests                                  | pending |          |
+| ID   | Description                            | Status    | Evidence                                                                                                                                               |
+| ---- | -------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| P3.1 | Signed-out dashboard gate              | completed | `components/dashboard/dashboard-auth-gate.tsx`                                                                                                         |
+| P3.2 | Signed-in dashboard behavior audit/fix | completed | already correct (per-user data, real "Continue learning", refresh-safe sync fixed in a prior session this conversation); no further code change needed |
+| P3.3 | Tests                                  | completed | `tests/integration/dashboard-auth-gate.test.tsx`, 3/3 passing                                                                                          |
+
+**Note**: the gate only applies when `featureFlags.supabaseEnabled` is true (accounts actually
+exist for this deployment). When Supabase isn't configured, the dashboard remains the existing
+guest/local-only experience, matching every other Supabase-disabled surface in this app being
+honest local/demo mode rather than an unsatisfiable gate.
 
 ## Phase 4 — Certificates
 
-| ID   | Description                                            | Status  | Evidence |
-| ---- | ------------------------------------------------------ | ------- | -------- |
-| P4.1 | Guest certificate-page gate copy                       | pending |          |
-| P4.2 | Require auth for issue/download                        | pending |          |
-| P4.3 | Eligibility progress display ("8 of 12")               | pending |          |
-| P4.4 | Certificate visual redesign (issuer/signatory/QR/note) | pending |          |
-| P4.5 | QR generation + verification URL only                  | pending |          |
-| P4.6 | PDF generation route (server-rendered, trusted data)   | pending |          |
-| P4.7 | Legacy local-certificate handling                      | pending |          |
-| P4.8 | Tests (QR decode, PDF, eligibility, duplicate)         | pending |          |
+| ID   | Description                                            | Status    | Evidence                                                                                                                                                                                               |
+| ---- | ------------------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| P4.1 | Guest certificate-page gate copy                       | completed | `certificates-dashboard.tsx` sign-in gate, `certificate-presentation.tsx` "not yet verifiable"                                                                                                         |
+| P4.2 | Require auth for issue/download                        | completed | issue button gated on `signedIn`; PDF route requires a real session (401 otherwise)                                                                                                                    |
+| P4.3 | Eligibility progress display ("8 of 12")               | completed | `RequirementRow` shows "`N` of `M` required lessons completed"                                                                                                                                         |
+| P4.4 | Certificate visual redesign (issuer/signatory/QR/note) | completed | `certificate-presentation.tsx`, `lib/certificates/pdf.ts`                                                                                                                                              |
+| P4.5 | QR generation + verification URL only                  | completed | `lib/certificates/qr.ts`; decode-tested, see P4.8                                                                                                                                                      |
+| P4.6 | PDF generation route (server-rendered, trusted data)   | completed | `app/api/certificates/[type]/[targetId]/pdf/route.ts`, RLS-scoped, no service-role key                                                                                                                 |
+| P4.7 | Legacy local-certificate handling                      | completed | `mergeCertificates` now re-validates any local-only certificate against real merged progress before trusting it (a genuine, previously-unhandled gap found while implementing this phase -- see below) |
+| P4.8 | Tests (QR decode, PDF, eligibility, duplicate)         | completed | `tests/unit/certificate-{qr,pdf,pdf-route}.test.ts`, `tests/integration/certificate*.test.tsx`, `tests/unit/progress-merge.test.ts`                                                                    |
+
+**Security fix found and made during this phase (not in the original scope list, but required by
+"No local certificate can be promoted without server eligibility validation")**: `mergeCertificates`
+in `lib/learning/storage.ts` previously took an unconditional union of local and remote
+certificates -- a certificate that existed only in a guest's `localStorage` (hand-edited, or a
+pre-existing local certificate from before sign-in was required to issue one) would have been
+pushed to the server as a trusted, permanent record on the next sync, with no re-validation at
+all. Fixed: a local-only certificate is now re-validated against the fully-merged real progress
+before being trusted; a remote-confirmed certificate is always trusted unconditionally (it already
+passed this check once, on a previous sync, and re-checking it against a possibly-incomplete
+freshly-syncing device's local view could wrongly _drop_ a genuine, permanent certificate). Full
+before/after regression coverage in `tests/unit/progress-merge.test.ts`.
 
 ## Phase 5 — Study Abroad
 

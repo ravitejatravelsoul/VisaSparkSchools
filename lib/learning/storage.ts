@@ -11,6 +11,10 @@ import {
   type ActivityEvent,
   type CertificateState,
 } from "@/lib/learning/types";
+import {
+  getCourseCompletionEligibility,
+  getSkillAchievementEligibility,
+} from "@/lib/certificates/eligibility";
 
 /** focusMinutesByDate keeps at most this many most-recent days -- bounded history, never unbounded. */
 const FOCUS_MINUTES_RETENTION_DAYS = 90;
@@ -432,12 +436,46 @@ function mergeFocusMinutesByDate(
  * side issued first -- this is what "cannot create duplicates through
  * refresh or multiple tabs" actually requires: exactly one canonical record
  * per id, chosen deterministically, never a coin-flip.
+ *
+ * Any certificate present in `b` (the remote/server side) is always trusted
+ * unconditionally, whether or not it also exists locally -- it already made
+ * it to the server through a previously-validated issuance, and re-checking
+ * it against `validationContext` (this pass's merged progress, which may
+ * not yet reflect every historical completion on a freshly-syncing device)
+ * could wrongly *drop* a genuine, already-permanent certificate. The actual
+ * risk is the opposite: a certificate that exists *only* locally (`a`, not
+ * in `b`) has never been confirmed by anything but this device's own
+ * localStorage, which a learner can edit directly, or which could be a
+ * pre-existing local certificate issued before this platform required
+ * sign-in to issue one at all (see docs/product-expansion/DECISIONS.md's
+ * "legacy local certificate" handling). Promoting that straight into the
+ * synced/pushed result without re-checking it would let an untrusted local
+ * value become a "real", server-confirmed certificate merely because
+ * localStorage said it existed -- so only that local-only case is
+ * re-validated against `validationContext`, and dropped silently (not
+ * carried forward, not pushed) if it no longer checks out.
  */
 function mergeCertificates(
   a: Record<string, CertificateState>,
   b: Record<string, CertificateState>,
+  validationContext: ProgressState,
 ): Record<string, CertificateState> {
-  const merged: Record<string, CertificateState> = { ...a };
+  const merged: Record<string, CertificateState> = {};
+  for (const [id, cert] of Object.entries(a)) {
+    if (id in b) {
+      // Exists on both sides -- e.g. genuinely, independently issued on two
+      // devices before they ever synced. Both are real issuances (not an
+      // unconfirmed local-only value), so no re-validation; reconciled by
+      // the earliest-issuedAt tie-break in the loop below, same as always.
+      merged[id] = cert;
+      continue;
+    }
+    const eligibility =
+      cert.type === "course-completion"
+        ? getCourseCompletionEligibility(cert.targetId, validationContext)
+        : getSkillAchievementEligibility(cert.targetId, validationContext);
+    if (eligibility.eligible) merged[id] = cert;
+  }
   for (const [id, cert] of Object.entries(b)) {
     const existing = merged[id];
     merged[id] = !existing || cert.issuedAt < existing.issuedAt ? cert : existing;
@@ -600,7 +638,10 @@ export function mergeProgress(local: ProgressState, remote: ProgressState): Prog
 
   merged.activity = mergeActivity(local.activity, remote.activity);
 
-  merged.certificates = mergeCertificates(local.certificates, remote.certificates);
+  // `merged` at this point already has every other field (lessonStatus,
+  // projectProgress, practiceAttempts, ...) fully reconciled -- exactly the
+  // progress a local-only certificate needs to be re-validated against.
+  merged.certificates = mergeCertificates(local.certificates, remote.certificates, merged);
 
   // Preferences: last-write-wins as a whole object, using the explicit
   // `updatedAt` stamp each `setProfile` call sets -- avoids stitching

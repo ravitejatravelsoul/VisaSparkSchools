@@ -24,6 +24,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { SectionHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LinkButton, Button } from "@/components/ui/button";
+import { DashboardAuthGate } from "@/components/dashboard/dashboard-auth-gate";
 import type { ActivityEvent } from "@/lib/learning/types";
 
 const NOTE_PREVIEW_LENGTH = 120;
@@ -60,6 +61,17 @@ export function DashboardClient() {
 
   if (!hydrated) {
     return <DashboardSkeleton />;
+  }
+
+  // A dashboard is inherently personal -- when accounts exist for this
+  // deployment (Supabase configured) but this visitor hasn't signed in,
+  // show the auth gate instead of any progress/stats, guest or otherwise.
+  // When Supabase isn't configured at all, there is no sign-in concept to
+  // gate behind, so this deployment's only mode (local/guest) is shown
+  // exactly as it always has been -- matching every other "Supabase
+  // disabled" surface in this app being honest local/demo mode, not broken.
+  if (featureFlags.supabaseEnabled && !userId) {
+    return <DashboardAuthGate />;
   }
 
   const completedCount = Object.values(state.lessonStatus).filter((s) => s === "completed").length;

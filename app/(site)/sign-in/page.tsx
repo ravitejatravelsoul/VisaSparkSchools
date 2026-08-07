@@ -9,10 +9,10 @@ export const metadata: Metadata = {
   alternates: { canonical: `${siteConfig.url}/sign-in` },
 };
 
-type SearchParams = Promise<{ confirmation?: string }>;
+type SearchParams = Promise<{ confirmation?: string; next?: string }>;
 
 export default async function SignInPage({ searchParams }: { searchParams: SearchParams }) {
-  const { confirmation } = await searchParams;
+  const { confirmation, next } = await searchParams;
 
   return (
     <Container className="max-w-md py-16">
@@ -22,7 +22,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Searc
           you&apos;ve already confirmed your email, or sign up again to request a fresh link.
         </Alert>
       )}
-      <AuthForm mode="sign-in" />
+      <AuthForm mode="sign-in" next={next} />
     </Container>
   );
 }
