@@ -141,4 +141,12 @@ export const tracks: Track[] = [
       "Quantitative aptitude, logical and analytical reasoning, and group discussion and interview preparation for campus placements.",
     order: 17,
   },
+  {
+    id: "exam-preparation",
+    slug: "exam-preparation",
+    title: "Study-Abroad Exam Preparation",
+    description:
+      "Independent, self-paced preparation for the English-proficiency and graduate-admissions tests most study-abroad applications require: IELTS, PTE Academic, TOEFL iBT, and the GRE General Test.",
+    order: 18,
+  },
 ];

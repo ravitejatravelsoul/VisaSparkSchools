@@ -17,6 +17,8 @@ import {
 import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
 import { CourseProgressActions } from "@/components/course/course-progress-actions";
+import { getExamPrepMeta } from "@/lib/exam-prep/registry";
+import { TrademarkNotice } from "@/components/exam-prep/trademark-notice";
 import { trackAccent } from "@/lib/ui/track-accent";
 import { accentClasses } from "@/lib/ui/category-accent";
 import { difficultyTone } from "@/lib/ui/difficulty";
@@ -58,6 +60,7 @@ export default async function CourseOverviewPage({ params }: { params: Params })
   const nextCourses = course.nextCourseSlugs
     .map((slug) => getCourseBySlug(slug))
     .filter((c): c is NonNullable<typeof c> => Boolean(c));
+  const examPrepMeta = getExamPrepMeta(course.slug);
 
   return (
     <Container className="py-10">
@@ -115,6 +118,12 @@ export default async function CourseOverviewPage({ params }: { params: Params })
         <Badge tone="neutral">{course.estimatedHours}h total</Badge>
       </div>
 
+      {examPrepMeta && (
+        <div className="mt-4">
+          <TrademarkNotice meta={examPrepMeta} />
+        </div>
+      )}
+
       {prerequisiteCourses.length > 0 && (
         <p className="mt-4 text-sm text-(--color-ink-muted)">
           Helpful before you begin (optional -- you can start this course now):{" "}
@@ -171,6 +180,14 @@ export default async function CourseOverviewPage({ params }: { params: Params })
         >
           Practice this course &rarr;
         </Link>
+        {examPrepMeta && (
+          <Link
+            href={`/courses/${course.slug}/exam-practice`}
+            className="font-medium text-(--color-brand-strong) hover:underline"
+          >
+            {examPrepMeta.officialAbbreviation} diagnostic, sections &amp; speaking/writing &rarr;
+          </Link>
+        )}
         <Link
           href="/study-studio?tab=plan"
           className="font-medium text-(--color-brand-strong) hover:underline"

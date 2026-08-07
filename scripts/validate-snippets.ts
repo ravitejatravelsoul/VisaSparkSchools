@@ -141,7 +141,8 @@ async function main() {
   for (const lesson of allLessons) {
     // Exam-prep lessons (Phase 6) have neither guidedExercise nor
     // independentExercise -- nothing to push for those.
-    if (lesson.guidedExercise) exercises.push({ lessonId: lesson.id, exercise: lesson.guidedExercise });
+    if (lesson.guidedExercise)
+      exercises.push({ lessonId: lesson.id, exercise: lesson.guidedExercise });
     if (lesson.independentExercise) {
       exercises.push({ lessonId: lesson.id, exercise: lesson.independentExercise });
     }

@@ -15,6 +15,7 @@ import {
 } from "../lib/directory/registry";
 import { validateDirectory } from "../lib/directory/validate";
 import { countryRoadmaps } from "../lib/study-abroad/registry";
+import { EXAM_PREP_COURSE_SLUGS as EXAM_PREP_SLUGS_TUPLE } from "../lib/exam-prep/types";
 
 let errorCount = 0;
 
@@ -267,12 +268,7 @@ for (const lesson of allLessons) {
 // every course outside this explicit allow-list must still provide all
 // three, and every exam-prep lesson must consistently omit all three rather
 // than mixing shapes. ---
-const EXAM_PREP_COURSE_SLUGS = new Set<string>([
-  "ielts-preparation",
-  "pte-academic-preparation",
-  "toefl-ibt-preparation",
-  "gre-general-test-preparation",
-]);
+const EXAM_PREP_COURSE_SLUGS = new Set<string>(EXAM_PREP_SLUGS_TUPLE);
 for (const lesson of allLessons) {
   const isExamPrep = EXAM_PREP_COURSE_SLUGS.has(lesson.courseSlug);
   const hasAnyCodeFields = Boolean(

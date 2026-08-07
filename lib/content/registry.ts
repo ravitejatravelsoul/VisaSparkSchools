@@ -22,6 +22,7 @@ import { testAutomationFrameworkLessons } from "@/content/lessons/test-automatio
 import { quantitativeAptitudeLessons } from "@/content/lessons/quantitative-aptitude";
 import { careerAndGdPreparationLessons } from "@/content/lessons/career-and-gd-preparation";
 import { logicalAnalyticalReasoningLessons } from "@/content/lessons/logical-analytical-reasoning";
+import { ieltsLessons } from "@/content/lessons/ielts";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -53,6 +54,7 @@ export const allLessons: Lesson[] = [
   ...quantitativeAptitudeLessons,
   ...careerAndGdPreparationLessons,
   ...logicalAnalyticalReasoningLessons,
+  ...ieltsLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);

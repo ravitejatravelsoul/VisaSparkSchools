@@ -1293,4 +1293,65 @@ export const courses: CourseInput[] = [
       },
     ],
   },
+  {
+    id: "ielts-preparation",
+    slug: "ielts-preparation",
+    trackSlug: "exam-preparation",
+    title: "IELTS Preparation",
+    description:
+      "Independent preparation for all four IELTS sections -- Listening, Reading, Writing, and Speaking -- with original practice passages, transcripts, and self-review writing/speaking tasks.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 8,
+    audience:
+      "Learners preparing to take IELTS Academic or General Training for study-abroad, work, or immigration purposes, at any starting English level.",
+    learningOutcomes: [
+      "Describe the IELTS test format, scoring system, and the difference between the Academic and General Training versions",
+      "Apply section-specific strategies (question-preview, paraphrase recognition, skimming/scanning, essay structuring, cue-card planning) across Listening, Reading, Writing, and Speaking",
+      "Complete a self-assessed diagnostic, section practice, and a mixed mock test, and self-review a timed Writing and Speaking response against real IELTS-style criteria",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: [],
+    modules: [
+      {
+        id: "ielts-overview-strategy",
+        title: "Test Overview & Strategy",
+        summary: "Format, scoring, and how to build a realistic study plan.",
+        lessonSlugs: ["ielts-test-format-overview", "ielts-study-plan-and-band-descriptors"],
+      },
+      {
+        id: "ielts-listening-module",
+        title: "Listening",
+        summary: "Format, question types, and completion/multiple-choice/matching strategy.",
+        lessonSlugs: [
+          "ielts-listening-format-and-question-types",
+          "ielts-listening-completion-strategies",
+          "ielts-listening-multiple-choice-matching",
+        ],
+      },
+      {
+        id: "ielts-reading-module",
+        title: "Reading",
+        summary: "Format, True/False/Not Given, and skimming/scanning/matching headings.",
+        lessonSlugs: ["ielts-reading-format-and-question-types", "ielts-reading-skimming-scanning"],
+      },
+      {
+        id: "ielts-writing-module",
+        title: "Writing",
+        summary: "Academic Task 1, General Training Task 1 letters, and Task 2 essays.",
+        lessonSlugs: [
+          "ielts-writing-task-1-academic",
+          "ielts-writing-task-1-general",
+          "ielts-writing-task-2-essay",
+        ],
+      },
+      {
+        id: "ielts-speaking-module",
+        title: "Speaking",
+        summary: "Part 1 interview, and the Part 2 long turn plus Part 3 discussion.",
+        lessonSlugs: ["ielts-speaking-part-1-introduction", "ielts-speaking-parts-2-3"],
+      },
+    ],
+  },
 ];

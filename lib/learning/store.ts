@@ -144,7 +144,9 @@ function computeLessonContribution(state: ProgressState, lesson: Lesson): number
   // Exam-prep lessons (Phase 6) have no guidedExercise/independentExercise --
   // undefined here reads as "not solved" rather than throwing, so mastery for
   // a shared skill tag never crashes on a lesson that legitimately has none.
-  const guided = lesson.guidedExercise ? state.exerciseAttempts[lesson.guidedExercise.id] : undefined;
+  const guided = lesson.guidedExercise
+    ? state.exerciseAttempts[lesson.guidedExercise.id]
+    : undefined;
   const independent = lesson.independentExercise
     ? state.exerciseAttempts[lesson.independentExercise.id]
     : undefined;
