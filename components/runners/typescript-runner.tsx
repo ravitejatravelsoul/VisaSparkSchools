@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CodeEditor } from "@/components/runners/code-editor";
+import { SplitRunnerLayout } from "@/components/runners/split-runner-layout";
 import { buildRunnerDoc } from "@/lib/runners/html-js-doc";
 import type { RunResult, RunnerStatus } from "@/lib/runners/types";
 import type { TsDiagnostic } from "@/lib/runners/typescript-compile";
@@ -47,6 +48,7 @@ export function TypeScriptRunner({
   const [diagnostics, setDiagnostics] = useState<TsDiagnostic[]>([]);
   const [compiling, setCompiling] = useState(false);
   const [runToken, setRunToken] = useState(0);
+  const [mobileTab, setMobileTab] = useState<"editor" | "output">("editor");
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timeoutRef = useRef<number | undefined>(undefined);
 
@@ -82,6 +84,7 @@ export function TypeScriptRunner({
     setResult(null);
     setDiagnostics([]);
     setCompiling(true);
+    setMobileTab("output");
 
     // Dynamic import keeps the ~8.7 MB compiler out of every other route's
     // bundle; it is fetched the first time a learner runs a TypeScript lab.
@@ -118,113 +121,133 @@ export function TypeScriptRunner({
   const errors = diagnostics.filter((d) => d.category === "error");
 
   return (
-    <div className="flex flex-col gap-3">
-      <CodeEditor
-        value={code}
-        onChange={onCodeChange}
-        language="typescript"
-        ariaLabel={editorLabel}
-        height={editorHeight}
-      />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" onClick={run} disabled={status === "running"}>
-          {status === "running" ? (compiling ? "Type-checking…" : "Running…") : "Run"}
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={stop}
-          disabled={status === "idle" && !doc}
-        >
-          Stop
-        </Button>
-        <Button type="button" variant="ghost" onClick={restoreStarter}>
-          Restore starter code
-        </Button>
-      </div>
-
-      <div aria-live="polite" className="text-sm">
-        {compiling && <p className="text-(--color-ink-muted)">Type-checking your TypeScript…</p>}
-        {status === "running" && !compiling && (
-          <p className="text-(--color-ink-muted)">Running the compiled JavaScript…</p>
-        )}
-        {status === "timeout" && (
-          <p className="text-(--color-warning)">
-            This is taking a long time — your code may have an infinite loop. Click Stop, fix the
-            code, and try again.
-          </p>
-        )}
-      </div>
-
-      {/*
-        Type errors are reported as a status region rather than role="alert":
-        in a TypeScript lesson a type error is frequently the expected outcome
-        of the exercise, not a failure the learner needs interrupting for.
-      */}
-      {errors.length > 0 && (
-        <div
-          role="status"
-          className="rounded-lg border-l-4 border-(--color-danger) bg-(--color-danger-contrast) p-3 text-sm"
-        >
-          <p className="mb-1 font-semibold text-(--color-ink)">
-            {errors.length === 1 ? "1 type error" : `${errors.length} type errors`}
-          </p>
-          <ul className="flex flex-col gap-1 text-(--color-ink-muted)">
-            {errors.map((d, i) => (
-              <li key={i} className="font-mono text-xs">
-                {d.line !== undefined && (
-                  <span className="text-(--color-ink-faint)">Line {d.line}: </span>
-                )}
-                <span>{d.message}</span>
-                <span className="text-(--color-ink-faint)"> (TS{d.code})</span>
-              </li>
-            ))}
-          </ul>
+    <SplitRunnerLayout
+      editorLabel={editorLabel}
+      outputLabel="Output"
+      activeMobileTab={mobileTab}
+      onActiveMobileTabChange={setMobileTab}
+      toolbar={
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" onClick={run} disabled={status === "running"}>
+            {status === "running" ? (compiling ? "Type-checking…" : "Running…") : "Run"}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={stop}
+            disabled={status === "idle" && !doc}
+          >
+            Stop
+          </Button>
+          <Button type="button" variant="ghost" onClick={restoreStarter}>
+            Restore starter code
+          </Button>
         </div>
-      )}
-
-      {doc && (
-        <iframe
-          key={runToken}
-          ref={iframeRef}
-          title="Hidden TypeScript execution frame"
-          srcDoc={doc}
-          sandbox="allow-scripts allow-forms"
-          className="hidden"
+      }
+      editor={
+        <CodeEditor
+          value={code}
+          onChange={onCodeChange}
+          language="typescript"
+          ariaLabel={editorLabel}
+          height={editorHeight}
         />
-      )}
+      }
+      output={
+        <div className="flex flex-col gap-3">
+          <div aria-live="polite" className="text-sm">
+            {compiling && (
+              <p className="text-(--color-ink-muted)">Type-checking your TypeScript…</p>
+            )}
+            {status === "running" && !compiling && (
+              <p className="text-(--color-ink-muted)">Running the compiled JavaScript…</p>
+            )}
+            {status === "timeout" && (
+              <p className="text-(--color-warning)">
+                This is taking a long time — your code may have an infinite loop. Click Stop, fix
+                the code, and try again.
+              </p>
+            )}
+          </div>
 
-      {result?.logs && result.logs.length > 0 && (
-        <div className="rounded-lg border border-(--color-border) bg-(--color-code-bg) p-3">
-          <p className="mb-1 text-xs font-medium text-(--color-ink-muted)">Console</p>
-          <ul className="font-mono text-xs">
-            {result.logs.map((line, i) => (
-              <li
-                key={i}
-                className={
-                  line.level === "error"
-                    ? "text-(--color-danger)"
-                    : line.level === "warn"
-                      ? "text-(--color-warning)"
-                      : "text-(--color-ink)"
-                }
-              >
-                {line.text}
-              </li>
-            ))}
-          </ul>
+          {/*
+            Type errors are reported as a status region rather than role="alert":
+            in a TypeScript lesson a type error is frequently the expected outcome
+            of the exercise, not a failure the learner needs interrupting for.
+          */}
+          {errors.length > 0 && (
+            <div
+              role="status"
+              className="rounded-lg border-l-4 border-(--color-danger) bg-(--color-danger-contrast) p-3 text-sm"
+            >
+              <p className="mb-1 font-semibold text-(--color-ink)">
+                {errors.length === 1 ? "1 type error" : `${errors.length} type errors`}
+              </p>
+              <ul className="flex flex-col gap-1 text-(--color-ink-muted)">
+                {errors.map((d, i) => (
+                  <li key={i} className="font-mono text-xs">
+                    {d.line !== undefined && (
+                      <span className="text-(--color-ink-faint)">Line {d.line}: </span>
+                    )}
+                    <span>{d.message}</span>
+                    <span className="text-(--color-ink-faint)"> (TS{d.code})</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {doc && (
+            <iframe
+              key={runToken}
+              ref={iframeRef}
+              title="Hidden TypeScript execution frame"
+              srcDoc={doc}
+              sandbox="allow-scripts allow-forms"
+              className="hidden"
+            />
+          )}
+
+          {result?.logs && result.logs.length > 0 && (
+            <div className="rounded-lg border border-(--color-border) bg-(--color-code-bg) p-3">
+              <p className="mb-1 text-xs font-medium text-(--color-ink-muted)">Console</p>
+              <ul className="font-mono text-xs">
+                {result.logs.map((line, i) => (
+                  <li
+                    key={i}
+                    className={
+                      line.level === "error"
+                        ? "text-(--color-danger)"
+                        : line.level === "warn"
+                          ? "text-(--color-warning)"
+                          : "text-(--color-ink)"
+                    }
+                  >
+                    {line.text}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {result?.error && (
+            <p
+              role="alert"
+              className="rounded-lg border border-(--color-danger) bg-(--color-surface) p-3 text-sm text-(--color-danger)"
+            >
+              Runtime error: {result.error}
+            </p>
+          )}
+
+          {!compiling &&
+            status !== "running" &&
+            errors.length === 0 &&
+            !result?.logs?.length &&
+            !result?.error && (
+              <p className="text-sm text-(--color-ink-faint)">Click Run to see the output.</p>
+            )}
         </div>
-      )}
-
-      {result?.error && (
-        <p
-          role="alert"
-          className="rounded-lg border border-(--color-danger) bg-(--color-surface) p-3 text-sm text-(--color-danger)"
-        >
-          Runtime error: {result.error}
-        </p>
-      )}
-    </div>
+      }
+    />
   );
 }

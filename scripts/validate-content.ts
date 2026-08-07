@@ -355,6 +355,64 @@ for (const lesson of allLessons) {
   }
 }
 
+// --- Guided output labs (Phase 8): languages with no safe browser
+// execution path at all (see docs/product-expansion/RUNNER_CAPABILITY_MATRIX.md).
+// Structural minimums (>=1 step, >=1 hint) are already enforced by
+// guidedOutputLabSchema at parse time -- this checks id uniqueness, fill-in-
+// blank internal consistency, and the same "never claim this ran" rule
+// guided local labs enforce, plus the fixed "Expected output" labeling
+// promise (a lesson's own text must never call it "Your output"). ---
+{
+  const outputLabIds = new Map<string, string>();
+  const FALSE_EXECUTION_PHRASES = [
+    /\bwe (ran|ran it|executed|verified|tested) (it|this|your code)\b/i,
+    /\bautomatically verified\b/i,
+    /\bclick run\b/i,
+    /\bruns? in your browser\b/i,
+    /\bthe browser (ran|executed)\b/i,
+    /\bvisasparkschools (ran|executed|verified)\b/i,
+    /\byour output\b/i,
+  ];
+  for (const lesson of allLessons) {
+    const lab = lesson.guidedOutputLab;
+    if (!lab) continue;
+
+    const existing = outputLabIds.get(lab.id);
+    if (existing) {
+      fail(`Guided output lab id "${lab.id}" is used by both "${existing}" and "${lesson.slug}".`);
+    }
+    outputLabIds.set(lab.id, lesson.slug);
+
+    if (lab.mode === "fill-in-blank") {
+      const step = lab.steps[0];
+      if (lab.blankPlaceholder && !step.code.includes(lab.blankPlaceholder)) {
+        fail(
+          `Lesson "${lesson.slug}" guided output lab "${lab.id}" declares blankPlaceholder "${lab.blankPlaceholder}" but its step code never contains it.`,
+        );
+      }
+    }
+
+    if (lab.mode === "guided-editing") {
+      for (const step of lab.steps) {
+        if (!step.description) {
+          fail(
+            `Lesson "${lesson.slug}" guided output lab "${lab.id}": every guided-editing step needs a description.`,
+          );
+        }
+      }
+    }
+
+    const labText = JSON.stringify(lab);
+    for (const pattern of FALSE_EXECUTION_PHRASES) {
+      if (pattern.test(labText)) {
+        fail(
+          `Lesson "${lesson.slug}" guided output lab text matches a false-execution-claim pattern (${pattern}) -- a guided output lab must never imply the code ran, or call the result "your output" instead of "Expected output".`,
+        );
+      }
+    }
+  }
+}
+
 // --- Quiz integrity: valid answer indexes, no duplicate questions within a
 // lesson, and no two quiz questions across the same course that are
 // identical apart from a renamed variable/value (a shallow-rewrite check). ---

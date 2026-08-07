@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CodeEditor } from "@/components/runners/code-editor";
+import { SplitRunnerLayout } from "@/components/runners/split-runner-layout";
 import { Button } from "@/components/ui/button";
 import type { ExerciseTest } from "@/lib/content/types";
 import type { RunnerStatus } from "@/lib/runners/types";
@@ -42,6 +43,7 @@ export function SqlRunner({
   const [rows, setRows] = useState<unknown[][]>([]);
   const [error, setError] = useState<string | undefined>(undefined);
   const [testResults, setTestResults] = useState<{ id: string; passed: boolean }[] | undefined>();
+  const [mobileTab, setMobileTab] = useState<"editor" | "output">("editor");
 
   const workerRef = useRef<Worker | null>(null);
   const requestIdRef = useRef(0);
@@ -68,6 +70,7 @@ export function SqlRunner({
     setStatus("running");
     setError(undefined);
     setTestResults(undefined);
+    setMobileTab("output");
 
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
     timeoutRef.current = window.setTimeout(() => {
@@ -123,83 +126,95 @@ export function SqlRunner({
   }, [onCodeChange, starterCode]);
 
   return (
-    <div className="flex flex-col gap-3">
-      <CodeEditor
-        value={code}
-        onChange={onCodeChange}
-        language="sql"
-        ariaLabel="SQL query editor"
-        height={160}
-      />
-
-      <div className="flex flex-wrap items-center gap-2">
-        <Button type="button" onClick={run} disabled={status === "running"}>
-          {status === "running" ? "Running…" : "Run query"}
-        </Button>
-        <Button type="button" variant="secondary" onClick={stop} disabled={status === "idle"}>
-          Stop
-        </Button>
-        <Button type="button" variant="ghost" onClick={restoreStarter}>
-          Restore starter query
-        </Button>
-      </div>
-
-      <div aria-live="polite" className="text-sm">
-        {status === "running" && <p className="text-(--color-ink-muted)">Running your query…</p>}
-        {status === "timeout" && (
-          <p className="text-(--color-warning)">
-            This is taking a long time. Click Stop, check your query, and try again.
-          </p>
-        )}
-      </div>
-
-      {error && (
-        <p
-          role="alert"
-          className="rounded-lg border border-(--color-danger) bg-(--color-surface) p-3 text-sm text-(--color-danger)"
-        >
-          Query error: {error}
-        </p>
-      )}
-
-      {!error && rows.length > 0 && (
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label="Query results"
-          className="overflow-x-auto rounded-lg border border-(--color-border)"
-        >
-          <table className="w-full min-w-max text-left text-sm">
-            <caption className="sr-only">Query results, {rows.length} rows</caption>
-            <thead className="bg-(--color-canvas)">
-              <tr>
-                {columns.map((col) => (
-                  <th key={col} scope="col" className="px-3 py-2 font-medium">
-                    {col}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, i) => (
-                <tr key={i} className="border-t border-(--color-border)">
-                  {row.map((cell, j) => (
-                    <td key={j} className="px-3 py-2 font-mono">
-                      {String(cell)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <SplitRunnerLayout
+      editorLabel="SQL query editor"
+      outputLabel="Results"
+      activeMobileTab={mobileTab}
+      onActiveMobileTabChange={setMobileTab}
+      toolbar={
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" onClick={run} disabled={status === "running"}>
+            {status === "running" ? "Running…" : "Run query"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={stop} disabled={status === "idle"}>
+            Stop
+          </Button>
+          <Button type="button" variant="ghost" onClick={restoreStarter}>
+            Restore starter query
+          </Button>
         </div>
-      )}
+      }
+      editor={
+        <CodeEditor
+          value={code}
+          onChange={onCodeChange}
+          language="sql"
+          ariaLabel="SQL query editor"
+          height={160}
+        />
+      }
+      output={
+        <div className="flex flex-col gap-3">
+          <div aria-live="polite" className="text-sm">
+            {status === "running" && (
+              <p className="text-(--color-ink-muted)">Running your query…</p>
+            )}
+            {status === "timeout" && (
+              <p className="text-(--color-warning)">
+                This is taking a long time. Click Stop, check your query, and try again.
+              </p>
+            )}
+          </div>
 
-      {!error && status === "done" && rows.length === 0 && (
-        <p className="text-sm text-(--color-ink-faint)">
-          Query ran successfully and returned no rows.
-        </p>
-      )}
-    </div>
+          {error && (
+            <p
+              role="alert"
+              className="rounded-lg border border-(--color-danger) bg-(--color-surface) p-3 text-sm text-(--color-danger)"
+            >
+              Query error: {error}
+            </p>
+          )}
+
+          {!error && rows.length > 0 && (
+            <div
+              tabIndex={0}
+              role="region"
+              aria-label="Query results"
+              className="overflow-x-auto rounded-lg border border-(--color-border)"
+            >
+              <table className="w-full min-w-max text-left text-sm">
+                <caption className="sr-only">Query results, {rows.length} rows</caption>
+                <thead className="bg-(--color-canvas)">
+                  <tr>
+                    {columns.map((col) => (
+                      <th key={col} scope="col" className="px-3 py-2 font-medium">
+                        {col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, i) => (
+                    <tr key={i} className="border-t border-(--color-border)">
+                      {row.map((cell, j) => (
+                        <td key={j} className="px-3 py-2 font-mono">
+                          {String(cell)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {!error && status === "done" && rows.length === 0 && (
+            <p className="text-sm text-(--color-ink-faint)">
+              Query ran successfully and returned no rows.
+            </p>
+          )}
+        </div>
+      }
+    />
   );
 }

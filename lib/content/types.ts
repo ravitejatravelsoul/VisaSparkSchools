@@ -106,6 +106,60 @@ export const guidedLocalLabSchema = z.object({
 export type GuidedLocalLab = z.infer<typeof guidedLocalLabSchema>;
 export type GuidedLocalLabInput = z.input<typeof guidedLocalLabSchema>;
 
+/**
+ * A guided-output lab: for languages this platform cannot safely execute in
+ * the browser at all (C, C++, C#, Angular, AngularJS, PHP, Go, Kotlin -- see
+ * docs/product-expansion/RUNNER_CAPABILITY_MATRIX.md for the per-language
+ * rationale). There is no code editor that does anything and no Run button.
+ * The learner reads real code and either predicts, fills in, or follows an
+ * edited sequence, then compares against a precomputed "expectedOutput" --
+ * `components/runners/guided-output-panel.tsx` renders that field under a
+ * fixed "Expected output" heading (never "Your output") for exactly the same
+ * "can't be softened by a specific lesson's authoring" reason
+ * guidedLocalLabSchema's banner is fixed.
+ */
+export const guidedOutputStepSchema = z.object({
+  /** Narrative for a single edit in "guided-editing" mode; omitted for predict/fill-in-blank. */
+  description: z.string().min(1).optional(),
+  code: z.string().min(1),
+  expectedOutput: z.string().min(1),
+});
+export type GuidedOutputStep = z.infer<typeof guidedOutputStepSchema>;
+
+export const guidedOutputLabSchema = z
+  .object({
+    id: z.string().min(1),
+    title: z.string().min(1),
+    /** Display label only (e.g. "C", "Go") -- deliberately not runnerLanguageSchema, since none of these ever execute. */
+    language: z.string().min(1),
+    mode: z.enum(["predict", "fill-in-blank", "guided-editing"]),
+    prompt: z.string().min(1),
+    steps: z.array(guidedOutputStepSchema).min(1),
+    /** fill-in-blank only: the literal placeholder text used inside a step's code, e.g. "____". */
+    blankPlaceholder: z.string().min(1).optional(),
+    /** fill-in-blank only: the correct fill, shown on reveal for self-check -- never graded/submitted anywhere. */
+    blankAnswer: z.string().min(1).optional(),
+    hints: z.array(z.string().min(1)).min(1),
+  })
+  .superRefine((val, ctx) => {
+    if (val.mode === "fill-in-blank" && (!val.blankAnswer || !val.blankPlaceholder)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "fill-in-blank guided output labs require blankPlaceholder and blankAnswer",
+        path: ["blankAnswer"],
+      });
+    }
+    if (val.mode !== "guided-editing" && val.steps.length !== 1) {
+      ctx.addIssue({
+        code: "custom",
+        message: "predict/fill-in-blank guided output labs must have exactly one step",
+        path: ["steps"],
+      });
+    }
+  });
+export type GuidedOutputLab = z.infer<typeof guidedOutputLabSchema>;
+export type GuidedOutputLabInput = z.input<typeof guidedOutputLabSchema>;
+
 export const codeExampleSchema = z.object({
   language: runnerLanguageSchema,
   code: z.string().min(1),
@@ -154,6 +208,15 @@ export const lessonSchema = z.object({
    * unconditionally) needed no changes for this feature.
    */
   guidedLocalLab: guidedLocalLabSchema.optional(),
+  /**
+   * Optional: for lessons in a language this platform cannot safely execute
+   * in the browser at all (see guidedOutputLabSchema above). Additive, same
+   * reasoning as guidedLocalLab -- every lesson still declares a real
+   * example/guidedExercise/independentExercise (typically with
+   * example.language "none" for these courses) so completion/mastery logic
+   * needs no special case.
+   */
+  guidedOutputLab: guidedOutputLabSchema.optional(),
   commonMistakes: z.array(z.string().min(1)).min(1),
   quiz: z.array(quizQuestionSchema).min(3),
   takeaway: z.string().min(1),
