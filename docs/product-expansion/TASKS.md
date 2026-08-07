@@ -157,19 +157,24 @@ before/after regression coverage in `tests/unit/progress-merge.test.ts`.
 
 ## Phase 10 — Guided chatbot navigator
 
-| ID    | Description                                   | Status  | Evidence |
-| ----- | --------------------------------------------- | ------- | -------- |
-| P10.1 | Audit existing chatbot                        | pending |          |
-| P10.2 | Deterministic option tree + routing           | pending |          |
-| P10.3 | Accessibility (dialog, focus, escape, mobile) | pending |          |
-| P10.4 | Tests                                         | pending |          |
+| ID    | Description                                   | Status    | Evidence                                                                                                                                                                                                     |
+| ----- | --------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| P10.1 | Audit existing chatbot                        | completed | no site-wide chatbot existed; the only related component is the lesson-scoped, LLM-backed, opt-in AI tutor (`components/ai/tutor-launcher.tsx`), left untouched -- this is a new, separate, global component |
+| P10.2 | Deterministic option tree + routing           | completed | `lib/help/options.ts` (pure, no React, no external API), `components/help/help-navigator.tsx`                                                                                                                |
+| P10.3 | Accessibility (dialog, focus, escape, mobile) | completed | reuses `useModalA11y` (the same hook already used by mobile nav/course-nav/tech-filter/AI tutor)                                                                                                             |
+| P10.4 | Tests                                         | completed | `tests/unit/help-options.test.ts` (25), `tests/integration/help-navigator.test.tsx` (8)                                                                                                                      |
+
+**Note**: two options (`exam-prep` -> `/exam-preparation`, `study-abroad` -> `/study-abroad`) point
+at routes this phase itself doesn't build -- see Phases 5 and 6, planned later in this same
+session. If either phase doesn't ship, update these two routes before considering this phase
+release-ready (do not ship a dead link).
 
 ## Phase 11 — Footer attribution
 
-| ID    | Description                   | Status  | Evidence |
-| ----- | ----------------------------- | ------- | -------- |
-| P11.1 | Add developer/CEO attribution | pending |          |
-| P11.2 | Tests                         | pending |          |
+| ID    | Description                   | Status    | Evidence                                         |
+| ----- | ----------------------------- | --------- | ------------------------------------------------ |
+| P11.1 | Add developer/CEO attribution | completed | `components/layout/footer.tsx`                   |
+| P11.2 | Tests                         | completed | `tests/integration/footer.test.tsx`, 3/3 passing |
 
 ## Phase 12 — Global audit
 

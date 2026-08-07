@@ -21,7 +21,7 @@ export function Footer() {
       <Container className="flex flex-col gap-2 border-t border-(--color-border) py-6 text-xs text-(--color-ink-faint) sm:flex-row sm:items-center sm:justify-between">
         <p>
           © {new Date().getFullYear()} {siteConfig.name}. Public beta. Developed by{" "}
-          {siteConfig.developerName}.
+          {siteConfig.developerName}. CEO: {siteConfig.certificateSignatory.name}.
         </p>
         <p>Built for learning. Not affiliated with any other coding tutorial site.</p>
       </Container>
