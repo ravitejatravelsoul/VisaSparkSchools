@@ -19,6 +19,7 @@ import { siteConfig } from "@/lib/site-config";
 import { CourseProgressActions } from "@/components/course/course-progress-actions";
 import { getExamPrepMeta } from "@/lib/exam-prep/registry";
 import { TrademarkNotice } from "@/components/exam-prep/trademark-notice";
+import { getInterviewQuestionsForCourse } from "@/lib/interview-prep/registry";
 import { trackAccent } from "@/lib/ui/track-accent";
 import { accentClasses } from "@/lib/ui/category-accent";
 import { difficultyTone } from "@/lib/ui/difficulty";
@@ -61,6 +62,7 @@ export default async function CourseOverviewPage({ params }: { params: Params })
     .map((slug) => getCourseBySlug(slug))
     .filter((c): c is NonNullable<typeof c> => Boolean(c));
   const examPrepMeta = getExamPrepMeta(course.slug);
+  const interviewQuestionCount = getInterviewQuestionsForCourse(course.slug).length;
 
   return (
     <Container className="py-10">
@@ -194,6 +196,14 @@ export default async function CourseOverviewPage({ params }: { params: Params })
         >
           Add to a study plan &rarr;
         </Link>
+        {interviewQuestionCount > 0 && (
+          <Link
+            href={`/courses/${course.slug}/${examPrepMeta ? "preparation-questions" : "interview-questions"}`}
+            className="font-medium text-(--color-brand-strong) hover:underline"
+          >
+            {examPrepMeta ? "Preparation questions" : "Interview questions"} &rarr;
+          </Link>
+        )}
       </p>
 
       <div className="mt-8 flex flex-col gap-8">

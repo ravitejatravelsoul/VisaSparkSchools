@@ -16,6 +16,8 @@ import {
 import { validateDirectory } from "../lib/directory/validate";
 import { countryRoadmaps } from "../lib/study-abroad/registry";
 import { EXAM_PREP_COURSE_SLUGS as EXAM_PREP_SLUGS_TUPLE } from "../lib/exam-prep/types";
+import { allInterviewQuestions } from "../lib/interview-prep/registry";
+import { MIN_QUESTIONS_PER_COURSE } from "../lib/interview-prep/types";
 
 let errorCount = 0;
 
@@ -615,6 +617,48 @@ ok(
     }
   }
   ok(`Study Abroad-checked ${countryRoadmaps.length} country roadmaps (23 steps each).`);
+}
+
+// --- Interview / preparation questions (Phase 9): every registered course's
+// bank must meet the minimum count, have globally-unique ids, and have no
+// near-duplicate questions (same normalizeForDuplicateCheck logic as lesson
+// quizzes, scoped per course). A course with zero registered questions is
+// not an error here -- content lands incrementally; this only enforces the
+// bar once a course has *any* entries. ---
+{
+  const seenIds = new Set<string>();
+  const byCourse = new Map<string, typeof allInterviewQuestions>();
+  for (const q of allInterviewQuestions) {
+    if (seenIds.has(q.id)) {
+      fail(`Interview/preparation question id "${q.id}" is not globally unique.`);
+    }
+    seenIds.add(q.id);
+    const bucket = byCourse.get(q.courseSlug) ?? [];
+    bucket.push(q);
+    byCourse.set(q.courseSlug, bucket);
+  }
+
+  for (const [courseSlug, questions] of byCourse) {
+    if (questions.length < MIN_QUESTIONS_PER_COURSE) {
+      fail(
+        `Course "${courseSlug}" has only ${questions.length} interview/preparation questions -- the minimum is ${MIN_QUESTIONS_PER_COURSE}.`,
+      );
+    }
+    const promptsSeenForCourse = new Map<string, string>();
+    for (const q of questions) {
+      const normalized = normalizeForDuplicateCheck(q.question);
+      const existing = promptsSeenForCourse.get(normalized);
+      if (existing) {
+        fail(
+          `Course "${courseSlug}" interview/preparation questions "${existing}" and "${q.id}" appear to be the same question with only names/numbers changed.`,
+        );
+      }
+      promptsSeenForCourse.set(normalized, q.id);
+    }
+  }
+  ok(
+    `Interview/preparation questions checked: ${allInterviewQuestions.length} across ${byCourse.size} course(s).`,
+  );
 }
 
 console.log("");
