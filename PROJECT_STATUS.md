@@ -2274,6 +2274,69 @@ guest-mode copy).
 
 Commit: `feat: make courses independently discoverable`.
 
+## GitHub Actions CI reliability fix
+
+**Symptom**: every push to `main` for at least 11 consecutive commits (`c4b2d24` through `ba67016`,
+spanning several days) failed CI at the `quality` job's very first real step, `Install dependencies`
+(`npm ci`) — everything after (format/lint/typecheck/content/tests/build) was skipped as a
+consequence, and the `e2e` job never ran (`needs: quality`). Confirmed via the GitHub REST API
+(`/repos/.../actions/runs`, `/check-runs`, `/check-runs/{id}/annotations`) without needing
+`gh auth` (job logs themselves require collaborator auth even on a public repo; job step statuses
+and check-run annotations do not) — every recent run's job list showed step 4 "Install dependencies"
+as `failure` and every later step as `skipped`, ruling out a Playwright-specific defect (it was
+never reached) or a flaky/varying cause (identical failing step across many different commits).
+
+**Root cause, reproduced locally**: `npm ci` requires `package-lock.json` to be self-consistent
+with what its own resolver would produce — and different npm major versions resolve certain deeply
+optional, platform-conditional packages differently. This repo's `package-lock.json` was last
+regenerated with npm 11 (this developer's local global npm), but the CI workflow pins
+`actions/setup-node@v4` to `node-version: 22`, whose bundled npm is 10.x. npm 11's resolver omits
+some nested optional-peer entries (`@emnapi/core`/`@emnapi/runtime` at version `1.11.3`, pulled in
+transitively through `tailwindcss`'s Oxide engine's WASM fallback packages) that npm 10's resolver
+still expects to find explicitly recorded in the lock file. Reproduced directly: `npm ci` succeeds
+with the committed lock file under npm 11, but fails under `npx npm@10 ci` with
+`npm error Missing: @emnapi/runtime@1.11.3 from lock file` / `npm error 'npm ci' can only install
+packages when your package.json and package-lock.json ... are in sync` — the exact class of error
+GitHub's generic "Process completed with exit code 1" annotation was masking.
+
+**Fix**: regenerated `package-lock.json` using `npx npm@10 install --package-lock-only` (matching
+Node 22's bundled npm), then `npx npm@10 audit fix` (also under npm 10, to avoid reintroducing the
+same drift) to close a `js-yaml` high-severity advisory pulled in transitively via `eslint`'s
+`@eslint/eslintrc` — `npm audit` now reports 0 vulnerabilities. Verified the resulting lock file
+installs cleanly under **both** npm 10 (`npx npm@10 ci`) and this developer's regular npm 11
+(`npm ci`), so this doesn't just move the mismatch onto local dev. Added
+`"packageManager": "npm@10.9.9"` to `package.json` as an inert, Corepack-recognized pin (does
+nothing unless Corepack is explicitly enabled — verified `npm ci` prints no warning and behaves
+identically with or without the field) documenting which npm major version this lock file is
+authoritative for, so a future contributor regenerating it with a newer npm knows to check it
+against the same version CI uses if `npm ci` ever starts failing again this way.
+
+**Build tooling**: the task brief asked whether webpack is this repository's intentionally
+supported production build mode (several unrelated troubleshooting notes in this file mention
+`next build --webpack` as a workaround for a Windows-specific Application Control policy blocking
+a native SWC binary on one developer's machine). Checked directly: `package.json`'s own `build`
+script and `.github/workflows/ci.yml`'s `Production build` step both already just run `next build`
+(no `--webpack` flag, i.e. Turbopack, the Next.js 16 default), and a plain `next build` was
+reproduced successfully on this machine with no flag needed — the earlier Windows-only blocking
+issue is not currently reproducing, and there is no evidence anywhere in `package.json`/`ci.yml`/
+`vercel` deployment history that webpack was ever the intended default. Left `next build` as-is;
+no build-command change was needed or made.
+
+**Not the cause, checked and ruled out**: the generated search index (`content:search-index`) is
+deterministic (built twice from a clean tree, byte-identical output, verified again in this
+session); there is no dependency on `.env.local` or any developer-machine-only file anywhere in the
+`quality`/`e2e` jobs; Node version is explicitly pinned (22) and does not drift between runs;
+Playwright itself was never reached, so it was never a Playwright defect as the failure notification
+implied.
+
+**Verification**: from a clean `npm ci` (both npm 10 and npm 11): `npm audit` (0 vulnerabilities),
+`format:check`, `lint`, `typecheck`, `content:validate`, `content:validate-snippets`,
+`content:search-index` (run twice, deterministic), `test` (592/592), `next build` (default
+bundler, matching CI exactly), and the full Playwright suite (237/239 passing chromium — the same
+2 pre-existing local-environment-only mismatches noted above, unrelated to this fix) all pass.
+
+Commit: `fix: make GitHub Actions CI reliable`.
+
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 
 The CodeWise build (prior to this expansion) reported: production build/typecheck/lint/format/

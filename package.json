@@ -2,6 +2,7 @@
   "name": "visasparkschools",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@10.9.9",
   "scripts": {
     "predev": "npm run content:search-index",
     "dev": "next dev",
