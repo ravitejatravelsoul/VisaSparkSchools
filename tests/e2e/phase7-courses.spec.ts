@@ -31,6 +31,18 @@ const COURSES = [
     lessonSlug: "kotlin-introduction-and-jvm",
     lessonHeading: "Introduction to Kotlin and the JVM",
   },
+  {
+    slug: "angular-application-development",
+    title: "Angular Application Development",
+    lessonSlug: "angular-fundamentals-and-components",
+    lessonHeading: "Angular Fundamentals: Components and the CLI",
+  },
+  {
+    slug: "angularjs-legacy-maintenance",
+    title: "AngularJS Legacy Maintenance",
+    lessonSlug: "angularjs-legacy-context",
+    lessonHeading: "AngularJS: Legacy Context and Why You're Learning It",
+  },
 ];
 
 for (const { slug, title, lessonSlug, lessonHeading } of COURSES) {

@@ -422,7 +422,10 @@ export const frontendTechnologies: TechnologyInput[] = [
       "Modules and routing",
     ],
     example: {
-      language: "javascript",
+      // Real Angular/TypeScript syntax, not JavaScript, and Angular has no
+      // safe in-browser execution (see RUNNER_CAPABILITY_MATRIX.md) -- "none"
+      // is the honest label.
+      language: "none",
       code: `@Component({\n  selector: "app-counter",\n  template: \`<button (click)="count = count + 1">{{count}}</button>\`,\n})\nclass CounterComponent {\n  count = 0;\n}`,
       explanation:
         "The @Component decorator attaches metadata (a template, a selector) to a plain class -- Angular's structure leans heavily on TypeScript classes and decorators, unlike React's plain functions.",
@@ -431,7 +434,8 @@ export const frontendTechnologies: TechnologyInput[] = [
       "Large enterprise single-page applications",
       "Teams that want strong architectural conventions built in",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Angular Application Development course"],
+    courseId: "angular-application-development",
     projectIdeas: ["A small service-backed component using Angular's dependency injection"],
     references: [{ label: "Angular official documentation", url: "https://angular.dev/" }],
     searchKeywords: ["typescript framework", "enterprise frontend", "spa framework"],
@@ -476,7 +480,8 @@ export const frontendTechnologies: TechnologyInput[] = [
         "ng-click and {{count}} are AngularJS directives/interpolation living directly in HTML attributes -- a template style that later frameworks (including Angular 2+) moved away from.",
     },
     useCases: ["Maintaining legacy AngularJS applications only"],
-    practiceOptions: [],
+    practiceOptions: ["Take the AngularJS Legacy Maintenance course"],
+    courseId: "angularjs-legacy-maintenance",
     projectIdeas: [
       "Identify which parts of an AngularJS app's logic (services, controllers) would map to which parts of a modern framework, as a migration-planning exercise",
     ],

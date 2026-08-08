@@ -197,4 +197,20 @@ export const tracks: Track[] = [
       "A modern, null-safe language that runs on the JVM (and beyond) -- Android's preferred language, and increasingly used for backend services too.",
     order: 24,
   },
+  {
+    id: "angular",
+    slug: "angular",
+    title: "Angular Application Development",
+    description:
+      "A full, opinionated framework for large single-page applications -- components, dependency injection, RxJS, and routing, using modern (post-AngularJS) Angular.",
+    order: 25,
+  },
+  {
+    id: "angularjs",
+    slug: "angularjs",
+    title: "AngularJS Legacy Maintenance",
+    description:
+      "AngularJS (1.x) reached end of life in 2022 and is not recommended for new projects -- this track exists to help you read, maintain, and safely modernize an existing AngularJS codebase.",
+    order: 26,
+  },
 ];

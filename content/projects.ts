@@ -2191,4 +2191,135 @@ export const projects: Project[] = [
     ],
     references: [{ label: "Kotlin documentation", url: "https://kotlinlang.org/docs/home.html" }],
   },
+  {
+    id: "angular-task-list-architecture",
+    slug: "angular-task-list-architecture",
+    title: "Angular Task List Application Architecture",
+    description:
+      "Design (on paper/in guided steps, since this platform can't build/run a real Angular app) a task-list application's component/service architecture, applying components, services, and routing.",
+    difficulty: "intermediate",
+    estimatedHours: 7,
+    isCapstone: true,
+    trackSlugs: ["angular"],
+    prerequisiteLessonIds: [
+      "angular-services-and-di",
+      "angular-inputs-outputs",
+      "angular-routing",
+      "angular-reactive-forms",
+    ],
+    objectives: [
+      "Design a TaskListComponent, a TaskItemComponent (with @Input/@Output), and a TaskService managing shared state",
+      "Design routes for a task list view and a task detail view with a route parameter",
+      "Design a reactive form for creating a new task, with at least one validator",
+      "Explain how change detection keeps the list in sync as tasks are added/completed",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the component and service structure",
+        description: "Define TaskListComponent, TaskItemComponent, and an injectable TaskService.",
+        checklist: [
+          "TaskService holds the shared list of tasks as its single source of truth",
+          "TaskItemComponent receives a task via @Input and emits a 'completed' event via @Output",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Design the routes",
+        description:
+          "Define a route for the task list and a route with a parameter for a task's detail view.",
+        checklist: [
+          "A route maps a path like tasks/:id to a TaskDetailComponent",
+          "TaskDetailComponent reads the id via ActivatedRoute and looks up the matching task from TaskService",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Design a reactive form for adding a task",
+        description: "Define a FormGroup with at least a required title field.",
+        checklist: [
+          "The form uses FormGroup/FormControl, not template-driven forms",
+          "Validators.required (at minimum) is applied to the title field",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Explain the change-detection flow",
+        description: "Describe how adding/completing a task propagates to the rendered list.",
+        checklist: [
+          "The explanation traces from TaskService's state change through to TaskListComponent's re-rendered bindings",
+          "It correctly identifies that no manual DOM manipulation is involved",
+        ],
+      },
+    ],
+    references: [{ label: "Angular documentation", url: "https://angular.dev/" }],
+  },
+  {
+    id: "angularjs-modernization-audit",
+    slug: "angularjs-modernization-audit",
+    title: "AngularJS Codebase Modernization Audit",
+    description:
+      "Audit a small existing AngularJS module (described in the milestones, since this platform can't provide a real legacy codebase) and produce a modernization plan -- not a new AngularJS build, consistent with this course's legacy-maintenance focus.",
+    difficulty: "advanced",
+    estimatedHours: 6,
+    isCapstone: true,
+    trackSlugs: ["angularjs"],
+    prerequisiteLessonIds: [
+      "angularjs-reading-existing-code",
+      "angularjs-digest-cycle",
+      "angularjs-performance-pitfalls",
+      "angularjs-modernization-strategy",
+    ],
+    objectives: [
+      "Given a described AngularJS module's structure, identify all $scope-dependent code and shared services",
+      "Identify at least one real digest-cycle performance concern in the described module (e.g. a large ng-repeat with no one-time binding)",
+      "Propose an incremental (ngUpgrade) migration plan for one specific feature of the module",
+      "Justify whether incremental migration or a full rewrite better fits the described module, with real reasoning",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Map the module's structure",
+        description:
+          "Given a description of an AngularJS module (controllers, services, directives), diagram what depends on what.",
+        checklist: [
+          "Every controller's $scope dependencies are identified",
+          "Every shared service and what depends on it is identified",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Identify a real performance concern",
+        description:
+          "Find at least one genuine digest-cycle performance issue in the described module.",
+        checklist: [
+          "The issue references a specific real AngularJS performance concept from this course (e.g. watcher count, missing one-time binding)",
+          "A concrete fix is proposed (e.g. applying :: to a specific binding)",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Propose an incremental migration plan for one feature",
+        description:
+          "Describe how ngUpgrade could migrate one specific feature to modern Angular first.",
+        checklist: [
+          "The plan identifies which specific feature migrates first and why",
+          "The plan describes how AngularJS and Angular would coexist during the transition",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Justify the overall strategy",
+        description:
+          "Recommend incremental migration or a full rewrite for the described module, with reasoning.",
+        checklist: [
+          "The recommendation references real factors from this course (module size, team capacity, architectural health)",
+          "The recommendation is not simply 'keep it on AngularJS indefinitely'",
+        ],
+      },
+    ],
+    references: [
+      { label: "AngularJS official documentation (legacy)", url: "https://angularjs.org/" },
+    ],
+  },
 ];

@@ -1907,4 +1907,124 @@ export const courses: CourseInput[] = [
       },
     ],
   },
+  {
+    id: "angular-application-development",
+    slug: "angular-application-development",
+    trackSlug: "angular",
+    title: "Angular Application Development",
+    description:
+      "A full, TypeScript-first framework for large single-page applications -- components, data binding, services and dependency injection, RxJS, routing, and pipes.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 8,
+    audience:
+      "Learners with solid HTML/CSS/JavaScript/TypeScript fundamentals who want to build large, structured single-page applications with Angular.",
+    learningOutcomes: [
+      "Read and predict the behavior of component logic, services, and RxJS operator chains in real Angular code",
+      "Explain how @Input/@Output, dependency injection, and change detection connect components and services together",
+      "Describe when Angular's opinionated, full-framework structure is (and isn't) the right fit for a project",
+    ],
+    prerequisiteCourseSlugs: ["typescript-foundations"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["angular"],
+    modules: [
+      {
+        id: "angular-fundamentals-module",
+        title: "Angular Fundamentals",
+        summary: "Components, the CLI, templates/data binding, and control-flow directives.",
+        lessonSlugs: [
+          "angular-fundamentals-and-components",
+          "angular-templates-and-data-binding",
+          "angular-directives",
+        ],
+      },
+      {
+        id: "angular-data-components",
+        title: "Data & Components",
+        summary:
+          "Parent-child communication, change detection, and services with dependency injection.",
+        lessonSlugs: [
+          "angular-inputs-outputs",
+          "angular-change-detection-basics",
+          "angular-services-and-di",
+        ],
+      },
+      {
+        id: "angular-rxjs-http-forms",
+        title: "RxJS, HTTP & Forms",
+        summary: "Observable fundamentals, HttpClient, and reactive forms.",
+        lessonSlugs: ["angular-rxjs-observables", "angular-httpclient", "angular-reactive-forms"],
+      },
+      {
+        id: "angular-routing-architecture",
+        title: "Routing & Architecture",
+        summary: "The Router, pipes, and project structure/when Angular fits.",
+        lessonSlugs: ["angular-routing", "angular-pipes", "angular-project-structure-and-fit"],
+      },
+    ],
+  },
+  {
+    id: "angularjs-legacy-maintenance",
+    slug: "angularjs-legacy-maintenance",
+    trackSlug: "angularjs",
+    title: "AngularJS Legacy Maintenance",
+    description:
+      "AngularJS (1.x) reached end of life in 2022 and is not recommended for new projects -- this course helps you read, maintain, and safely modernize an existing AngularJS codebase.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 7,
+    audience:
+      "Developers who need to read, maintain, or plan a modernization of an existing AngularJS codebase -- not a recommended starting point for new projects.",
+    learningOutcomes: [
+      "Read and predict the behavior of $scope, two-way binding, directives, and the digest cycle in real AngularJS code",
+      "Explain the digest cycle's performance implications and apply real mitigations like one-time binding",
+      "Evaluate whether an existing AngularJS application is a better fit for incremental migration (ngUpgrade) or a full rewrite",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: ["angular-application-development"],
+    relatedTechnologySlugs: ["angularjs"],
+    modules: [
+      {
+        id: "angularjs-legacy-context-module",
+        title: "Legacy Context",
+        summary: "End-of-life status, $scope/two-way binding, and modules/controllers.",
+        lessonSlugs: [
+          "angularjs-legacy-context",
+          "angularjs-scope-and-two-way-binding",
+          "angularjs-modules-and-controllers",
+        ],
+      },
+      {
+        id: "angularjs-directives-services",
+        title: "Directives & Services",
+        summary:
+          "Built-in and custom directives, and services/factories with dependency injection.",
+        lessonSlugs: [
+          "angularjs-built-in-directives",
+          "angularjs-custom-directives",
+          "angularjs-services-and-factories",
+        ],
+      },
+      {
+        id: "angularjs-digest-data-flow",
+        title: "Digest Cycle & Data Flow",
+        summary: "The digest cycle, $http, and performance pitfalls.",
+        lessonSlugs: [
+          "angularjs-digest-cycle",
+          "angularjs-http-service",
+          "angularjs-performance-pitfalls",
+        ],
+      },
+      {
+        id: "angularjs-maintaining-modernizing",
+        title: "Maintaining & Modernizing",
+        summary: "Reading existing code, testing legacy code, and modernization strategy.",
+        lessonSlugs: [
+          "angularjs-reading-existing-code",
+          "angularjs-testing-legacy-code",
+          "angularjs-modernization-strategy",
+        ],
+      },
+    ],
+  },
 ];
