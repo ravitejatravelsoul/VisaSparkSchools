@@ -2453,6 +2453,43 @@ the last run in this expansion), and targeted real-Chromium Playwright runs per 
 final pre-push report — as with every phase above, **nothing from this expansion has been pushed,
 and no live Supabase project or Vercel deployment has been touched.**
 
+### Phase 9 completion + executable RLS verification (continuation of the second expansion)
+
+The owner rejected an earlier report in this same expansion for stopping at a partial Phase 9 (9 of
+33 courses had interview/preparation banks) and for treating "no Docker" as license to skip RLS
+verification. This continuation resumed and finished both, without pushing, deploying, or touching
+the live Supabase project at any point. **This subsection supersedes the interview-prep/RLS figures
+stated earlier in this "Second expansion" section above**, which predate this work.
+
+**Interview/preparation questions, complete**: built `lib/interview-prep/classification.ts`, a
+programmatic single source of truth classifying all 33 catalog courses into
+technical/exam-prep/exempt (3 justified exemptions: `quantitative-aptitude`,
+`logical-analytical-reasoning`, `career-and-gd-preparation`), and strengthened
+`scripts/validate-content.ts` to hard-fail the build if any applicable course lacks its bank. Authored
+50-question banks (batches A-G) for all 21 courses the classifier identified as missing one: how-computing-works,
+html-css, typescript, git-apis-sql, ai-foundations, software-testing, api-testing, nodejs-express,
+java, dsa, selenium, linux-shell, test-automation-framework, go, c, cpp, csharp, php, kotlin, angular,
+angularjs — the last framed exclusively around legacy maintenance/security/modernization/migration,
+never presented as current technology. `npm run content:validate` now passes with **1,500
+interview/preparation questions across all 30 applicable courses** (3 exempt), zero errors — proven by
+the catalog-wide validator, not self-reported. `npm run content:interview-inventory` independently
+confirms every course `Status: OK`, exit code 0.
+
+**Executable RLS verification**: this machine still has no Docker/`psql`/Supabase CLI (confirmed:
+`which docker`/`which psql`/`which supabase` all fail), so investigated safe alternatives per the
+owner's explicit instruction and landed on `@electric-sql/pglite` — a real Postgres engine compiled to
+WASM, running fully local/in-process, no Docker, no network, no relationship to the live Supabase
+project. Built `tests/rls/` (`npm run test:rls`): loads every one of this project's real, unmodified
+migration files (0001-0007) into PGlite, stubs the minimal Supabase `auth` schema slice the migrations
+reference (`auth.uid()` implemented byte-for-byte as Supabase's own), and runs **138 real
+query-execution assertions** across all 20 user-owned tables/behaviors — owner CRUD allowed, cross-user
+and anon access denied, `tutor_usage`'s RPC-only-write rule, `certificates`' immutability and
+`verify_certificate()`'s column allowlist, and a catch-all `pg_class.relrowsecurity` check. **138/138
+passing.** Validated with a deliberate negative control (disabling the role switch in `asUser()`) that
+correctly failed 92/138 assertions before the fix was reverted, confirming the suite is not vacuous.
+`supabase/verify-rls.sql` and `docs/SECURITY.md` updated to point at this executable suite as the
+routine verification path.
+
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 
 The CodeWise build (prior to this expansion) reported: production build/typecheck/lint/format/

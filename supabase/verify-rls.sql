@@ -1,17 +1,26 @@
 -- Row Level Security verification script for VisaSparkSchools.
 --
--- NOT executed as part of this repository's build, tests, or CI, and NOT
--- run against any live/shared project by any automated process. This is a
--- reproducible script for a human (or a future CI job with its own
--- disposable database) to run manually against a local, disposable
--- Supabase instance -- never against production data.
+-- The same properties this script documents are now proven by EXECUTION,
+-- automatically, with no Docker/psql/Supabase CLI required -- see
+-- `npm run test:rls` (tests/rls/policies.test.ts), which runs every one of
+-- this project's real migration files against a real Postgres engine
+-- (PGlite, WASM, fully local/in-process) and asserts on the actual query
+-- results. That suite is the routine, CI-suitable verification path; run it
+-- on every change to supabase/migrations/. See docs/SECURITY.md's "RLS
+-- verification procedure" section for the full picture.
 --
--- No PostgreSQL-compatible tooling (psql, a local Supabase CLI instance,
--- etc.) was available in the environment this script was authored in, so
--- it has been statically reviewed (matched column-by-column and
--- policy-by-policy against supabase/migrations/0001_init.sql and
--- 0002_phase4_learning_accounts.sql) but not executed. Treat it as a
--- documented procedure, not a proof, until it has actually been run.
+-- This .sql file remains as a human-readable reference for exercising the
+-- same properties directly against a real linked Supabase project (a
+-- one-off sanity check against a *specific deployed* project, distinct from
+-- the repo-level guarantee `npm run test:rls` gives). NOT executed as part
+-- of this repository's build, tests, or CI, and NOT run against any
+-- live/shared project by any automated process -- for a human to run
+-- manually against a local, disposable Supabase instance, never against
+-- production data. It has been statically reviewed (matched column-by-column
+-- and policy-by-policy against every migration through
+-- 0007_profile_signup_fields.sql) but not itself executed in this form;
+-- treat it as a documented manual procedure, not a proof -- for the
+-- executed proof, see `npm run test:rls` above.
 --
 -- Usage:
 --   1. supabase start                     (local, disposable instance only)

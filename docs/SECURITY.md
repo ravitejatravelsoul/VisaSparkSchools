@@ -76,31 +76,42 @@ reasoning, and verification results.
 
 ## RLS verification procedure
 
-`supabase/verify-rls.sql` is a concrete, reproducible script implementing the procedure below --
-written and statically reviewed against `supabase/migrations/0001_init.sql` and
-`0002_phase4_learning_accounts.sql`, but **not executed**, since no PostgreSQL-compatible local
-tooling (`psql`, a running `supabase start` instance, etc.) was available while building this
-beta. Run it against a disposable local Supabase instance (never production data) before trusting
-either migration with real user data -- see the script's own header for exact steps.
+**Executable, automated verification: `npm run test:rls`.** This runs `tests/rls/policies.test.ts`
+against every one of this project's real, unmodified migration files
+(`supabase/migrations/0001_init.sql` through `0007_profile_signup_fields.sql`) loaded into
+[PGlite](https://pglite.dev/) -- a real Postgres engine compiled to WASM, running fully in-process
+with no Docker, no network access, and no relationship whatsoever to the live Supabase project. It
+exists because this development environment has no Docker/`psql`/Supabase CLI available (confirmed
+by `which docker`/`which psql`/`which supabase` all failing), so a disposable local `supabase start`
+instance was not an option -- PGlite is the "safe alternative" that still lets the policies be
+proven correct by execution rather than by static read-through alone. See `tests/rls/setup.ts`'s
+header comment for exactly how it stubs the minimal slice of Supabase's own `auth` schema
+(`auth.users`, `auth.uid()`, matching Supabase's real `auth.uid()` implementation byte-for-byte) the
+migrations depend on.
 
-Once a real Supabase project is linked (see `docs/DEPLOYMENT.md`), verify Row Level Security with
-two authenticated test users:
+138 test cases cover, for every one of the 20 user-owned tables/behaviors across all 7 migrations:
 
-1. As user A, insert a row into each of `lesson_progress`, `bookmarks`, `notes`, `skill_mastery`,
-   `review_queue`, `exercise_attempts`, `quiz_attempts`, `daily_goals`, `enrollments`,
-   `roadmap_progress`, `roadmap_step_completions`, `project_progress`,
-   `project_milestone_completions`, `activity_log`.
-2. As user B, attempt to `select`/`update`/`delete` user A's rows by id — every attempt must return
-   zero rows / be denied, never an error leaking existence vs. non-existence differently.
-3. As an unauthenticated (anon) client, attempt the same — must also be denied.
-4. Confirm `user_feedback` allows an anonymous insert but no client (including the submitter) can
-   `select` any row back.
-5. Confirm `tutor_usage` is client-readable only (owner `select`) and that a direct client `insert`/
-   `update`/`delete` against it — as the owning user, with their own session — is denied. All writes
-   to this table must only be possible through the `increment_tutor_usage()` RPC (`security definer`),
-   never through a client-facing table policy; otherwise a user could reset their own daily AI tutor
-   quota by writing to the table directly instead of going through the app.
+1. The owner can insert/select/update/delete their own row(s).
+2. A different authenticated user is denied read/update/delete on rows they don't own.
+3. An unauthenticated (anon) client is denied the same.
+4. `user_feedback` allows an anonymous insert but denies `select` back to any caller, including the
+   submitter.
+5. `tutor_usage` denies a direct owner `update` (no such policy exists) and only allows quota writes
+   through the `increment_tutor_usage()` `security definer` RPC, with the daily allowance enforced.
+6. `certificates` denies `update` entirely (even for the owner -- immutability by design) and
+   `verify_certificate()` returns only its seven documented safe columns (never `user_id`/`id`/
+   `cert_id`) for a correct verification code, and no row for an incorrect one.
+7. A catch-all query against `pg_class.relrowsecurity` confirms RLS is actually enabled (not just
+   policy-covered) on every `public` table with a `user_id` column, so a future migration that adds
+   a new per-user table and forgets `enable row level security` fails this suite immediately.
 
-This is also exercisable via `supabase test db` or a short script using two service-role-free
-anon-key clients signed in as different test users, run against a local `supabase start` instance
-(never against production data).
+This suite was validated with a deliberate negative control (temporarily disabling the role switch
+in `asUser()`) that made 92 of 138 assertions fail as expected, confirming the suite genuinely
+enforces RLS rather than passing vacuously; the real implementation was restored immediately after
+and re-confirmed at 138/138 passing.
+
+`supabase/verify-rls.sql` remains as a human-readable, manually-runnable reference for exercising
+the same properties directly against a real linked Supabase project (see its own header for exact
+`psql`/Supabase Studio steps) -- useful for a one-off sanity check against a specific deployed
+project, but `npm run test:rls` is the routine, CI-suitable, no-external-dependency verification path
+and should be run on every change to `supabase/migrations/`.
