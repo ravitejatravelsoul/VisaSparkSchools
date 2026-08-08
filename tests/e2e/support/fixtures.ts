@@ -1,4 +1,5 @@
 import { test as base, type Route } from "@playwright/test";
+import { monacoLocalFixtureMock } from "./monaco-fixture";
 
 export * from "@playwright/test";
 
@@ -16,20 +17,21 @@ export * from "@playwright/test";
  * empty), so this guard mostly proves the negative and catches anything
  * that mechanism didn't anticipate.
  *
- * Only http(s) traffic to an explicitly allowed host, or a host an
- * individual test explicitly mocks via the `mockRoutes` fixture option,
- * is allowed through. Everything else is aborted and recorded as a
- * violation that fails the test in `afterEach`, with a sanitized message
+ * The allowlist is loopback-only -- no uncontrolled external hostname is
+ * globally permitted, including cdn.jsdelivr.net (previously allowlisted
+ * here; that let Monaco Editor and, on runner-specific pages, Pyodide reach
+ * the real internet during the default guest-mode suite, making it neither
+ * offline nor deterministic -- see tests/e2e/support/monaco-fixture.ts and
+ * playwright.network-integration.config.ts for how each is now handled).
+ * Only http(s) traffic to a loopback host, or a host explicitly mocked --
+ * either the built-in Monaco local-fixture mock (always active, every page
+ * with a code editor needs it) or a spec's own `mockRoutes` fixture option
+ * -- is allowed through. Everything else is aborted and recorded as a
+ * violation that fails the test afterward, with a sanitized message
  * (hostname + path only -- never a query string, which is exactly where a
  * token/credential would end up).
  */
-export const ALLOWED_HOSTS = new Set([
-  "127.0.0.1",
-  "localhost",
-  // The one legitimate third-party host the app's own CSP allow-lists
-  // unconditionally (Monaco editor's CSS/font/script) -- see next.config.ts.
-  "cdn.jsdelivr.net",
-]);
+export const ALLOWED_HOSTS = new Set(["127.0.0.1", "localhost"]);
 
 export interface MockRoute {
   /** Short label used only in the violation/log message, never logged with the URL's query string. */
@@ -51,6 +53,13 @@ export function findMockRoute(url: URL, routes: MockRoute[]): MockRoute | undefi
   return routes.find((m) => m.match(url));
 }
 
+/**
+ * Mocks that are always active, independent of any per-test `mockRoutes`
+ * override -- infrastructure every page can depend on (Monaco Editor),
+ * not something individual specs opt into.
+ */
+const BUILT_IN_MOCKS: MockRoute[] = [monacoLocalFixtureMock];
+
 /** Hostname + path only -- never the query string or body, where a token/credential would appear. */
 export function sanitizeTarget(url: URL): string {
   return `${url.hostname}${url.pathname}`;
@@ -68,6 +77,16 @@ export interface MockRoutesOption {
 
 type Fixtures = {
   mockRoutes: MockRoutesOption;
+  /**
+   * Hostnames a test *expects* the guard to block -- for a test that
+   * deliberately proves the guard's default-deny behavior itself (see
+   * tests/e2e/remote-guard.spec.ts). The request is still aborted exactly
+   * as normal; only the outer "fail this test" bookkeeping is skipped for
+   * these specific hostnames, so a test can assert on the resulting
+   * rejection without the guard's own protection mechanism failing it for
+   * doing exactly what it was asked to do.
+   */
+  expectBlockedHosts: string[];
   remoteGuard: void;
 };
 
@@ -76,9 +95,10 @@ export const test = base.extend<Fixtures>({
   // to explicitly allow-list a mocked, locally-fulfilled endpoint (e.g. a
   // fake Turnstile script) without weakening the guard for every other host.
   mockRoutes: [{ routes: [] }, { option: true }],
+  expectBlockedHosts: [[], { option: true }],
 
   remoteGuard: [
-    async ({ context, mockRoutes }, use) => {
+    async ({ context, mockRoutes, expectBlockedHosts }, use) => {
       const violations: string[] = [];
 
       await context.route("**/*", async (route) => {
@@ -96,13 +116,15 @@ export const test = base.extend<Fixtures>({
           return;
         }
 
-        const mock = findMockRoute(url, mockRoutes.routes);
+        const mock = findMockRoute(url, [...BUILT_IN_MOCKS, ...mockRoutes.routes]);
         if (mock) {
           await mock.fulfill(route, url);
           return;
         }
 
-        violations.push(sanitizeTarget(url));
+        if (!expectBlockedHosts.includes(url.hostname)) {
+          violations.push(sanitizeTarget(url));
+        }
         await route.abort("blockedbyclient");
       });
 
@@ -112,8 +134,9 @@ export const test = base.extend<Fixtures>({
         throw new Error(
           `[remote-guard] Blocked ${violations.length} unexpected outbound request(s) this test tried to make: ` +
             `${violations.join(", ")}. Only ${[...ALLOWED_HOSTS].join(", ")} plus explicitly mocked hosts ` +
-            `(via the mockRoutes fixture option) are permitted in isolated Playwright profiles. If this request ` +
-            `was expected, add a mock for it rather than widening the allowlist.`,
+            `(built-in mocks like Monaco Editor's local fixture, or a spec's own mockRoutes fixture option) ` +
+            `are permitted in isolated Playwright profiles. If this request was expected, add a mock for it ` +
+            `rather than widening the allowlist.`,
         );
       }
     },

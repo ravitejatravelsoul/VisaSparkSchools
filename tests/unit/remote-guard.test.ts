@@ -23,8 +23,8 @@ describe("remote-connection guard", () => {
       expect(isAllowedHost("localhost")).toBe(true);
     });
 
-    it("allows the one CSP-allow-listed third-party CDN", () => {
-      expect(isAllowedHost("cdn.jsdelivr.net")).toBe(true);
+    it("blocks cdn.jsdelivr.net -- no third-party CDN is globally allowlisted, only a specific mocked path under it (see monaco-fixture.test.ts)", () => {
+      expect(isAllowedHost("cdn.jsdelivr.net")).toBe(false);
     });
 
     it("blocks the linked production Supabase hostname", () => {
@@ -43,8 +43,8 @@ describe("remote-connection guard", () => {
       expect(isAllowedHost("evil.example.test")).toBe(false);
     });
 
-    it("the allowlist contains exactly the expected hosts, no more", () => {
-      expect(ALLOWED_HOSTS).toEqual(new Set(["127.0.0.1", "localhost", "cdn.jsdelivr.net"]));
+    it("the allowlist is loopback-only -- no third-party host, no more", () => {
+      expect(ALLOWED_HOSTS).toEqual(new Set(["127.0.0.1", "localhost"]));
     });
   });
 
