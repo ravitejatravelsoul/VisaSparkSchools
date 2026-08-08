@@ -39,8 +39,20 @@ export interface TurnstileWidgetHandle {
  */
 export const TurnstileWidget = forwardRef<
   TurnstileWidgetHandle,
-  { onToken: (token: string | null) => void; onStatusChange?: (status: TurnstileStatus) => void }
->(function TurnstileWidget({ onToken, onStatusChange }, ref) {
+  {
+    onToken: (token: string | null) => void;
+    onStatusChange?: (status: TurnstileStatus) => void;
+    /** Shown instead of the widget when no site key is configured -- customize per flow (sign-up/sign-in/reset/resend) so the fail-closed message names the actual unavailable action. */
+    unavailableMessage?: string;
+  }
+>(function TurnstileWidget(
+  {
+    onToken,
+    onStatusChange,
+    unavailableMessage = "This form is unavailable until the security check is configured for this deployment.",
+  },
+  ref,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | undefined>(undefined);
   const [scriptReady, setScriptReady] = useState(false);
@@ -90,7 +102,7 @@ export const TurnstileWidget = forwardRef<
   if (!turnstileSiteKey) {
     return (
       <p role="alert" className="text-sm text-(--color-danger)">
-        Security check is not configured for this deployment. Sign-up is unavailable until it is.
+        Security check is not configured for this deployment. {unavailableMessage}
       </p>
     );
   }
