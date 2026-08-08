@@ -7,6 +7,10 @@ import { ieltsInterviewQuestions } from "@/content/interview-prep/ielts";
 import { greInterviewQuestions } from "@/content/interview-prep/gre";
 import { pteInterviewQuestions } from "@/content/interview-prep/pte";
 import { toeflInterviewQuestions } from "@/content/interview-prep/toefl";
+import { javascriptInterviewQuestions } from "@/content/interview-prep/javascript";
+import { pythonInterviewQuestions } from "@/content/interview-prep/python";
+import { reactInterviewQuestions } from "@/content/interview-prep/react";
+import { postgresqlInterviewQuestions } from "@/content/interview-prep/postgresql";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -19,6 +23,10 @@ const rawBanks: InterviewQuestionInput[][] = [
   greInterviewQuestions,
   pteInterviewQuestions,
   toeflInterviewQuestions,
+  javascriptInterviewQuestions,
+  pythonInterviewQuestions,
+  reactInterviewQuestions,
+  postgresqlInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
