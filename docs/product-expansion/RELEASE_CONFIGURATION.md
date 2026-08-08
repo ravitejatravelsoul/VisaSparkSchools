@@ -132,10 +132,21 @@ project (`supabase backups list --project-ref <ref>`, `supabase projects list`) 
   unverified capability must not be relied on as a recovery plan.
 
 **Verdict: `BLOCKED`.** No tested, restorable recovery method currently exists for this project.
-This must be resolved (enable PITR and/or confirm a completed daily backup exists, or separately
-verify a manual export actually works from a real machine) before applying migration 0007 or
-otherwise changing hosted schema/Auth configuration — not as part of this local implementation
-task. Do not proceed past step 1 in §8 while this status is `BLOCKED`.
+This must be resolved before applying migration 0007 or otherwise changing hosted schema/Auth
+configuration — not as part of this local implementation task. Do not proceed past step 1 in §8
+while this status is `BLOCKED`. Required to clear this blocker (any one path is sufficient, but it
+must be a _tested_ one):
+
+1. Owner confirms the actual Supabase plan in the dashboard billing page.
+2. If that plan includes automatic daily backups: wait until a real, completed, restorable backup
+   actually appears in **Database → Backups**, and record its exact timestamp here.
+3. If automatic backups aren't available (or as a second, independent method): from a real
+   machine with Docker and/or `psql`/`pg_dump` available (not this one), create a manual logical
+   backup, then **restore it into a separate, isolated environment** and confirm the restore
+   actually succeeds and produces the expected schema/data before trusting it as a recovery path.
+   An untested dump file is not a verified recovery method regardless of how it was produced.
+4. PITR remains optional — enabling it is the owner's choice — but at least one of the two methods
+   above must be genuinely tested before this gate can clear, not merely configured.
 
 ## 7. Migration execution safety procedure (documentation only — do not run outside a real cutover)
 

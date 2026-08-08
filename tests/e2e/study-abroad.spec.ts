@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("nav to Study Abroad directory to a country roadmap, then expand a step", async ({
   page,

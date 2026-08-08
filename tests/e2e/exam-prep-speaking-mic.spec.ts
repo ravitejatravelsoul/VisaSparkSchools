@@ -1,4 +1,4 @@
-import { test, expect, chromium } from "@playwright/test";
+import { test, expect, chromium } from "./support/fixtures";
 
 /**
  * Regression test for a real bug found during this expansion's security

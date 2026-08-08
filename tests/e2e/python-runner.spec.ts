@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 // Pyodide is a multi-MB WebAssembly runtime fetched from a CDN on first use;
 // give it a generous timeout so this isn't flaky on a slow connection.

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("Learn page renders with correctly spaced dynamic text", async ({ page }) => {
   await page.goto("/learn");

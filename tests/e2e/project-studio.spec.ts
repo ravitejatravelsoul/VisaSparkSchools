@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("Project Studio is reachable from the footer and lists projects", async ({ page }) => {
   await page.goto("/");

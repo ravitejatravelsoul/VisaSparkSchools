@@ -1,4 +1,4 @@
-import { test, expect, devices } from "@playwright/test";
+import { test, expect, devices } from "./support/fixtures";
 
 test.describe("mobile lesson navigation", () => {
   test.use({ viewport: devices["iPhone 13"].viewport, hasTouch: true, isMobile: true });

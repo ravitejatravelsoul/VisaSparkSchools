@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "test:rls": "vitest run --config vitest.rls.config.ts",
     "e2e": "playwright test",
+    "e2e:auth-captcha": "playwright test --config=playwright.auth-captcha.config.ts",
     "content:validate": "tsx scripts/validate-content.ts",
     "content:search-index": "tsx scripts/build-search-index.ts",
     "content:ai-index": "tsx scripts/ai-ingest.ts",

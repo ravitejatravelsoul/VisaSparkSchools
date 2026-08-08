@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("completing a quiz shows a score", async ({ page }) => {
   await page.goto("/courses/javascript-fundamentals/js-variables-types");

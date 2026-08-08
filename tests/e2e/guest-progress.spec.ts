@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("guest learner can complete a lesson and progress survives a refresh", async ({ page }) => {
   await page.goto("/courses/html-css-fundamentals/html-document-structure");

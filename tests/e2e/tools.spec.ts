@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("Tools Hub is reachable from the footer and lists real tools", async ({ page }) => {
   await page.goto("/");

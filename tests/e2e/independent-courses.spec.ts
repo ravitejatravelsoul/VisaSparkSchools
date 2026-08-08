@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 /**
  * Product-model regression suite: VisaSparkSchools courses are independently

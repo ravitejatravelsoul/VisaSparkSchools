@@ -55,7 +55,16 @@ export const TurnstileWidget = forwardRef<
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | undefined>(undefined);
-  const [scriptReady, setScriptReady] = useState(false);
+  // Lazy-initialized: if `window.turnstile` already exists when this
+  // instance first mounts (e.g. an earlier widget on the same page already
+  // finished loading the script -- the sign-up form's resend widget mounts
+  // fresh after the main widget already loaded it), next/script's <Script>
+  // never fires `onLoad` again for a second mount of the same `src` once
+  // it has *fully* loaded (only while still in flight) -- so waiting on
+  // onLoad alone would leave this instance stuck "loading" forever.
+  const [scriptReady, setScriptReady] = useState(
+    () => typeof window !== "undefined" && Boolean(window.turnstile),
+  );
   const [status, setStatusState] = useState<TurnstileStatus>("loading");
   const domId = useId();
 
@@ -73,6 +82,14 @@ export const TurnstileWidget = forwardRef<
       }
     },
   }));
+
+  // Covers the same already-loaded case as the lazy initializer above, for
+  // the (unlikely but possible) case where `window.turnstile` becomes
+  // available between this component's first render and its first effect
+  // run, or via a mechanism other than this component's own <Script>.
+  useEffect(() => {
+    if (!scriptReady && window.turnstile) setScriptReady(true);
+  }, [scriptReady]);
 
   useEffect(() => {
     if (!scriptReady || !containerRef.current || !turnstileSiteKey) return;

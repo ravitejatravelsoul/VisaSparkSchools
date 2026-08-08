@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 // Content lands course-by-course; until a course has registered questions,
 // both routes must 404 rather than render an empty page, and the wrong

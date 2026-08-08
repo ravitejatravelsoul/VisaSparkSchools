@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("a Quantitative Aptitude lesson's quiz shows a score", async ({ page }) => {
   await page.goto("/courses/quantitative-aptitude/percentages");

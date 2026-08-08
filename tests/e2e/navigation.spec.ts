@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("homepage title states the product name exactly once", async ({ page }) => {
   await page.goto("/");

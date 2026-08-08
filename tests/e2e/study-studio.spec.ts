@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("Study Studio is reachable from the header and shows the Today tab by default", async ({
   page,

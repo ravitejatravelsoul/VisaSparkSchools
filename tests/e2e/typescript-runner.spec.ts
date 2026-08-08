@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 // The TypeScript runner executes the compiled JS inside a *hidden* iframe
 // (unlike the HTML/JS runner's visible one) -- output is relayed back via

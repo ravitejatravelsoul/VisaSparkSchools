@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("HTML/CSS/JS playground example runs and shows output", async ({ page }) => {
   await page.goto("/playground");

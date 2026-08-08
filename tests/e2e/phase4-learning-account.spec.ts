@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./support/fixtures";
 
 test("enrolling in a course via its overview page tracks progress and survives a refresh", async ({
   page,
