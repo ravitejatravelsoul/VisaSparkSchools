@@ -45,12 +45,15 @@
 
 ## Email delivery and branding
 
-- Supabase's shared/default mailer sends from a generic Supabase address regardless of the HTML
-  template content. Changing the _visible sender name/address_ to `VS Schools <no-reply@...>`
-  requires configuring **custom SMTP** with a **verified sending domain** in the hosted Supabase
-  project -- this cannot be achieved by code/template changes alone. This repo ships the
-  email HTML/text templates and a full SMTP/DNS checklist in `RELEASE_CONFIGURATION.md`; applying
-  them to the live project is an owner action.
+- Supabase's shared/default mailer is documented by Supabase as restricted and not intended for
+  production use (low rate limits, not a durable delivery path for real users) -- independent of
+  branding, this makes custom SMTP a **functional release blocker** for a public launch, not merely
+  a cosmetic sender-name concern. It also sends from a generic Supabase address regardless of HTML
+  template content, so the _visible sender name/address_ only becomes `VS Schools <no-reply@...>`
+  once custom SMTP with a **verified sending domain** is configured in the hosted Supabase project
+  -- neither the delivery-reliability fix nor the branding fix can be achieved by code/template
+  changes alone. This repo ships the email HTML/text templates and a full SMTP/DNS/rate-limit
+  checklist in `RELEASE_CONFIGURATION.md`; applying them to the live project is an owner action.
 
 ## Course runner capability decisions
 
