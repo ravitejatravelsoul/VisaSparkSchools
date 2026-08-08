@@ -14,9 +14,28 @@ vi.mock("next/navigation", () => ({
 
 // Simulates a solved Turnstile challenge without needing the real script --
 // see components/auth/turnstile-widget.tsx, which is exercised separately.
+// The sign-up form mounts a *second*, independent widget instance for the
+// resend action (tokens are single-use), so mounts are tracked in order:
+// the first mount (the main sign-up widget) always auto-resolves; later
+// mounts (the resend widget) only auto-resolve unless a test opts out via
+// `blockResendAutoResolve`, letting a test exercise the "not solved yet"
+// state for resend specifically.
+let turnstileMountCount = 0;
+let blockResendAutoResolve = false;
 vi.mock("@/components/auth/turnstile-widget", () => ({
-  TurnstileWidget: ({ onToken }: { onToken: (t: string) => void }) => {
-    onToken("test-captcha-token");
+  TurnstileWidget: ({
+    onToken,
+    onStatusChange,
+  }: {
+    onToken: (t: string) => void;
+    onStatusChange?: (s: string) => void;
+  }) => {
+    turnstileMountCount += 1;
+    const isResendInstance = turnstileMountCount > 1;
+    if (!(isResendInstance && blockResendAutoResolve)) {
+      onToken("test-captcha-token");
+      onStatusChange?.("solved");
+    }
     return <div data-testid="turnstile-stub" />;
   },
 }));
@@ -48,6 +67,8 @@ beforeEach(() => {
   push.mockClear();
   signUp.mockReset();
   resend.mockReset();
+  turnstileMountCount = 0;
+  blockResendAutoResolve = false;
 });
 
 describe("SignUpForm", () => {
@@ -140,9 +161,25 @@ describe("SignUpForm", () => {
       expect(resend).toHaveBeenCalledWith({
         type: "signup",
         email: "ada@example.test",
+        options: { captchaToken: "test-captcha-token" },
       }),
     );
     expect(await screen.findByRole("button", { name: /Resend in \d+s/ })).toBeDisabled();
+  });
+
+  it("resend is blocked until its own captcha challenge is solved", async () => {
+    signUp.mockResolvedValue({ data: { session: null }, error: null });
+    blockResendAutoResolve = true;
+    render(<SignUpForm />);
+    fillRequiredFields();
+    fireEvent.click(screen.getByRole("button", { name: "Sign up" }));
+    await screen.findByText(/check your email/i);
+
+    // The resend button is hard-disabled until its own captcha resolves --
+    // a real click on a disabled button never reaches the handler, so this
+    // proves submission is blocked without needing to invoke resend().
+    expect(screen.getByRole("button", { name: "Resend email" })).toBeDisabled();
+    expect(resend).not.toHaveBeenCalled();
   });
 
   it("'use a different email' returns to the form", async () => {

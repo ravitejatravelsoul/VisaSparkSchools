@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ArrowRightIcon, EyeIcon, EyeOffIcon } from "@/components/ui/icons";
-import { TurnstileWidget, type TurnstileWidgetHandle } from "@/components/auth/turnstile-widget";
+import { useTurnstileCaptcha } from "@/components/auth/use-turnstile-captcha";
 import { validateName, normalizeName } from "@/lib/profile/name";
 import { validateAndNormalizePhone } from "@/lib/profile/phone";
 import { PHONE_COUNTRIES, DEFAULT_PHONE_COUNTRY } from "@/lib/profile/countries";
@@ -52,7 +52,15 @@ interface FieldErrors {
 
 export function SignUpForm() {
   const router = useRouter();
-  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const captcha = useTurnstileCaptcha("Sign-up is unavailable until it is.");
+  // A separate challenge for the resend action below: the sign-up widget's
+  // token is already consumed by the initial signUp() call by the time the
+  // "check your email" step renders, and a Turnstile token is single-use --
+  // reusing it (or reusing a stale resend token across multiple resends)
+  // would be rejected by Supabase anyway, with a confusing error.
+  const resendCaptcha = useTurnstileCaptcha(
+    "Resending the confirmation email is unavailable until it is.",
+  );
 
   const [step, setStep] = useState<"form" | "check-email">("form");
   const [submittedEmail, setSubmittedEmail] = useState("");
@@ -68,12 +76,12 @@ export function SignUpForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [learnerLevel, setLearnerLevel] = useState<LearnerLevel | "">("");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [formError, setFormError] = useState<string | undefined>();
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendError, setResendError] = useState<string | undefined>();
 
   const errorSummaryId = useId();
   const strength = estimatePasswordStrength(password);
@@ -127,7 +135,7 @@ export function SignUpForm() {
     if (!learnerLevel) {
       next.learnerLevel = "Choose the option that best describes you.";
     }
-    if (!captchaToken) {
+    if (!captcha.isReady) {
       next.captcha = "Complete the security check before continuing.";
     }
     if (!termsAccepted) {
@@ -163,7 +171,7 @@ export function SignUpForm() {
       email: trimmedEmail,
       password,
       options: {
-        captchaToken: captchaToken ?? undefined,
+        captchaToken: captcha.token ?? undefined,
         data: {
           first_name: normalizedFirst,
           last_name: normalizedLast,
@@ -179,8 +187,9 @@ export function SignUpForm() {
       // Never surface a raw provider message that could reveal account
       // existence, rate-limit internals, or other implementation details.
       setFormError(GENERIC_SIGNUP_ERROR);
-      turnstileRef.current?.reset();
-      setCaptchaToken(null);
+      // A Turnstile token is single-use -- reset so a resubmit doesn't
+      // silently retry with an already-consumed (and now-invalid) token.
+      captcha.reset();
       return;
     }
 
@@ -200,7 +209,24 @@ export function SignUpForm() {
   async function resend() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase || resendCooldown > 0) return;
-    await supabase.auth.resend({ type: "signup", email: submittedEmail });
+    setResendError(undefined);
+    if (!resendCaptcha.isReady) {
+      setResendError("Complete the security check before resending.");
+      return;
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: submittedEmail,
+      options: { captchaToken: resendCaptcha.token ?? undefined },
+    });
+    // Single-use token: reset regardless of outcome so a second resend
+    // click (once the cooldown clears) always needs a freshly-solved
+    // challenge, never a stale or already-consumed one.
+    resendCaptcha.reset();
+    if (error) {
+      setResendError("Couldn't resend the email. Try again in a moment.");
+      return;
+    }
     setResendCooldown(30);
     const interval = setInterval(() => {
       setResendCooldown((s) => {
@@ -228,13 +254,19 @@ export function SignUpForm() {
             Don&apos;t see it? Check your spam or junk folder — confirmation emails sometimes end up
             there.
           </p>
+          <div className="mt-4">{resendCaptcha.widget}</div>
+          {resendError && (
+            <Alert tone="danger" className="mt-2">
+              {resendError}
+            </Alert>
+          )}
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Button
               type="button"
               variant="secondary"
               size="sm"
               onClick={resend}
-              disabled={resendCooldown > 0}
+              disabled={resendCooldown > 0 || !resendCaptcha.isReady}
             >
               {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend email"}
             </Button>
@@ -475,7 +507,7 @@ export function SignUpForm() {
           </fieldset>
 
           <div>
-            <TurnstileWidget ref={turnstileRef} onToken={setCaptchaToken} />
+            {captcha.widget}
             {errors.captcha && <FieldError id="signup-captcha-error">{errors.captcha}</FieldError>}
           </div>
 
