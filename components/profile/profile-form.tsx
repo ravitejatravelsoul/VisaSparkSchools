@@ -171,6 +171,7 @@ export function ProfileForm() {
             </select>
             <input
               type="tel"
+              aria-label="Phone number"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               autoComplete="tel-national"

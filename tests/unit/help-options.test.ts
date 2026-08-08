@@ -43,8 +43,10 @@ describe("resolveHelpOption: route mapping", () => {
     expect(resolveHelpOption("choose-topic", guestCtx).actions[0].href).toBe("/topics");
   });
 
-  it("exam-prep routes to /exam-preparation", () => {
-    expect(resolveHelpOption("exam-prep", guestCtx).actions[0].href).toBe("/exam-preparation");
+  it("exam-prep routes to the real exam-preparation topic page", () => {
+    expect(resolveHelpOption("exam-prep", guestCtx).actions[0].href).toBe(
+      "/topics/exam-preparation",
+    );
   });
 
   it("study-abroad routes to /study-abroad", () => {

@@ -1,8 +1,12 @@
 # Project Status — VisaSparkSchools
 
-Last updated: 2026-08-04. This is the durable checklist for the CodeWise → VisaSparkSchools
+Last updated: 2026-08-08. This is the durable checklist for the CodeWise → VisaSparkSchools
 expansion — update it precisely as work progresses. Do not mark anything done that hasn't
 actually been run and verified. Do not mark a later phase complete based only on scaffolding.
+See "Second expansion (2026-08-08)" below for the most recent work (Study Abroad, Exam Prep,
+8 new technical courses, Interview Prep, guided runner labs, chatbot navigator, footer
+attribution); everything above that section documents the prior CodeWise → VisaSparkSchools
+expansion this one builds on top of.
 
 ## Baseline commit
 
@@ -2336,6 +2340,100 @@ bundler, matching CI exactly), and the full Playwright suite (237/239 passing ch
 2 pre-existing local-environment-only mismatches noted above, unrelated to this fix) all pass.
 
 Commit: `fix: make GitHub Actions CI reliable`.
+
+## Second expansion (2026-08-08) — Study Abroad, Exam Prep, 8 new technical courses, Interview Prep, guided runner labs, chatbot navigator, footer attribution
+
+Started from `d065c4a` ("fix: make GitHub Actions CI reliable" — the last commit documented above),
+clean tree, CI green, migrations 0001-0006 live-reviewed-but-unapplied, courses independently
+discoverable. This section documents a second, later, separately-scoped multi-phase expansion
+(15 phases per its own brief) layered on top of everything above. Full phase-by-phase detail,
+task IDs, and exact evidence pointers live in `docs/product-expansion/TASKS.md` and
+`docs/product-expansion/REQUIREMENTS.md`; this section is the exact content-inventory summary
+required by that brief's R12.2, not a duplicate of the full task log.
+
+**Local commits this expansion added** (all local only, nothing pushed — 17 commits,
+`d065c4a..HEAD`): `99e59d5` signup/profile onboarding, `9fcf993` authenticated certificates work
+carried from the prior track, `0899b5d` guided help navigation (chatbot) and company attribution,
+`f328466` side-by-side runner layout and guided-output labs, `3933eac` Study Abroad (6 countries),
+`345387c` guided-lab wiring + lesson-schema relaxation, `a90efcd` exam-prep infrastructure + IELTS
+course, `9b95725` optional speaking-tasks fix, `7b66014` validator fix for guided-output-lab shape,
+`ca7e4c5` GRE/PTE/TOEFL exam-prep courses + Go course, `e5fc417` interview-prep infrastructure,
+`b9bba43` C/C++/C#/PHP courses, `2bb45aa` Kotlin course, `6373e91` Angular/AngularJS courses
+(Phase 7 complete), `a4847d7` all 4 exam-prep preparation-question banks, `ab79fcf`
+JavaScript/Python/React/PostgreSQL interview questions, `8484ca1` Playwright interview questions.
+
+**Content inventory, computed from `npm run content:validate`'s own output (not hand-counted)**:
+27 tracks, **33 courses** (up from the prior expansion's count — 8 new: Go, C, C++, C#/.NET, PHP,
+Kotlin, Angular, AngularJS), **396 lessons**, 31 projects (8 new capstones for the 8 new courses),
+16 directory categories, 83 technologies (9 of this expansion's new-course languages/frameworks
+back-linked via `courseId`: go, c, cpp, csharp, dotnet, php, kotlin, angular, angularjs), 16
+learning paths, **6 Study Abroad country roadmaps** (US/Canada/UK/Australia/Germany/Ireland, 23
+fixed steps each), **4 exam-prep courses** with full writing/speaking-practice infrastructure
+(IELTS/PTE/TOEFL/GRE), and **450 interview/preparation questions across 9 courses** (200 across
+the 4 exam-prep courses' "Preparation Questions," 250 across 5 technical courses' "Interview
+Questions": JavaScript, Python, React, PostgreSQL, Playwright).
+
+**Study Abroad** (`/study-abroad`): 6 countries, each with the same 23 canonical visa/application
+steps (`STUDY_ABROAD_STEPS` in `lib/study-abroad/types.ts`), official-source links restricted to an
+allow-listed domain set, automated sweeps for no-guarantee/no-authority/no-hardcoded-currency
+language, and a persistent "confirm with the official source, this is not immigration advice"
+disclaimer on every country page.
+
+**Exam Prep** (IELTS/PTE/TOEFL/GRE): each course has real lesson content, a writing-practice tool
+(timed textarea + self-assessment rubric, never an AI or official score), a speaking-practice tool
+(MediaRecorder-based local-only recording with a feature-detected fallback, same no-official-score
+guarantee), a diagnostic/section-practice mode built on the pre-existing `PracticeSession` engine
+(no parallel quiz system), and now a full 50-question "Preparation Questions" bank each. GRE and
+TOEFL content reflects the exams' current (as of this expansion's authoring date) task formats,
+including GRE's single "Analyze an Issue" essay (no "Analyze an Argument") and TOEFL's Jan-2026
+Speaking/Writing task changes (Listen and Repeat/Take an Interview; Build a Sentence/Write an
+Email/Write for an Academic Discussion), independently confirmed via WebFetch against ETS's current
+public material rather than assumed from training data.
+
+**8 new technical courses** (Go, C, C++, C#/.NET, PHP, Kotlin, Angular, AngularJS): 12 lessons and
+one capstone project each. None of these 8 languages has a safe in-browser execution runtime, so
+every lesson uses a `guidedOutputLab` (predict/fill-in-blank/guided-editing modes, documented in
+`docs/product-expansion/RUNNER_CAPABILITY_MATRIX.md`) instead of a live code runner — every such
+lesson is labeled "Not executed" with "Expected output," never implying real execution happened.
+AngularJS content explicitly frames the framework as end-of-life/maintenance-only, matching the
+pre-existing directory guide's tone; its capstone is a migration-audit project, not "build a new
+AngularJS app." Each of the 8 languages/frameworks got a `courseId` back-link added to its existing
+technology-directory guide entry (previously guide-only), and any directory code-snippet previously
+mislabeled `language: "javascript"` for a language with no runner (c/cpp/csharp/kotlin/angular/
+dotnet) was corrected to the honest `"none"`.
+
+**Interview Prep / Preparation Questions**: a `MIN_QUESTIONS_PER_COURSE = 50` schema/validator
+(global id uniqueness, per-course minimum, a near-duplicate-question sweep) shared by both the
+"Interview Questions" route (technical courses) and "Preparation Questions" route (exam-prep
+courses) via one `InterviewPrepBrowser` component. **9 of the 33 courses have a full 50-question
+bank** — all 4 exam-prep courses, plus JavaScript, Python, React, PostgreSQL, and Playwright,
+deliberately chosen to cover the brief's named language/framework/database/testing-automation
+categories. **The remaining ~24 technical courses do not yet have a question bank** — this is an
+explicit, disclosed scope reduction (see `docs/product-expansion/TASKS.md`'s Phase 9 note for the
+full reason: an Agent-tool monthly spend limit was hit mid-session, cutting off further parallelized
+content authoring), not an oversight or a silently-dropped requirement. No cloud-focused course
+exists in the catalog at all, so the brief's "cloud" category has no representative course to attach
+questions to yet either.
+
+**Guided runner labs / side-by-side layout** (Phase 8): a `guidedOutputLab` schema/component
+supporting predict, fill-in-blank, and guided-editing modes for languages with no safe in-browser
+runner, wired into the lesson page (a real gap found and fixed: the schema field existed before
+this expansion but was never rendered anywhere).
+
+**Chatbot navigator** (Phase 10, `components/help/help-navigator.tsx`): a deterministic option-tree
+help widget, not an LLM — distinct from and untouched relative to the existing lesson-scoped opt-in
+AI tutor.
+
+**Footer attribution** (Phase 11): "Developed by Raviteja Vemulapelli" / "CEO: Naga Malleswararao
+Boddu" in the footer's secondary section, without implying the developer is the CEO.
+
+**Verification run after every content batch this expansion**: `content:validate`,
+`tsc --noEmit`, `eslint .`, the full Vitest suite (**756 tests across 86 files, all passing** as of
+the last run in this expansion), and targeted real-Chromium Playwright runs per new surface
+(**140 `test(...)` declarations across 21 e2e spec files** as of the last count). See Phase 14 in
+`docs/product-expansion/TASKS.md` for the full clean-install verification pass and Phase 15 for the
+final pre-push report — as with every phase above, **nothing from this expansion has been pushed,
+and no live Supabase project or Vercel deployment has been touched.**
 
 ## Pre-expansion baseline (preserved for history — this is what the old status doc recorded)
 

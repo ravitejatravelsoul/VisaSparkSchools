@@ -10,6 +10,7 @@ import { tools } from "@/lib/tools/registry";
 import { countryRoadmaps } from "@/lib/study-abroad/registry";
 import { getCoursesWithInterviewPrep } from "@/lib/interview-prep/registry";
 import { isExamPrepCourseSlug } from "@/lib/exam-prep/types";
+import { examPrepMetas } from "@/lib/exam-prep/registry";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url;
@@ -116,6 +117,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.4,
   }));
 
+  const examPracticeRoutes = examPrepMetas.map((meta) => ({
+    url: `${base}/courses/${meta.courseSlug}/exam-practice`,
+    changeFrequency: "monthly" as const,
+    priority: 0.4,
+  }));
+
   return [
     ...staticRoutes,
     ...trackRoutes,
@@ -129,5 +136,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...toolRoutes,
     ...studyAbroadRoutes,
     ...interviewPrepRoutes,
+    ...examPracticeRoutes,
   ];
 }

@@ -120,6 +120,35 @@ const routes = [
   "/project-studio/git-collaboration-workflow",
   // Phase 9: honest completion certificates.
   "/certificates",
+  // Second expansion, Phase 5: Study Abroad.
+  "/study-abroad",
+  "/study-abroad/united-states",
+  "/study-abroad/canada",
+  // Second expansion, Phase 6: Exam Prep.
+  "/topics/exam-preparation",
+  "/courses/ielts-preparation",
+  "/courses/ielts-preparation/ielts-speaking-parts-2-3",
+  "/courses/ielts-preparation/exam-practice",
+  "/courses/gre-general-test-preparation/exam-practice",
+  "/courses/pte-academic-preparation/exam-practice",
+  "/courses/toefl-ibt-preparation/exam-practice",
+  // Second expansion, Phase 7: 8 new technical courses (guided-output labs).
+  "/courses/go-programming",
+  "/courses/go-programming/go-variables-types-and-constants",
+  "/courses/c-programming",
+  "/courses/cpp-programming",
+  "/courses/csharp-dotnet-fundamentals",
+  "/courses/php-web-development",
+  "/courses/kotlin-fundamentals",
+  "/courses/angular-application-development",
+  "/courses/angularjs-legacy-maintenance",
+  // Second expansion, Phase 9: interview / preparation questions.
+  "/courses/ielts-preparation/preparation-questions",
+  "/courses/javascript-fundamentals/interview-questions",
+  "/courses/python-fundamentals/interview-questions",
+  "/courses/react-application-development/interview-questions",
+  "/courses/database-design-and-postgresql/interview-questions",
+  "/courses/playwright-web-automation/interview-questions",
 ];
 
 for (const route of routes) {

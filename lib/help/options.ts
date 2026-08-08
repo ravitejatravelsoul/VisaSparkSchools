@@ -69,7 +69,7 @@ export function resolveHelpOption(id: HelpOptionId["id"], ctx: HelpContext): Hel
     case "exam-prep":
       return {
         text: "IELTS, PTE Academic, TOEFL iBT and GRE General Test preparation are each independent courses with practice and timed mock sections.",
-        actions: [{ label: "Open exam preparation", href: "/exam-preparation" }],
+        actions: [{ label: "Open exam preparation", href: "/topics/exam-preparation" }],
       };
     case "study-abroad":
       return {
