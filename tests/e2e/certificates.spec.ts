@@ -69,12 +69,8 @@ test("the issued certificate shows real course title, criteria, and a unique id 
   await expect(page.getByText("Certificate of Completion")).toBeVisible();
   await expect(page.getByText("How Computing & the Web Work")).toBeVisible();
   await expect(page.getByText("All required lessons in this course are completed.")).toBeVisible();
-  await expect(
-    page.getByText(/Certificate ID: course-completion:how-computing-works/),
-  ).toBeVisible();
-  await expect(
-    page.getByText(/not an accredited degree, license, or professional certification/i),
-  ).toBeVisible();
+  await expect(page.getByText(/Verification code: vcode-/)).toBeVisible();
+  await expect(page.getByText(/not a university degree or vendor certification/i)).toBeVisible();
 });
 
 test("issuing a certificate twice never creates a duplicate (idempotent, survives refresh)", async ({
@@ -82,15 +78,20 @@ test("issuing a certificate twice never creates a duplicate (idempotent, survive
 }) => {
   await issueHowComputingWorksCertificate(page);
 
+  await page.goto("/certificates/course-completion/how-computing-works");
+  const codeBefore = await page.getByText(/Verification code: vcode-/).innerText();
+
+  await page.goto("/certificates");
   await page.reload();
   const row = page.getByRole("group", { name: ROW_LABEL });
   await expect(row.getByRole("link", { name: "View certificate" })).toBeVisible();
   await expect(row.getByRole("button", { name: "Issue certificate" })).toHaveCount(0);
 
   await page.goto("/certificates/course-completion/how-computing-works");
-  await expect(
-    page.getByText("Certificate ID: course-completion:how-computing-works"),
-  ).toBeVisible();
+  // Same verification code after a second visit -- re-issuing never
+  // generates a new one, proving issuance is idempotent, not just that a
+  // certificate exists.
+  await expect(page.getByText(codeBefore)).toBeVisible();
 });
 
 test("a guest sees the local-storage-only, not-independently-verifiable disclosure", async ({
@@ -98,7 +99,7 @@ test("a guest sees the local-storage-only, not-independently-verifiable disclosu
 }) => {
   await issueHowComputingWorksCertificate(page);
   await page.goto("/certificates/course-completion/how-computing-works");
-  await expect(page.getByText(/not independently verifiable/i)).toBeVisible();
+  await expect(page.getByText(/not yet independently verifiable/i)).toBeVisible();
   await expect(page.getByText(/Public verification link/i)).toHaveCount(0);
 });
 

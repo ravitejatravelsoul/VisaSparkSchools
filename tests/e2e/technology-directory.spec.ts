@@ -85,8 +85,11 @@ test("technology directory: no-results state for a nonsense search", async ({ pa
 });
 
 test("guide-only technology never shows a fake 'Start course' action", async ({ page }) => {
-  // Kotlin has no courseId and no runnerSupport in the registry -- guide-only.
-  await page.goto("/technologies/kotlin");
+  // Kotlin got a real course (courseId: "kotlin-fundamentals") once the Phase 7
+  // technical-course expansion shipped, so it's no longer a guide-only example --
+  // use "rust", which stays outside that expansion's scope and has no courseId
+  // and no runnerSupport in the registry.
+  await page.goto("/technologies/rust");
   await expect(page.getByRole("link", { name: /start course/i })).toHaveCount(0);
   await expect(page.getByRole("link", { name: /open playground/i })).toHaveCount(0);
   await expect(page.getByText(/guide only/i)).toBeVisible();

@@ -71,6 +71,11 @@ test("a plan lesson scheduled for today appears on the Today tab and can be star
   await page.getByRole("button", { name: "Create a study plan" }).click();
   await page.getByLabel("Plan title").fill("Today Plan");
   await page.getByLabel("How Computing & the Web Work").check();
+  // Preferred study days default to weekdays only (Mon-Fri) -- explicitly
+  // check every day so the plan's first lesson lands on "today" regardless
+  // of which real calendar day this suite happens to run on.
+  await page.getByLabel("Sun").check();
+  await page.getByLabel("Sat").check();
   await page.getByRole("button", { name: "Create plan" }).click();
 
   await page.getByRole("tab", { name: "Today" }).click();
