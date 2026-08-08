@@ -188,11 +188,13 @@ complete from the earlier partial pass and are kept as-is):
   `git-apis-sql` -- 200 questions, `content/interview-prep/{how-computing-works,html-css,typescript,git-apis-sql}.ts`.
 - **Batch B (3/21 done, 7/21 total)**: `ai-foundations`, `software-testing-foundations`,
   `api-testing-and-automation` -- 150 questions, `content/interview-prep/{ai-foundations,software-testing,api-testing}.ts`.
-  Remaining: `nodejs-express-backend-development`, `java-programming-foundations`,
-  `data-structures-and-algorithms`, `selenium-webdriver-automation`, `linux-shell-fundamentals`,
-  `test-automation-framework-engineering`, `go-programming`, `c-programming`, `cpp-programming`,
-  `csharp-dotnet-fundamentals`, `php-web-development`, `kotlin-fundamentals`,
-  `angular-application-development`, `angularjs-legacy-maintenance` (14 remaining).
+- **Batch C (3/21 done, 10/21 total)**: `nodejs-express-backend-development`,
+  `java-programming-foundations`, `data-structures-and-algorithms` -- 150 questions,
+  `content/interview-prep/{nodejs-express,java,dsa}.ts`. Remaining: `selenium-webdriver-automation`,
+  `linux-shell-fundamentals`, `test-automation-framework-engineering`, `go-programming`,
+  `c-programming`, `cpp-programming`, `csharp-dotnet-fundamentals`, `php-web-development`,
+  `kotlin-fundamentals`, `angular-application-development`, `angularjs-legacy-maintenance`
+  (11 remaining).
 
 ## Phase 10 — Guided chatbot navigator
 

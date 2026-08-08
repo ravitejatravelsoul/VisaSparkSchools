@@ -19,6 +19,9 @@ import { gitApisSqlInterviewQuestions } from "@/content/interview-prep/git-apis-
 import { aiFoundationsInterviewQuestions } from "@/content/interview-prep/ai-foundations";
 import { softwareTestingInterviewQuestions } from "@/content/interview-prep/software-testing";
 import { apiTestingInterviewQuestions } from "@/content/interview-prep/api-testing";
+import { nodejsExpressInterviewQuestions } from "@/content/interview-prep/nodejs-express";
+import { javaInterviewQuestions } from "@/content/interview-prep/java";
+import { dsaInterviewQuestions } from "@/content/interview-prep/dsa";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -43,6 +46,9 @@ const rawBanks: InterviewQuestionInput[][] = [
   aiFoundationsInterviewQuestions,
   softwareTestingInterviewQuestions,
   apiTestingInterviewQuestions,
+  nodejsExpressInterviewQuestions,
+  javaInterviewQuestions,
+  dsaInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
