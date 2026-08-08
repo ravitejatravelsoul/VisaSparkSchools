@@ -190,11 +190,13 @@ complete from the earlier partial pass and are kept as-is):
   `api-testing-and-automation` -- 150 questions, `content/interview-prep/{ai-foundations,software-testing,api-testing}.ts`.
 - **Batch C (3/21 done, 10/21 total)**: `nodejs-express-backend-development`,
   `java-programming-foundations`, `data-structures-and-algorithms` -- 150 questions,
-  `content/interview-prep/{nodejs-express,java,dsa}.ts`. Remaining: `selenium-webdriver-automation`,
-  `linux-shell-fundamentals`, `test-automation-framework-engineering`, `go-programming`,
-  `c-programming`, `cpp-programming`, `csharp-dotnet-fundamentals`, `php-web-development`,
-  `kotlin-fundamentals`, `angular-application-development`, `angularjs-legacy-maintenance`
-  (11 remaining).
+  `content/interview-prep/{nodejs-express,java,dsa}.ts`.
+- **Batch D (3/21 done, 13/21 total)**: `selenium-webdriver-automation`, `linux-shell-fundamentals`,
+  `test-automation-framework-engineering` -- 150 questions,
+  `content/interview-prep/{selenium,linux-shell,test-automation-framework}.ts`. Remaining:
+  `go-programming`, `c-programming`, `cpp-programming`, `csharp-dotnet-fundamentals`,
+  `php-web-development`, `kotlin-fundamentals`, `angular-application-development`,
+  `angularjs-legacy-maintenance` (8 remaining).
 
 ## Phase 10 — Guided chatbot navigator
 

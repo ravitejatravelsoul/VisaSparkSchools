@@ -22,6 +22,9 @@ import { apiTestingInterviewQuestions } from "@/content/interview-prep/api-testi
 import { nodejsExpressInterviewQuestions } from "@/content/interview-prep/nodejs-express";
 import { javaInterviewQuestions } from "@/content/interview-prep/java";
 import { dsaInterviewQuestions } from "@/content/interview-prep/dsa";
+import { seleniumInterviewQuestions } from "@/content/interview-prep/selenium";
+import { linuxShellInterviewQuestions } from "@/content/interview-prep/linux-shell";
+import { testAutomationFrameworkInterviewQuestions } from "@/content/interview-prep/test-automation-framework";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -49,6 +52,9 @@ const rawBanks: InterviewQuestionInput[][] = [
   nodejsExpressInterviewQuestions,
   javaInterviewQuestions,
   dsaInterviewQuestions,
+  seleniumInterviewQuestions,
+  linuxShellInterviewQuestions,
+  testAutomationFrameworkInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
