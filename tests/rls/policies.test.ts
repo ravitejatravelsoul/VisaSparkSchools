@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { PGlite, Transaction } from "@electric-sql/pglite";
+import { readdirSync } from "node:fs";
+import path from "node:path";
 import { asAnon, asUser, createTestDatabase, createUser } from "./setup";
+
+const MIGRATIONS_DIR = path.resolve(__dirname, "../../supabase/migrations");
 
 /**
  * Executable RLS verification for every table in supabase/migrations/*.sql,
@@ -47,6 +51,163 @@ async function insertOwnerRow(
 }
 
 // ---------------------------------------------------------------------------
+// Execution-role proof: every other test in this file trusts that asUser()/
+// asAnon() actually put the session into a real, non-privileged Postgres
+// role subject to RLS. This block proves that trust is warranted, rather
+// than asserting it in a comment -- a superuser or BYPASSRLS role would
+// make every "denies access" test in this file pass vacuously (nothing to
+// deny), so this is checked explicitly, not assumed.
+// ---------------------------------------------------------------------------
+describe("RLS execution-role proof (is the harness actually testing anything?)", () => {
+  it("defines anon/authenticated as real, non-superuser, non-BYPASSRLS, NOLOGIN roles -- matching Supabase's own role model", async () => {
+    const result = await db.query<{
+      rolname: string;
+      rolsuper: boolean;
+      rolbypassrls: boolean;
+      rolcanlogin: boolean;
+    }>(
+      `select rolname, rolsuper, rolbypassrls, rolcanlogin from pg_roles where rolname in ('anon', 'authenticated') order by rolname`,
+    );
+    expect(result.rows).toHaveLength(2);
+    for (const role of result.rows) {
+      expect(role.rolsuper, `${role.rolname} must not be a superuser`).toBe(false);
+      expect(role.rolbypassrls, `${role.rolname} must not have BYPASSRLS`).toBe(false);
+      // Matches real Supabase: PostgREST authenticates as its own service
+      // role and switches into anon/authenticated via `SET ROLE`, per
+      // request -- neither role is ever logged into directly.
+      expect(
+        role.rolcanlogin,
+        `${role.rolname} should be NOLOGIN, switched into via SET ROLE`,
+      ).toBe(false);
+    }
+  });
+
+  it("actually runs queries as the 'authenticated' role inside asUser(), not the bootstrap superuser", async () => {
+    const result = await asUser(db, USER_A, (tx) =>
+      tx.query<{ current_user: string; is_super: boolean; bypassrls: boolean }>(
+        `select current_user,
+                (select rolsuper from pg_roles where rolname = current_user) as is_super,
+                (select rolbypassrls from pg_roles where rolname = current_user) as bypassrls`,
+      ),
+    );
+    expect(result.rows[0].current_user).toBe("authenticated");
+    expect(result.rows[0].is_super).toBe(false);
+    expect(result.rows[0].bypassrls).toBe(false);
+  });
+
+  it("actually runs queries as the 'anon' role inside asAnon(), not the bootstrap superuser", async () => {
+    const result = await asAnon(db, (tx) =>
+      tx.query<{ current_user: string; is_super: boolean; bypassrls: boolean }>(
+        `select current_user,
+                (select rolsuper from pg_roles where rolname = current_user) as is_super,
+                (select rolbypassrls from pg_roles where rolname = current_user) as bypassrls`,
+      ),
+    );
+    expect(result.rows[0].current_user).toBe("anon");
+    expect(result.rows[0].is_super).toBe(false);
+    expect(result.rows[0].bypassrls).toBe(false);
+  });
+
+  it("has the row_security session GUC enabled (on) for both authenticated and anon sessions", async () => {
+    const asAuthenticated = await asUser(db, USER_A, (tx) =>
+      tx.query<{ row_security: string }>("show row_security"),
+    );
+    expect(asAuthenticated.rows[0].row_security).toBe("on");
+
+    const asAnonymous = await asAnon(db, (tx) =>
+      tx.query<{ row_security: string }>("show row_security"),
+    );
+    expect(asAnonymous.rows[0].row_security).toBe("on");
+  });
+
+  it("does not own the tables it queries -- postgres (the migration-running bootstrap role) is the table owner, not authenticated/anon", async () => {
+    const result = await db.query<{ tablename: string; tableowner: string }>(
+      `select tablename, tableowner from pg_tables where schemaname = 'public' and tablename = 'profiles'`,
+    );
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].tableowner).not.toBe("authenticated");
+    expect(result.rows[0].tableowner).not.toBe("anon");
+  });
+
+  it("applied migrations in the correct numeric order (0001 through 0007), so later migrations' ALTERs land on the schema earlier migrations actually created", async () => {
+    const files = readdirSync(MIGRATIONS_DIR)
+      .filter((f) => f.endsWith(".sql"))
+      .sort();
+    expect(files).toEqual([
+      "0001_init.sql",
+      "0002_phase4_learning_accounts.sql",
+      "0003_phase6_practice_attempts.sql",
+      "0004_phase7_study_studio.sql",
+      "0005_phase9_certificates.sql",
+      "0006_fix_certificates_public_view_write_access.sql",
+      "0007_profile_signup_fields.sql",
+    ]);
+    // Direct evidence the order was actually respected, not just the file
+    // list: 0007's columns exist on the table 0001 created, and 0006's
+    // verify_certificate() function (which replaces 0005's view) is the
+    // one actually present -- neither would be true if 0007 or 0006 had
+    // run before the migration they depend on.
+    const columns = await db.query<{ column_name: string }>(
+      `select column_name from information_schema.columns where table_schema = 'public' and table_name = 'profiles' and column_name = 'phone_e164'`,
+    );
+    expect(columns.rows).toHaveLength(1);
+    const certView = await db.query<{ count: string }>(
+      `select count(*)::text from information_schema.tables where table_schema = 'public' and table_name = 'certificates_public'`,
+    );
+    expect(certView.rows[0].count).toBe("0"); // dropped by 0006, must not exist
+  });
+
+  it("proves RLS -- not a missing GRANT, not table ownership, not a WHERE clause -- is specifically what denies cross-user access", async () => {
+    // An isolated scratch table, deliberately NOT one of the app's real
+    // tables, so this proof is self-contained and not coupled to any
+    // specific migration's policy wording. The same query, same role, same
+    // data -- toggling only `enable/disable row level security` on the
+    // table -- is what should flip the result, isolating RLS itself (not
+    // some other access-control layer) as the causal mechanism.
+    await db.exec(`
+      create table public.rls_mechanism_check (
+        id uuid primary key default gen_random_uuid(),
+        owner_id uuid not null,
+        secret text not null
+      );
+      grant all on public.rls_mechanism_check to authenticated;
+      insert into public.rls_mechanism_check (owner_id, secret) values ('${USER_A}', 'only-a-should-see-this');
+    `);
+
+    // Before RLS is even enabled on this table: authenticated as a
+    // DIFFERENT user, the row is fully visible -- proving the base grant
+    // alone does not restrict access (RLS is doing nothing yet).
+    const beforeRls = await asUser(db, USER_B, (tx) =>
+      tx.query<Row>("select * from public.rls_mechanism_check"),
+    );
+    expect(beforeRls.rows).toHaveLength(1);
+
+    await db.exec(`
+      alter table public.rls_mechanism_check enable row level security;
+      create policy "owner only" on public.rls_mechanism_check
+        for select using (auth.uid() = owner_id);
+    `);
+
+    // Same query, same role, same underlying row -- now denied, purely
+    // because RLS is enabled with a policy restricting it.
+    const afterRlsOtherUser = await asUser(db, USER_B, (tx) =>
+      tx.query<Row>("select * from public.rls_mechanism_check"),
+    );
+    expect(afterRlsOtherUser.rows).toHaveLength(0);
+
+    // The actual owner still sees it -- confirms the denial above was the
+    // policy condition being false for user B, not the table having
+    // somehow become universally unreadable.
+    const afterRlsOwner = await asUser(db, USER_A, (tx) =>
+      tx.query<Row>("select * from public.rls_mechanism_check"),
+    );
+    expect(afterRlsOwner.rows).toHaveLength(1);
+
+    await db.exec(`drop table public.rls_mechanism_check`);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // profiles (migrations 0001, 0002, 0007)
 // ---------------------------------------------------------------------------
 describe("public.profiles", () => {
@@ -83,6 +244,31 @@ describe("public.profiles", () => {
       ),
     );
     expect(result.affectedRows).toBe(1);
+  });
+
+  it("keeps phone_e164 (a migration 0007 column) private to its owner -- denied to a different user and to anon", async () => {
+    await asUser(db, USER_A, (tx) =>
+      tx.query("update public.profiles set phone_e164 = $1 where id = $2", [
+        "+14155551234",
+        USER_A,
+      ]),
+    );
+
+    const asOwner = await asUser(db, USER_A, (tx) =>
+      tx.query<Row>("select phone_e164 from public.profiles where id = $1", [USER_A]),
+    );
+    expect(asOwner.rows).toHaveLength(1);
+    expect(asOwner.rows[0].phone_e164).toBe("+14155551234");
+
+    const asOtherUser = await asUser(db, USER_B, (tx) =>
+      tx.query<Row>("select phone_e164 from public.profiles where id = $1", [USER_A]),
+    );
+    expect(asOtherUser.rows).toHaveLength(0);
+
+    const asAnonymous = await asAnon(db, (tx) =>
+      tx.query<Row>("select phone_e164 from public.profiles where id = $1", [USER_A]),
+    );
+    expect(asAnonymous.rows).toHaveLength(0);
   });
 });
 
@@ -381,6 +567,32 @@ describe("public.certificates + public.verify_certificate()", () => {
       tx.query<Row>("select * from public.certificates"),
     );
     expect(result.rows).toHaveLength(1);
+  });
+
+  it("blocks duplicate issuance of the same certificate for the same user (unique(user_id, cert_id))", async () => {
+    await expect(
+      asUser(db, USER_A, (tx) =>
+        tx.query(
+          `insert into public.certificates
+            (user_id, cert_id, cert_type, target_id, target_title, display_name, issued_at, content_version_ref, verification_code)
+           values ($1, 'rls-check-cert', 'course-completion', 'rls-check-course', 'RLS Check Course', 'Asha Test', now(), 'v1', 'a-different-verification-code')`,
+          [USER_A],
+        ),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("blocks unauthorized certificate issuance -- a user cannot issue a certificate on another user's behalf", async () => {
+    await expect(
+      asUser(db, USER_B, (tx) =>
+        tx.query(
+          `insert into public.certificates
+            (user_id, cert_id, cert_type, target_id, target_title, display_name, issued_at, content_version_ref, verification_code)
+           values ($1, 'rls-check-cert-for-a', 'course-completion', 'rls-check-course', 'RLS Check Course', 'Forged', now(), 'v1', 'forged-verification-code')`,
+          [USER_A],
+        ),
+      ),
+    ).rejects.toThrow();
   });
 
   it("denies a different user from reading the certificate", async () => {

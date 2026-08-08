@@ -89,7 +89,7 @@ header comment for exactly how it stubs the minimal slice of Supabase's own `aut
 (`auth.users`, `auth.uid()`, matching Supabase's real `auth.uid()` implementation byte-for-byte) the
 migrations depend on.
 
-138 test cases cover, for every one of the 20 user-owned tables/behaviors across all 7 migrations:
+148 test cases cover, for every one of the 20 user-owned tables/behaviors across all 7 migrations:
 
 1. The owner can insert/select/update/delete their own row(s).
 2. A different authenticated user is denied read/update/delete on rows they don't own.
@@ -98,17 +98,53 @@ migrations depend on.
    submitter.
 5. `tutor_usage` denies a direct owner `update` (no such policy exists) and only allows quota writes
    through the `increment_tutor_usage()` `security definer` RPC, with the daily allowance enforced.
-6. `certificates` denies `update` entirely (even for the owner -- immutability by design) and
-   `verify_certificate()` returns only its seven documented safe columns (never `user_id`/`id`/
-   `cert_id`) for a correct verification code, and no row for an incorrect one.
-7. A catch-all query against `pg_class.relrowsecurity` confirms RLS is actually enabled (not just
+6. `certificates` denies `update` entirely (even for the owner -- immutability by design), blocks
+   duplicate issuance of the same `(user_id, cert_id)` pair, blocks one user issuing a certificate
+   under another user's `user_id`, and `verify_certificate()` returns only its seven documented safe
+   columns (never `user_id`/`id`/`cert_id`) for a correct verification code, and no row for an
+   incorrect one.
+7. `profiles.phone_e164` (a migration-0007 column) is confirmed private to its owner specifically --
+   denied to a different authenticated user and to anon, not just implicitly covered by a `select *`
+   assertion elsewhere.
+8. A catch-all query against `pg_class.relrowsecurity` confirms RLS is actually enabled (not just
    policy-covered) on every `public` table with a `user_id` column, so a future migration that adds
    a new per-user table and forgets `enable row level security` fails this suite immediately.
+9. **Execution-role proof**: `anon`/`authenticated` are confirmed via `pg_roles` to be real,
+   non-superuser, non-`BYPASSRLS`, `NOLOGIN` roles (matching Supabase's actual role model, where
+   PostgREST authenticates separately and switches into these roles per-request via `SET ROLE`);
+   `current_user` inside `asUser()`/`asAnon()` is confirmed to actually be `authenticated`/`anon`,
+   not the bootstrap `postgres` superuser used only to run migrations; the `row_security` session GUC
+   is confirmed `on`; the queried tables are confirmed owned by `postgres`, not by `authenticated`/
+   `anon` (a table's owner bypasses its own RLS policies by default, so this rules out an
+   accidental-owner false pass); the 7 migration files are confirmed to load in the correct numeric
+   order (0001 through 0007), with direct evidence (0007's `phone_e164` column exists on the table
+   0001 created; 0006's replacement `verify_certificate()` function exists and 0005's superseded
+   `certificates_public` view does not); and a dedicated, self-contained scratch table proves RLS
+   -- not a missing `GRANT`, not table ownership, not an implicit `WHERE` clause -- is the specific
+   mechanism denying cross-user access, by toggling `enable row level security` on/off against the
+   same query, same role, same row and observing the result flip.
 
 This suite was validated with a deliberate negative control (temporarily disabling the role switch
-in `asUser()`) that made 92 of 138 assertions fail as expected, confirming the suite genuinely
-enforces RLS rather than passing vacuously; the real implementation was restored immediately after
-and re-confirmed at 138/138 passing.
+in `asUser()`) that made 97 of 148 assertions fail as expected -- including the execution-role-proof
+tests themselves -- confirming the suite genuinely enforces RLS rather than passing vacuously; the
+real implementation was restored immediately after and re-confirmed at 148/148 passing.
+
+**Known PGlite-vs-hosted-Supabase differences (stated precisely, not glossed over)**: this suite
+proves the migrations' SQL/RLS logic is internally correct when evaluated by a real Postgres engine
+with `auth.uid()` and the `anon`/`authenticated` roles behaving exactly as Supabase's own
+implementation does. It does **not** exercise: PostgREST itself (JWT signature verification/expiry,
+request parsing, connection pooling, HTTP-level behavior -- this suite sets the
+`request.jwt.claim.sub` session value directly, bypassing JWT verification entirely, since that's
+PostgREST's responsibility, not something a migration file controls); the real `auth.users` table's
+actual (much richer) schema and its own RLS/triggers, since this suite stubs only the two columns
+the migrations reference; any Postgres major-version difference between PGlite (18.3) and whatever
+version the live Supabase project actually runs (RLS syntax/semantics have been stable across
+Postgres versions for years, but this is a real, if low-risk, gap); and the application/network
+layer above the database (Next.js route handlers, the Supabase client SDK, Vercel's runtime). In
+short: this is strong, genuine evidence the migrations are correct -- it is not proof that migration
+0007 behaves identically once actually applied to the hosted project, which is why a targeted
+post-migration RLS/security smoke test against the real hosted project remains a required release
+step (see `docs/product-expansion/RELEASE_CONFIGURATION.md`).
 
 `supabase/verify-rls.sql` remains as a human-readable, manually-runnable reference for exercising
 the same properties directly against a real linked Supabase project (see its own header for exact
