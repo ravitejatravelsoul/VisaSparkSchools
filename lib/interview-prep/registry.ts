@@ -11,6 +11,7 @@ import { javascriptInterviewQuestions } from "@/content/interview-prep/javascrip
 import { pythonInterviewQuestions } from "@/content/interview-prep/python";
 import { reactInterviewQuestions } from "@/content/interview-prep/react";
 import { postgresqlInterviewQuestions } from "@/content/interview-prep/postgresql";
+import { playwrightInterviewQuestions } from "@/content/interview-prep/playwright";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -27,6 +28,7 @@ const rawBanks: InterviewQuestionInput[][] = [
   pythonInterviewQuestions,
   reactInterviewQuestions,
   postgresqlInterviewQuestions,
+  playwrightInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks

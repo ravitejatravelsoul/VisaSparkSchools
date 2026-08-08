@@ -152,10 +152,10 @@ before/after regression coverage in `tests/unit/progress-merge.test.ts`.
 | ---- | ----------------------------------------------------------- | ----------- | -------- |
 | P9.1 | Question content schema + validator (>=50/course)           | completed   | `lib/interview-prep/types.ts` (`interviewQuestionSchema`, `MIN_QUESTIONS_PER_COURSE = 50`), validator section in `scripts/validate-content.ts` (global id uniqueness, per-course min-50 check, per-course near-duplicate check) |
 | P9.2 | UI: `/courses/[slug]/interview-questions`                   | completed   | `app/(site)/courses/[courseSlug]/interview-questions/page.tsx`, shared `components/interview-prep/interview-prep-browser.tsx` |
-| P9.3 | Question content per applicable course (all existing + new) | partial     | 8 of 33 courses complete: 4 exam-prep (see P9.4) plus 4 technical courses -- `javascript-fundamentals`, `python-fundamentals`, `react-application-development`, `database-design-and-postgresql` (50 questions each, `content/interview-prep/{javascript,python,react,postgresql}.ts`), chosen to span language/framework/database categories. The remaining ~25 technical/programming courses do not yet have question banks -- this is an explicit, honestly-disclosed scope reduction, not an oversight; see the note below and the final pre-push report for the reason |
+| P9.3 | Question content per applicable course (all existing + new) | partial     | 9 of 33 courses complete: 4 exam-prep (see P9.4) plus 5 technical courses -- `javascript-fundamentals`, `python-fundamentals`, `react-application-development`, `database-design-and-postgresql`, `playwright-web-automation` (50 questions each, `content/interview-prep/{javascript,python,react,postgresql,playwright}.ts`), chosen to span language/framework/database/testing-automation categories. The remaining ~24 technical/programming courses do not yet have question banks -- this is an explicit, honestly-disclosed scope reduction, not an oversight; see the note below and the final pre-push report for the reason |
 | P9.4 | Exam-prep "Preparation Questions" variant                   | completed   | `content/interview-prep/{ielts,gre,pte,toefl}.ts`, 50 questions each (200 total), wired into `lib/interview-prep/registry.ts`; `app/(site)/courses/[courseSlug]/preparation-questions/page.tsx` |
 | P9.5 | Search index/lazy-load integration                          | completed   | `app/sitemap.ts` (`interviewPrepRoutes` via `getCoursesWithInterviewPrep()`); pages are server-rendered, no lazy-load needed |
-| P9.6 | Tests                                                        | completed   | `tests/unit/interview-prep-schema.test.ts`, `tests/integration/interview-prep-browser.test.tsx`, `tests/e2e/interview-prep.spec.ts` (8/8 passing, real Chromium), plus a real-Chromium spot-check run against all 4 technical-course pages |
+| P9.6 | Tests                                                        | completed   | `tests/unit/interview-prep-schema.test.ts`, `tests/integration/interview-prep-browser.test.tsx`, `tests/e2e/interview-prep.spec.ts` (8/8 passing, real Chromium), plus real-Chromium spot-checks of all 5 technical-course pages |
 
 **Note on P9.3 scope**: the original brief asked for question banks across every applicable course
 (33 total, ~1,650 questions at 50/course). Four background agents were launched to parallelize the
@@ -164,12 +164,12 @@ limit (a hard infra constraint, confirmed to be specific to spawning new Agent s
 the main session's own tool use -- see Phase 7 notes). With no further delegation capacity, the
 decision was to fully complete the 4 exam-prep courses (200 questions) plus a representative spread
 of technical courses across the major categories the brief named -- language (JavaScript, Python),
-framework (React), and database (PostgreSQL) -- as a coherent, high-value, fully-shippable subset
-(400 real, schema-valid, honesty-reviewed questions total across 8 courses), rather than either
-silently truncating the phase or fabricating shallow placeholder content to hit a raw course count.
-Categories from the brief with no representative course yet: testing/automation, cloud, AI (the
-catalog currently has no dedicated cloud course at all). This is called out explicitly in the
-Phase 15 pre-push report.
+framework (React), database (PostgreSQL), and testing/automation (Playwright) -- as a coherent,
+high-value, fully-shippable subset (450 real, schema-valid, honesty-reviewed questions total across
+9 courses), rather than either silently truncating the phase or fabricating shallow placeholder
+content to hit a raw course count. Categories from the brief with no representative course yet:
+cloud, AI (the catalog currently has no dedicated cloud course at all; `ai-foundations` exists but
+has no question bank in this pass). This is called out explicitly in the Phase 15 pre-push report.
 
 ## Phase 10 — Guided chatbot navigator
 
