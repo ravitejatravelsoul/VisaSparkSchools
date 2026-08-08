@@ -4,10 +4,24 @@ None of the values below are secrets committed to this repository. This file lis
 project owner must configure in Vercel/Supabase dashboards before or during production release**
 of this expansion. No item here was performed during this session.
 
+**Local implementation status (as of this file's last update)**: content is complete (33 catalog
+courses; 26 technical + 4 exam-prep = 30 applicable courses each with a full 50-question
+interview/preparation bank; 3 justified exemptions) and `npm run test:rls` proves the Row Level
+Security policies in every migration file (0001-0007) execute correctly against a real local
+Postgres engine (PGlite/WASM), 138/138 passing. **This is local, pre-migration evidence only** — it
+does not prove migration 0007 has been correctly applied to the live, hosted Supabase project.
+Step 1 below (apply migration 0007) and step 9 (post-deployment production verification) remain
+required, and a targeted hosted-environment RLS/security smoke test should be performed
+immediately after step 1, before proceeding to the remaining steps.
+
 ## 1. Supabase migration
 
 - Review `supabase/migrations/0007_*.sql` (added this session, not applied) and apply it to the
   live project via `supabase db push` (or the dashboard SQL editor) once reviewed.
+- After applying, perform a hosted-environment verification pass (a real signed-in session issuing
+  a request that exercises the new `profiles` columns, plus a spot-check that RLS still denies
+  cross-user access on the live project) — the local `npm run test:rls` suite validates the
+  migration's SQL logic in isolation, not its behavior once actually applied to the hosted database.
 
 ## 2. Cloudflare Turnstile
 
@@ -64,6 +78,11 @@ Existing variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 8. Deploy to Vercel production.
 9. Perform live production verification (equivalent to the checklist used in the prior deployment
    session), including a real signup → Turnstile → branded email → confirmation → certificate
-   issuance → PDF/QR verification pass.
+   issuance → PDF/QR verification pass, **plus a targeted post-migration RLS/security smoke test**
+   against the hosted project (confirm a second real test account cannot read/update/delete the
+   first account's rows for at least `profiles` and one other table touched by migration 0007) —
+   the local `npm run test:rls` suite (138/138 passing) is real, meaningful evidence the migration's
+   SQL is correct, but it runs against an isolated local Postgres engine and cannot substitute for
+   confirming the policies behave the same way once actually applied to the hosted Supabase project.
 
 None of steps 1-9 were performed this session, per the explicit no-push/no-deploy instruction.

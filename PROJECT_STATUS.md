@@ -2423,12 +2423,16 @@ dotnet) was corrected to the honest `"none"`.
 **Interview Prep / Preparation Questions**: a `MIN_QUESTIONS_PER_COURSE = 50` schema/validator
 (global id uniqueness, per-course minimum, a near-duplicate-question sweep) shared by both the
 "Interview Questions" route (technical courses) and "Preparation Questions" route (exam-prep
-courses) via one `InterviewPrepBrowser` component. **9 of the 33 courses have a full 50-question
-bank** — all 4 exam-prep courses, plus JavaScript, Python, React, PostgreSQL, and Playwright,
-deliberately chosen to cover the brief's named language/framework/database/testing-automation
-categories. **The remaining ~24 technical courses do not yet have a question bank** — this is an
-explicit, disclosed scope reduction (see `docs/product-expansion/TASKS.md`'s Phase 9 note for the
-full reason: an Agent-tool monthly spend limit was hit mid-session, cutting off further parallelized
+courses) via one `InterviewPrepBrowser` component. **Historical note, superseded**: at the time this
+paragraph was originally written, only 9 of the 33 courses had a full 50-question bank (all 4
+exam-prep courses, plus JavaScript, Python, React, PostgreSQL, and Playwright), with the remaining
+~24 technical courses left as an explicitly disclosed scope reduction. **This is no longer the
+current state** — see the "Phase 9 completion + executable RLS verification" subsection further
+below in this same "Second expansion" section for the verified final numbers (26 technical + 4
+exam-prep = 30 applicable courses, all with full 50-question banks; 3 justified exemptions; 1,500
+total questions). The paragraph below is kept for historical continuity of the scope-reduction
+reasoning, which is no longer applicable — see the reason it existed in the first place: an Agent-tool
+monthly spend limit was hit mid-session, cutting off further parallelized
 content authoring), not an oversight or a silently-dropped requirement. No cloud-focused course
 exists in the catalog at all, so the brief's "cloud" category has no representative course to attach
 questions to yet either.
