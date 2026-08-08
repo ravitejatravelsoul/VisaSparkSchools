@@ -3,6 +3,10 @@ import {
   type InterviewQuestion,
   type InterviewQuestionInput,
 } from "@/lib/interview-prep/types";
+import { ieltsInterviewQuestions } from "@/content/interview-prep/ielts";
+import { greInterviewQuestions } from "@/content/interview-prep/gre";
+import { pteInterviewQuestions } from "@/content/interview-prep/pte";
+import { toeflInterviewQuestions } from "@/content/interview-prep/toefl";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -10,7 +14,12 @@ import {
  * fails the build, not a page render -- same eager-parse pattern as
  * lib/study-abroad/registry.ts and lib/exam-prep/registry.ts.
  */
-const rawBanks: InterviewQuestionInput[][] = [];
+const rawBanks: InterviewQuestionInput[][] = [
+  ieltsInterviewQuestions,
+  greInterviewQuestions,
+  pteInterviewQuestions,
+  toeflInterviewQuestions,
+];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
   .flat()

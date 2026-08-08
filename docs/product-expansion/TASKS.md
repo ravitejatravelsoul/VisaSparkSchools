@@ -148,14 +148,25 @@ before/after regression coverage in `tests/unit/progress-merge.test.ts`.
 
 ## Phase 9 — Interview questions
 
-| ID   | Description                                                 | Status  | Evidence |
-| ---- | ----------------------------------------------------------- | ------- | -------- |
-| P9.1 | Question content schema + validator (>=50/course)           | pending |          |
-| P9.2 | UI: `/courses/[slug]/interview-questions`                   | pending |          |
-| P9.3 | Question content per applicable course (all existing + new) | pending |          |
-| P9.4 | Exam-prep "Preparation Questions" variant                   | pending |          |
-| P9.5 | Search index/lazy-load integration                          | pending |          |
-| P9.6 | Tests                                                       | pending |          |
+| ID   | Description                                                 | Status      | Evidence |
+| ---- | ----------------------------------------------------------- | ----------- | -------- |
+| P9.1 | Question content schema + validator (>=50/course)           | completed   | `lib/interview-prep/types.ts` (`interviewQuestionSchema`, `MIN_QUESTIONS_PER_COURSE = 50`), validator section in `scripts/validate-content.ts` (global id uniqueness, per-course min-50 check, per-course near-duplicate check) |
+| P9.2 | UI: `/courses/[slug]/interview-questions`                   | completed   | `app/(site)/courses/[courseSlug]/interview-questions/page.tsx`, shared `components/interview-prep/interview-prep-browser.tsx` |
+| P9.3 | Question content per applicable course (all existing + new) | partial     | Only the 4 exam-prep courses are complete (see P9.4). None of the ~29 technical/programming courses have question banks yet -- this is an explicit, honestly-disclosed scope reduction, not an oversight; see the note below and the final pre-push report for the reason (Agent-tool monthly spend-limit hit mid-session, remaining Phase 9 content authored directly by the main session with no further delegation capacity to cover the full course catalog in this pass) |
+| P9.4 | Exam-prep "Preparation Questions" variant                   | completed   | `content/interview-prep/{ielts,gre,pte,toefl}.ts`, 50 questions each (200 total), wired into `lib/interview-prep/registry.ts`; `app/(site)/courses/[courseSlug]/preparation-questions/page.tsx` |
+| P9.5 | Search index/lazy-load integration                          | completed   | `app/sitemap.ts` (`interviewPrepRoutes` via `getCoursesWithInterviewPrep()`); pages are server-rendered, no lazy-load needed |
+| P9.6 | Tests                                                        | completed   | `tests/unit/interview-prep-schema.test.ts`, `tests/integration/interview-prep-browser.test.tsx`, `tests/e2e/interview-prep.spec.ts` (8/8 passing, real Chromium) |
+
+**Note on P9.3 scope**: the original brief asked for question banks across every applicable course.
+Four background agents were launched to parallelize the remaining Phase 7 technical-course content
+and all four hit the account's Agent-tool monthly spend limit (a hard infra constraint, confirmed to
+be specific to spawning new Agent subprocesses, not to the main session's own tool use -- see Phase 7
+notes). With no further delegation capacity and ~29 technical courses x 50 questions each being a
+multi-thousand-item authoring task, the decision was to fully complete the 4 exam-prep courses (200
+real, schema-valid, honesty-reviewed questions) as a coherent, high-value, fully-shippable subset, and
+leave the technical-course question banks for a follow-up pass rather than either silently truncating
+the phase or fabricating shallow placeholder content to hit a raw course count. This will be called
+out explicitly in the Phase 15 pre-push report.
 
 ## Phase 10 — Guided chatbot navigator
 
