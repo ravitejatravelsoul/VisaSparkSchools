@@ -189,4 +189,12 @@ export const tracks: Track[] = [
       "The language behind a large share of the web's backends -- from request handling and forms through modern PHP practices like Composer and PSR autoloading.",
     order: 23,
   },
+  {
+    id: "kotlin",
+    slug: "kotlin",
+    title: "Kotlin Fundamentals",
+    description:
+      "A modern, null-safe language that runs on the JVM (and beyond) -- Android's preferred language, and increasingly used for backend services too.",
+    order: 24,
+  },
 ];

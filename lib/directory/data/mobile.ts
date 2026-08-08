@@ -121,7 +121,9 @@ export const mobileTechnologies: TechnologyInput[] = [
       "Coroutines (async programming)",
     ],
     example: {
-      language: "javascript",
+      // No "kotlin" option exists in runnerLanguageSchema (Kotlin has no
+      // safe in-browser execution) -- "none" is the honest label.
+      language: "none",
       code: `data class User(val name: String, val age: Int)\n\nfun greet(user: User) = "Hello, \${user.name}!"`,
       explanation:
         "A data class auto-generates equality, toString, and copy methods from its properties -- eliminating boilerplate Java requires you to write by hand for the same thing.",
@@ -130,7 +132,8 @@ export const mobileTechnologies: TechnologyInput[] = [
       "Native Android app development",
       "JVM-based backend services (as a Java alternative)",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the Kotlin Fundamentals course"],
+    courseId: "kotlin-fundamentals",
     projectIdeas: [
       "A simple data class modeling a domain object, with a function that formats it for display",
     ],

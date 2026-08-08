@@ -2128,4 +2128,67 @@ export const projects: Project[] = [
     ],
     references: [{ label: "PHP official manual", url: "https://www.php.net/manual/en/" }],
   },
+  {
+    id: "kotlin-note-taking-app",
+    slug: "kotlin-note-taking-app",
+    title: "Kotlin Note-Taking Data Model",
+    description:
+      "Design (on paper/in guided steps, since this platform can't execute Kotlin) the data model and core logic for a note-taking app in Kotlin, applying data classes, null safety, and collections.",
+    difficulty: "intermediate",
+    estimatedHours: 5,
+    isCapstone: true,
+    trackSlugs: ["kotlin"],
+    prerequisiteLessonIds: [
+      "kotlin-data-classes",
+      "kotlin-null-safety",
+      "kotlin-collections",
+      "kotlin-project-wrap-up",
+    ],
+    objectives: [
+      "Design a Note data class (id, title, body, completed) with a default value for completed",
+      "Write a findNote(id) function returning Note? and handle the missing case with ?./?: at every call site",
+      "Write functions to add a note (returning a new list) and mark one complete (using copy(), not mutation)",
+      "Use filter to list only incomplete notes",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the Note data class",
+        description: "Define a Note data class with sensible defaults.",
+        checklist: [
+          "Note is declared as a data class with id, title, body, and completed fields",
+          "completed defaults to false so callers creating a new note don't need to specify it",
+        ],
+      },
+      {
+        id: "m2",
+        title: "A null-safe lookup function",
+        description: "Write findNote(notes, id): Note? and use ?./?: wherever it's called.",
+        checklist: [
+          "findNote's return type is honestly Note?, not Note",
+          "Every call site handles the null case with ?. or ?:, never !!",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Add and complete without mutation",
+        description:
+          "Write addNote (returns a new list) and completeNote (uses copy(), not in-place mutation).",
+        checklist: [
+          "addNote returns a new List<Note> rather than mutating the original in place",
+          "completeNote uses copy(completed = true) rather than reassigning a var field",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Filter incomplete notes",
+        description: "Write a function using filter to return only notes where completed is false.",
+        checklist: [
+          "The filter lambda checks !it.completed (or equivalent)",
+          "The function's return type is List<Note>",
+        ],
+      },
+    ],
+    references: [{ label: "Kotlin documentation", url: "https://kotlinlang.org/docs/home.html" }],
+  },
 ];

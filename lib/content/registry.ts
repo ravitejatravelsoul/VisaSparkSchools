@@ -31,6 +31,7 @@ import { cLessons } from "@/content/lessons/c";
 import { cppLessons } from "@/content/lessons/cpp";
 import { csharpLessons } from "@/content/lessons/csharp";
 import { phpLessons } from "@/content/lessons/php";
+import { kotlinLessons } from "@/content/lessons/kotlin";
 import type { Lesson, Course, Track, Project } from "@/lib/content/types";
 import { lessonSchema, projectSchema, courseSchema } from "@/lib/content/types";
 
@@ -71,6 +72,7 @@ export const allLessons: Lesson[] = [
   ...cppLessons,
   ...csharpLessons,
   ...phpLessons,
+  ...kotlinLessons,
 ]
   .map((lesson) => lessonSchema.parse(lesson))
   .sort((a, b) => a.order - b.order);

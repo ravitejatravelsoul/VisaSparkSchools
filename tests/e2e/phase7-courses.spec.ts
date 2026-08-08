@@ -25,6 +25,12 @@ const COURSES = [
     lessonSlug: "php-introduction-and-request-response",
     lessonHeading: "Introduction to PHP and the Request-Response Model",
   },
+  {
+    slug: "kotlin-fundamentals",
+    title: "Kotlin Fundamentals",
+    lessonSlug: "kotlin-introduction-and-jvm",
+    lessonHeading: "Introduction to Kotlin and the JVM",
+  },
 ];
 
 for (const { slug, title, lessonSlug, lessonHeading } of COURSES) {
@@ -32,7 +38,7 @@ for (const { slug, title, lessonSlug, lessonHeading } of COURSES) {
     page,
   }) => {
     await page.goto(`/courses/${slug}`);
-    await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: title, exact: true })).toBeVisible();
 
     await page
       .getByRole("link", { name: new RegExp(lessonHeading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")) })

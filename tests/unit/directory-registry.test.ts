@@ -158,10 +158,15 @@ describe("technology availability (the single source of truth for course/runner 
   });
 
   it("a guide-only technology (no courseId, no runnerSupport) never claims course or runner availability", () => {
-    const kotlin = getTechnologyBySlug("kotlin")!;
-    expect(kotlin.courseId).toBeUndefined();
-    expect(kotlin.runnerSupport).toBeUndefined();
-    const availability = getTechnologyAvailability(kotlin);
+    // Phase 7 (VisaSparkSchools product expansion) is progressively adding
+    // courses for previously guide-only languages (including Angular/
+    // AngularJS/Kotlin) -- use "rust", which is outside that phase's scope
+    // and has no course planned, rather than a slug that might gain a
+    // courseId later and silently invalidate this test's premise.
+    const rust = getTechnologyBySlug("rust")!;
+    expect(rust.courseId).toBeUndefined();
+    expect(rust.runnerSupport).toBeUndefined();
+    const availability = getTechnologyAvailability(rust);
     expect(availability.hasCourse).toBe(false);
     expect(availability.hasRunner).toBe(false);
     expect(availability.status).toBe("guide-only");

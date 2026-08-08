@@ -1847,4 +1847,64 @@ export const courses: CourseInput[] = [
       },
     ],
   },
+  {
+    id: "kotlin-fundamentals",
+    slug: "kotlin-fundamentals",
+    trackSlug: "kotlin",
+    title: "Kotlin Fundamentals",
+    description:
+      "A modern, null-safe JVM language -- from val/var and null safety through data classes, interfaces, collections, and an introduction to coroutines.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 6,
+    audience:
+      "Learners with some prior programming experience (Java or otherwise) who want a practical introduction to Kotlin for Android or backend development.",
+    learningOutcomes: [
+      "Read and predict the behavior of real Kotlin programs covering null safety, data classes, and collections",
+      "Explain why Kotlin classes are final by default and how nullable types prevent a whole class of runtime errors",
+      "Describe how Kotlin interoperates with Java and where it's used today (Android, Ktor, Spring)",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["kotlin"],
+    modules: [
+      {
+        id: "kotlin-fundamentals-module",
+        title: "Getting Started with Kotlin",
+        summary: "The JVM relationship, val vs var, and control flow.",
+        lessonSlugs: [
+          "kotlin-introduction-and-jvm",
+          "kotlin-val-var-and-types",
+          "kotlin-control-flow",
+        ],
+      },
+      {
+        id: "kotlin-null-safety-functions",
+        title: "Null Safety & Functions",
+        summary: "Null safety, and functions with default arguments and lambdas.",
+        lessonSlugs: ["kotlin-null-safety", "kotlin-functions-and-lambdas"],
+      },
+      {
+        id: "kotlin-classes-module",
+        title: "Classes & Data Classes",
+        summary: "Primary constructors, data classes, and interfaces/inheritance.",
+        lessonSlugs: [
+          "kotlin-classes-and-constructors",
+          "kotlin-data-classes",
+          "kotlin-interfaces-and-inheritance",
+        ],
+      },
+      {
+        id: "kotlin-collections-coroutines",
+        title: "Collections, Coroutines & Interop",
+        summary: "Collections, coroutines fundamentals, Java interop, and a wrap-up design lesson.",
+        lessonSlugs: [
+          "kotlin-collections",
+          "kotlin-coroutines-basics",
+          "kotlin-java-interop-and-usage",
+          "kotlin-project-wrap-up",
+        ],
+      },
+    ],
+  },
 ];
