@@ -2343,9 +2343,27 @@ Commit: `fix: make GitHub Actions CI reliable`.
 
 ## Second expansion (2026-08-08) — Study Abroad, Exam Prep, 8 new technical courses, Interview Prep, guided runner labs, chatbot navigator, footer attribution
 
-Started from `d065c4a` ("fix: make GitHub Actions CI reliable" — the last commit documented above),
-clean tree, CI green, migrations 0001-0006 live-reviewed-but-unapplied, courses independently
-discoverable. This section documents a second, later, separately-scoped multi-phase expansion
+Started from `d065c4a` ("fix: make GitHub Actions CI reliable" — the last commit documented above,
+and also the exact commit `origin/main` is currently at), clean tree, CI green, courses
+independently discoverable.
+
+**Corrected migration status** (an earlier version of this section incorrectly said "migrations
+0001-0006 live-reviewed-but-unapplied" — that was wrong and is corrected here). Per this file's own
+"Product-model correction" section above (checkpoint `ba67016`, which precedes `d065c4a`): "production
+already deployed separately via Vercel CLI, Supabase migrations 0001–0006 live and synchronized."
+The "GitHub Actions CI reliability fix" section above independently confirms the same thing from a
+different angle: "this dev machine's `.env.local` has real Supabase credentials configured from an
+earlier deployment session." Both statements were already in this file before this second expansion
+began -- they were not re-verified by connecting to production (this expansion's owner explicitly
+prohibited that), but the repository's own prior, contemporaneous records are consistent and
+unambiguous: **migrations 0001-0006 were applied to a real, live Supabase project during that earlier
+deployment session**, before this second expansion's own work started. Only migration `0007`
+(written during this expansion's own Phase 2, before this continuation) is genuinely new and
+unapplied -- `RELEASE_CONFIGURATION.md` has only ever described `0007` as pending, consistent with
+this. This file's own repository records are the authority used here, per the owner's instruction not
+to connect to or change production merely to check.
+
+This section documents a second, later, separately-scoped multi-phase expansion
 (15 phases per its own brief) layered on top of everything above. Full phase-by-phase detail,
 task IDs, and exact evidence pointers live in `docs/product-expansion/TASKS.md` and
 `docs/product-expansion/REQUIREMENTS.md`; this section is the exact content-inventory summary

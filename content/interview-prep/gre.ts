@@ -152,7 +152,8 @@ export const greInterviewQuestions: InterviewQuestionInput[] = [
     courseSlug: "gre-general-test-preparation",
     question:
       "What GRE Verbal question type asks you to fill in one, two, or three blanks in a passage?",
-    answer: "Text Completion.",
+    answer:
+      "Text Completion -- you select a word for each blank from a separate answer-choice column, and every blank must be filled correctly to earn credit for the question.",
     category: "Verbal Reasoning",
     difficulty: "beginner",
     lastReviewed: "2026-08-07",
@@ -442,7 +443,8 @@ export const greInterviewQuestions: InterviewQuestionInput[] = [
     id: "gre-prep-awa-02",
     courseSlug: "gre-general-test-preparation",
     question: "How much time do you have for the Analyze an Issue task?",
-    answer: "30 minutes.",
+    answer:
+      "30 minutes -- the same fixed window whether you spend it planning, writing, or both, so budgeting a few minutes for an outline still needs to leave enough time to fully develop the response.",
     category: "Analytical Writing",
     difficulty: "beginner",
     lastReviewed: "2026-08-07",

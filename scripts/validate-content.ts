@@ -18,6 +18,7 @@ import { countryRoadmaps } from "../lib/study-abroad/registry";
 import { EXAM_PREP_COURSE_SLUGS as EXAM_PREP_SLUGS_TUPLE } from "../lib/exam-prep/types";
 import { allInterviewQuestions } from "../lib/interview-prep/registry";
 import { MIN_QUESTIONS_PER_COURSE } from "../lib/interview-prep/types";
+import { classifyAllCourses } from "../lib/interview-prep/classification";
 
 let errorCount = 0;
 
@@ -619,20 +620,61 @@ ok(
   ok(`Study Abroad-checked ${countryRoadmaps.length} country roadmaps (23 steps each).`);
 }
 
-// --- Interview / preparation questions (Phase 9): every registered course's
-// bank must meet the minimum count, have globally-unique ids, and have no
+// --- Interview / preparation questions (Phase 9): catalog-wide coverage
+// (every non-exempt course must meet the minimum count -- a missing bank is
+// now a hard failure, not silently allowed), globally-unique ids, no
 // near-duplicate questions (same normalizeForDuplicateCheck logic as lesson
-// quizzes, scoped per course). A course with zero registered questions is
-// not an error here -- content lands incrementally; this only enforces the
-// bar once a course has *any* entries. ---
+// quizzes, scoped per course), no placeholder/empty content, valid course
+// slugs, and exam-prep courses never using job-interview framing. ---
 {
+  const classifications = classifyAllCourses();
+  const courseSlugSet = new Set(allCourses.map((c) => c.slug));
+  const classificationBySlug = new Map(classifications.map((c) => [c.slug, c]));
+
   const seenIds = new Set<string>();
   const byCourse = new Map<string, typeof allInterviewQuestions>();
+  const PLACEHOLDER_PATTERN = /\b(TODO|TBD|placeholder|lorem ipsum|fill (this|me) in|xxx+)\b/i;
+  const JOB_INTERVIEW_PHRASE_PATTERN =
+    /\b(in a (job|technical) interview|when interviewing for a job|tell me about yourself|why should we hire you|your greatest weakness)\b/i;
+
   for (const q of allInterviewQuestions) {
     if (seenIds.has(q.id)) {
       fail(`Interview/preparation question id "${q.id}" is not globally unique.`);
     }
     seenIds.add(q.id);
+
+    if (!courseSlugSet.has(q.courseSlug)) {
+      fail(
+        `Interview/preparation question "${q.id}" has courseSlug "${q.courseSlug}", which does not resolve to any real course in the catalog.`,
+      );
+    }
+    const classification = classificationBySlug.get(q.courseSlug);
+    if (classification?.classification === "exempt") {
+      fail(
+        `Interview/preparation question "${q.id}" targets course "${q.courseSlug}", which is explicitly exempt (${classification.exemptionReason}) -- remove this bank or the exemption, they can't both stand.`,
+      );
+    }
+
+    if (q.question.trim().toLowerCase() === q.answer.trim().toLowerCase()) {
+      fail(`Interview/preparation question "${q.id}" has an answer identical to its question.`);
+    }
+    if (PLACEHOLDER_PATTERN.test(q.question) || PLACEHOLDER_PATTERN.test(q.answer)) {
+      fail(`Interview/preparation question "${q.id}" contains placeholder-looking text.`);
+    }
+    if (q.answer.trim().length < 20) {
+      fail(
+        `Interview/preparation question "${q.id}" has a suspiciously short answer (${q.answer.trim().length} chars) -- likely a placeholder or filler, not a real explanation.`,
+      );
+    }
+    if (
+      classification?.classification === "exam-prep" &&
+      JOB_INTERVIEW_PHRASE_PATTERN.test(q.question + " " + q.answer)
+    ) {
+      fail(
+        `Exam-prep question "${q.id}" (course "${q.courseSlug}") uses job-interview framing -- exam-prep courses need "Preparation Questions" framing (exam format/strategy/scoring), never job-interview wording.`,
+      );
+    }
+
     const bucket = byCourse.get(q.courseSlug) ?? [];
     bucket.push(q);
     byCourse.set(q.courseSlug, bucket);
@@ -656,8 +698,22 @@ ok(
       promptsSeenForCourse.set(normalized, q.id);
     }
   }
+
+  // Catalog-wide coverage: every applicable (non-exempt) course must have a
+  // bank at all -- a course with zero registered questions used to pass
+  // silently ("content lands incrementally"); it no longer does, since the
+  // brief requires full catalog coverage, not incremental best-effort.
+  for (const c of classifications) {
+    if (c.classification === "exempt") continue;
+    if (!byCourse.has(c.slug)) {
+      fail(
+        `Course "${c.slug}" (${c.classification}) has NO interview/preparation question bank registered -- every applicable course requires one.`,
+      );
+    }
+  }
+
   ok(
-    `Interview/preparation questions checked: ${allInterviewQuestions.length} across ${byCourse.size} course(s).`,
+    `Interview/preparation questions checked: ${allInterviewQuestions.length} across ${byCourse.size} course(s) (${classifications.filter((c) => c.classification !== "exempt").length} applicable, ${classifications.filter((c) => c.classification === "exempt").length} exempt).`,
   );
 }
 
