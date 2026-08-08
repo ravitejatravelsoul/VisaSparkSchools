@@ -10,6 +10,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { safeRedirectPath } from "@/lib/auth/safe-redirect";
+import { useTurnstileCaptcha } from "@/components/auth/use-turnstile-captcha";
 
 type Mode = "sign-in" | "reset";
 
@@ -43,13 +44,20 @@ const COPY: Record<Mode, { title: string; cta: string; footer: React.ReactNode }
   },
 };
 
+const CAPTCHA_UNAVAILABLE_MESSAGE: Record<Mode, string> = {
+  "sign-in": "Sign-in is unavailable until it is.",
+  reset: "Password reset is unavailable until it is.",
+};
+
 export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
   const router = useRouter();
   const destination = safeRedirectPath(next);
+  const captcha = useTurnstileCaptcha(CAPTCHA_UNAVAILABLE_MESSAGE[mode]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [message, setMessage] = useState<string | undefined>();
+  const [captchaError, setCaptchaError] = useState<string | undefined>();
   const copy = COPY[mode];
 
   if (!featureFlags.supabaseEnabled) {
@@ -79,20 +87,40 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
     if (status === "loading") return; // double-submit guard
     const supabase = getSupabaseBrowserClient();
     if (!supabase) return;
-    setStatus("loading");
     setMessage(undefined);
+    setCaptchaError(undefined);
+    if (!captcha.isReady) {
+      setCaptchaError("Complete the security check before continuing.");
+      return;
+    }
+    setStatus("loading");
 
     if (mode === "reset") {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        captchaToken: captcha.token ?? undefined,
+      });
+      // The form stays mounted either way (no navigation for "reset"), so a
+      // Turnstile token -- single-use regardless of outcome -- must always
+      // be reset here, or a second submit would silently resend an
+      // already-consumed token that Supabase would reject.
+      captcha.reset();
       setStatus(error ? "error" : "done");
       setMessage(error ? error.message : "Check your email for a reset link.");
       return;
     }
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken: captcha.token ?? undefined },
+    });
     if (error) {
       setStatus("error");
       setMessage(error.message);
+      // Only reset on failure -- a successful sign-in navigates away and
+      // unmounts this form, so there's no resubmit path that could reuse
+      // the now-consumed token.
+      captcha.reset();
     } else {
       setStatus("done");
       // The guest-to-account sync lifecycle (lib/sync/orchestrator.ts's
@@ -134,7 +162,15 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
               />
             </label>
           )}
-          <Button type="submit" disabled={status === "loading"}>
+          <div>
+            {captcha.widget}
+            {captchaError && (
+              <p role="alert" className="mt-1 text-xs text-(--color-danger)">
+                {captchaError}
+              </p>
+            )}
+          </div>
+          <Button type="submit" disabled={status === "loading" || !captcha.isReady}>
             {status === "loading" ? "Please wait…" : copy.cta}
           </Button>
         </form>
