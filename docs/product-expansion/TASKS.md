@@ -181,6 +181,18 @@ is authored -- this is the validator doing its job, not a broken build being sil
 Each batch below is checked with the full validator (which will show a shrinking error count) plus
 manual review before its own commit.
 
+**Batch progress** (21 courses needed full banks at the start of this resumed pass; 9 were already
+complete from the earlier partial pass and are kept as-is):
+
+- **Batch A (4/21 done)**: `how-computing-works`, `html-css-fundamentals`, `typescript-foundations`,
+  `git-apis-sql` -- 200 questions, `content/interview-prep/{how-computing-works,html-css,typescript,git-apis-sql}.ts`.
+  Remaining: `ai-foundations`, `software-testing-foundations`, `api-testing-and-automation`,
+  `nodejs-express-backend-development`, `java-programming-foundations`,
+  `data-structures-and-algorithms`, `selenium-webdriver-automation`, `linux-shell-fundamentals`,
+  `test-automation-framework-engineering`, `go-programming`, `c-programming`, `cpp-programming`,
+  `csharp-dotnet-fundamentals`, `php-web-development`, `kotlin-fundamentals`,
+  `angular-application-development`, `angularjs-legacy-maintenance` (17 remaining).
+
 ## Phase 10 — Guided chatbot navigator
 
 | ID    | Description                                   | Status    | Evidence                                                                                                                                                                                                     |

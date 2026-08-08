@@ -12,6 +12,10 @@ import { pythonInterviewQuestions } from "@/content/interview-prep/python";
 import { reactInterviewQuestions } from "@/content/interview-prep/react";
 import { postgresqlInterviewQuestions } from "@/content/interview-prep/postgresql";
 import { playwrightInterviewQuestions } from "@/content/interview-prep/playwright";
+import { howComputingWorksInterviewQuestions } from "@/content/interview-prep/how-computing-works";
+import { htmlCssInterviewQuestions } from "@/content/interview-prep/html-css";
+import { typescriptInterviewQuestions } from "@/content/interview-prep/typescript";
+import { gitApisSqlInterviewQuestions } from "@/content/interview-prep/git-apis-sql";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -29,6 +33,10 @@ const rawBanks: InterviewQuestionInput[][] = [
   reactInterviewQuestions,
   postgresqlInterviewQuestions,
   playwrightInterviewQuestions,
+  howComputingWorksInterviewQuestions,
+  htmlCssInterviewQuestions,
+  typescriptInterviewQuestions,
+  gitApisSqlInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
