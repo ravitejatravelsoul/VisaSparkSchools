@@ -186,12 +186,13 @@ complete from the earlier partial pass and are kept as-is):
 
 - **Batch A (4/21 done)**: `how-computing-works`, `html-css-fundamentals`, `typescript-foundations`,
   `git-apis-sql` -- 200 questions, `content/interview-prep/{how-computing-works,html-css,typescript,git-apis-sql}.ts`.
-  Remaining: `ai-foundations`, `software-testing-foundations`, `api-testing-and-automation`,
-  `nodejs-express-backend-development`, `java-programming-foundations`,
+- **Batch B (3/21 done, 7/21 total)**: `ai-foundations`, `software-testing-foundations`,
+  `api-testing-and-automation` -- 150 questions, `content/interview-prep/{ai-foundations,software-testing,api-testing}.ts`.
+  Remaining: `nodejs-express-backend-development`, `java-programming-foundations`,
   `data-structures-and-algorithms`, `selenium-webdriver-automation`, `linux-shell-fundamentals`,
   `test-automation-framework-engineering`, `go-programming`, `c-programming`, `cpp-programming`,
   `csharp-dotnet-fundamentals`, `php-web-development`, `kotlin-fundamentals`,
-  `angular-application-development`, `angularjs-legacy-maintenance` (17 remaining).
+  `angular-application-development`, `angularjs-legacy-maintenance` (14 remaining).
 
 ## Phase 10 — Guided chatbot navigator
 

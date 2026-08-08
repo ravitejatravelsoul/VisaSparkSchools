@@ -16,6 +16,9 @@ import { howComputingWorksInterviewQuestions } from "@/content/interview-prep/ho
 import { htmlCssInterviewQuestions } from "@/content/interview-prep/html-css";
 import { typescriptInterviewQuestions } from "@/content/interview-prep/typescript";
 import { gitApisSqlInterviewQuestions } from "@/content/interview-prep/git-apis-sql";
+import { aiFoundationsInterviewQuestions } from "@/content/interview-prep/ai-foundations";
+import { softwareTestingInterviewQuestions } from "@/content/interview-prep/software-testing";
+import { apiTestingInterviewQuestions } from "@/content/interview-prep/api-testing";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -37,6 +40,9 @@ const rawBanks: InterviewQuestionInput[][] = [
   htmlCssInterviewQuestions,
   typescriptInterviewQuestions,
   gitApisSqlInterviewQuestions,
+  aiFoundationsInterviewQuestions,
+  softwareTestingInterviewQuestions,
+  apiTestingInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
