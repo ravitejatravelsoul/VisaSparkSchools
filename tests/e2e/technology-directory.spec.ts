@@ -169,8 +169,12 @@ test("a technology with runner support shows a working 'Open playground' action"
   await expect(openPlayground).toBeVisible();
   await openPlayground.click();
   await expect(page).toHaveURL(/\/playground\?lang=sql/);
-  // The SQL tab should be pre-selected via the query param.
-  await expect(page.getByRole("tab", { name: "SQL", selected: true })).toBeVisible();
+  // The SQL tab should be pre-selected via the query param. `exact: true`
+  // disambiguates from the split-runner's own mobile-only editor/output
+  // toggle tab (components/runners/split-runner-layout.tsx), whose SQL
+  // runner instance is labeled "SQL query editor" -- a substring match on
+  // "SQL" would otherwise also match that unrelated tab on mobile viewports.
+  await expect(page.getByRole("tab", { name: "SQL", exact: true, selected: true })).toBeVisible();
 });
 
 test("a legacy technology clearly explains its legacy status", async ({ page }) => {

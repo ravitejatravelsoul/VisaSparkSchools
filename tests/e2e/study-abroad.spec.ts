@@ -1,6 +1,15 @@
 import { test, expect } from "@playwright/test";
 
-test("nav to Study Abroad directory to a country roadmap, then expand a step", async ({ page }) => {
+test("nav to Study Abroad directory to a country roadmap, then expand a step", async ({
+  page,
+  isMobile,
+}) => {
+  // The desktop PrimaryNav (components/layout/header.tsx) is `hidden md:block`;
+  // on mobile the same link only exists inside the drawer nav, which
+  // technology-directory.spec.ts's equivalent nav test already covers
+  // separately -- same skip convention used there.
+  test.skip(isMobile, "desktop nav is hidden on mobile; see technology-directory.spec.ts");
+
   await page.goto("/");
   await page.getByLabel("Primary").getByRole("link", { name: "Study Abroad" }).click();
   await expect(page).toHaveURL(/\/study-abroad$/);

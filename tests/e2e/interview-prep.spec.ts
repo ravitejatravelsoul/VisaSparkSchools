@@ -3,11 +3,19 @@ import { test, expect } from "@playwright/test";
 // Content lands course-by-course; until a course has registered questions,
 // both routes must 404 rather than render an empty page, and the wrong
 // route for a course's type must also 404 regardless of question count.
+//
+// As of Phase 9's completion, every applicable technical/exam-prep course
+// has a full question bank (see lib/interview-prep/classification.ts), so
+// the "no registered questions yet" case can no longer be exercised by any
+// applicable course -- it's exercised here by a genuinely, permanently
+// exempt course instead (quantitative-aptitude has its own dedicated
+// practice-session infrastructure and is not classified as needing an
+// interview-prep bank at all).
 
-test("interview-questions 404s for a technical course with no registered questions yet", async ({
+test("interview-questions 404s for a course that is exempt from needing a question bank", async ({
   page,
 }) => {
-  const response = await page.goto("/courses/go-programming/interview-questions");
+  const response = await page.goto("/courses/quantitative-aptitude/interview-questions");
   expect(response?.status()).toBe(404);
 });
 
