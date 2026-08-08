@@ -28,6 +28,9 @@ import { testAutomationFrameworkInterviewQuestions } from "@/content/interview-p
 import { goInterviewQuestions } from "@/content/interview-prep/go";
 import { cInterviewQuestions } from "@/content/interview-prep/c";
 import { cppInterviewQuestions } from "@/content/interview-prep/cpp";
+import { csharpInterviewQuestions } from "@/content/interview-prep/csharp";
+import { phpInterviewQuestions } from "@/content/interview-prep/php";
+import { kotlinInterviewQuestions } from "@/content/interview-prep/kotlin";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -61,6 +64,9 @@ const rawBanks: InterviewQuestionInput[][] = [
   goInterviewQuestions,
   cInterviewQuestions,
   cppInterviewQuestions,
+  csharpInterviewQuestions,
+  phpInterviewQuestions,
+  kotlinInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks

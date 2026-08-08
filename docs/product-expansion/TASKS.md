@@ -195,9 +195,15 @@ complete from the earlier partial pass and are kept as-is):
   `test-automation-framework-engineering` -- 150 questions,
   `content/interview-prep/{selenium,linux-shell,test-automation-framework}.ts`.
 - **Batch E (3/21 done, 16/21 total)**: `go-programming`, `c-programming`, `cpp-programming` -- 150
-  questions, `content/interview-prep/{go,c,cpp}.ts`. Remaining: `csharp-dotnet-fundamentals`,
-  `php-web-development`, `kotlin-fundamentals`, `angular-application-development`,
-  `angularjs-legacy-maintenance` (5 remaining).
+  questions, `content/interview-prep/{go,c,cpp}.ts`.
+- **Batch F (3/21 done, 19/21 total)**: `csharp-dotnet-fundamentals`, `php-web-development`,
+  `kotlin-fundamentals` -- 150 questions, `content/interview-prep/{csharp,php,kotlin}.ts`. One
+  placeholder-regex false positive caught and fixed (`csharp-interview-fundamentals-03` legitimately
+  referenced `string.Format` "placeholder syntax"; reworded to "indexed slots" rather than weakening the
+  regex). Remaining: `angular-application-development`, `angularjs-legacy-maintenance` (2 remaining --
+  Batch G). Post-batch validator run: 1400 questions across 28 course(s) (30 applicable, 3 exempt), 0
+  errors except the 2 still-missing Angular banks. `npx tsc --noEmit`, `npm run lint`, `npx vitest run`
+  all clean (757/757 tests, unchanged).
 
 ## Phase 10 — Guided chatbot navigator
 
