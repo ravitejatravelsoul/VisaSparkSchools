@@ -152,7 +152,7 @@ before/after regression coverage in `tests/unit/progress-merge.test.ts`.
 | ---- | ----------------------------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P9.1 | Question content schema + validator (>=50/course)           | completed   | `lib/interview-prep/types.ts` (`interviewQuestionSchema`, `MIN_QUESTIONS_PER_COURSE = 50`), validator section in `scripts/validate-content.ts` (global id uniqueness, per-course min-50 check, per-course near-duplicate check)                                                                                                                                                                       |
 | P9.2 | UI: `/courses/[slug]/interview-questions`                   | completed   | `app/(site)/courses/[courseSlug]/interview-questions/page.tsx`, shared `components/interview-prep/interview-prep-browser.tsx`                                                                                                                                                                                                                                                                         |
-| P9.3 | Question content per applicable course (all existing + new) | in progress | Resumed per owner instruction: a partial subset does not satisfy R9.1, which requires _every_ applicable course. 9 courses already complete (see below) will be kept, not rewritten. Building a programmatic catalog-wide classification first (see the new inventory validator), then authoring banks for every remaining applicable course, batch by batch, with a focused commit after each batch. |
+| P9.3 | Question content per applicable course (all existing + new) | completed | Resumed per owner instruction: a partial subset does not satisfy R9.1, which requires _every_ applicable course. All 21 remaining courses (Batches A-G) now authored, on top of the 9 already-complete courses kept as-is -- 30/30 applicable courses. `npm run content:validate` and `npm run content:interview-inventory` both pass with zero errors, proving full coverage programmatically rather than by self-report. See batch-by-batch evidence below. |
 | P9.4 | Exam-prep "Preparation Questions" variant                   | completed   | `content/interview-prep/{ielts,gre,pte,toefl}.ts`, 50 questions each (200 total), wired into `lib/interview-prep/registry.ts`; `app/(site)/courses/[courseSlug]/preparation-questions/page.tsx`                                                                                                                                                                                                       |
 | P9.5 | Search index/lazy-load integration                          | completed   | `app/sitemap.ts` (`interviewPrepRoutes` via `getCoursesWithInterviewPrep()`); pages are server-rendered, no lazy-load needed                                                                                                                                                                                                                                                                          |
 | P9.6 | Tests                                                       | completed   | `tests/unit/interview-prep-schema.test.ts`, `tests/integration/interview-prep-browser.test.tsx`, `tests/e2e/interview-prep.spec.ts` (8/8 passing, real Chromium), plus real-Chromium spot-checks of all 5 technical-course pages                                                                                                                                                                      |
@@ -204,6 +204,24 @@ complete from the earlier partial pass and are kept as-is):
   Batch G). Post-batch validator run: 1400 questions across 28 course(s) (30 applicable, 3 exempt), 0
   errors except the 2 still-missing Angular banks. `npx tsc --noEmit`, `npm run lint`, `npx vitest run`
   all clean (757/757 tests, unchanged).
+- **Batch G (2/21 done, 21/21 total -- Phase 9 content authoring complete)**: `angular-application-development`,
+  `angularjs-legacy-maintenance` -- 100 questions, `content/interview-prep/{angular,angularjs}.ts`.
+  AngularJS's bank is framed exclusively around legacy maintenance/security/modernization/migration (EOL
+  status, `$scope`/digest-cycle mechanics, `ngUpgrade`, `$sce` security, characterization testing) and
+  never presents AngularJS as current technology or conflates it with the separate Angular (2+) course.
+  Caught and fixed the same math error noted twice in Batch A (only 4x10=40 questions written instead of
+  5x10=50) -- added a genuine 5th category, "Promises, Debugging & Legacy Tooling" (10 new, non-overlapping
+  questions on `$q`, `$timeout`, common console errors, `$watch` variants, memory leaks, and DevTools
+  debugging), rather than padding the existing four.
+  **`npm run content:validate` now passes with zero errors**: 1500 interview/preparation questions across
+  30 course(s) (30 applicable, 3 exempt) -- every applicable course in the catalog has its required bank at
+  or above the 50-item minimum. `npm run content:interview-inventory` confirms the same: every listed course
+  shows `Status: OK`, exit code 0. `npx tsc --noEmit`, `npm run lint`, `npx vitest run` all clean (757/757
+  tests, unchanged by these purely-additive content changes).
+
+**Phase 9 status: complete.** The catalog-wide validator (not a self-report) now proves full interview/
+preparation-question coverage across every applicable course, per the explicit requirement that Phase 9 not
+be called complete until the validator itself proves it.
 
 ## Phase 10 — Guided chatbot navigator
 

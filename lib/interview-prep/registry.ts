@@ -31,6 +31,8 @@ import { cppInterviewQuestions } from "@/content/interview-prep/cpp";
 import { csharpInterviewQuestions } from "@/content/interview-prep/csharp";
 import { phpInterviewQuestions } from "@/content/interview-prep/php";
 import { kotlinInterviewQuestions } from "@/content/interview-prep/kotlin";
+import { angularInterviewQuestions } from "@/content/interview-prep/angular";
+import { angularjsInterviewQuestions } from "@/content/interview-prep/angularjs";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -67,6 +69,8 @@ const rawBanks: InterviewQuestionInput[][] = [
   csharpInterviewQuestions,
   phpInterviewQuestions,
   kotlinInterviewQuestions,
+  angularInterviewQuestions,
+  angularjsInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks
