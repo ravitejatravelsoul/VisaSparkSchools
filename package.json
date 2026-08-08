@@ -20,7 +20,8 @@
     "content:search-index": "tsx scripts/build-search-index.ts",
     "content:ai-index": "tsx scripts/ai-ingest.ts",
     "content:validate-snippets": "tsx scripts/validate-snippets.ts",
-    "content:interview-inventory": "tsx scripts/interview-prep-inventory.ts"
+    "content:interview-inventory": "tsx scripts/interview-prep-inventory.ts",
+    "security:scan-client-secrets": "tsx scripts/scan-client-secrets.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
