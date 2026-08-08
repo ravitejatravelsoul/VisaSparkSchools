@@ -25,6 +25,9 @@ import { dsaInterviewQuestions } from "@/content/interview-prep/dsa";
 import { seleniumInterviewQuestions } from "@/content/interview-prep/selenium";
 import { linuxShellInterviewQuestions } from "@/content/interview-prep/linux-shell";
 import { testAutomationFrameworkInterviewQuestions } from "@/content/interview-prep/test-automation-framework";
+import { goInterviewQuestions } from "@/content/interview-prep/go";
+import { cInterviewQuestions } from "@/content/interview-prep/c";
+import { cppInterviewQuestions } from "@/content/interview-prep/cpp";
 
 /**
  * Per-course question banks, added incrementally as content lands (see
@@ -55,6 +58,9 @@ const rawBanks: InterviewQuestionInput[][] = [
   seleniumInterviewQuestions,
   linuxShellInterviewQuestions,
   testAutomationFrameworkInterviewQuestions,
+  goInterviewQuestions,
+  cInterviewQuestions,
+  cppInterviewQuestions,
 ];
 
 export const allInterviewQuestions: InterviewQuestion[] = rawBanks

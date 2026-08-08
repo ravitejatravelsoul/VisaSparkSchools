@@ -193,10 +193,11 @@ complete from the earlier partial pass and are kept as-is):
   `content/interview-prep/{nodejs-express,java,dsa}.ts`.
 - **Batch D (3/21 done, 13/21 total)**: `selenium-webdriver-automation`, `linux-shell-fundamentals`,
   `test-automation-framework-engineering` -- 150 questions,
-  `content/interview-prep/{selenium,linux-shell,test-automation-framework}.ts`. Remaining:
-  `go-programming`, `c-programming`, `cpp-programming`, `csharp-dotnet-fundamentals`,
+  `content/interview-prep/{selenium,linux-shell,test-automation-framework}.ts`.
+- **Batch E (3/21 done, 16/21 total)**: `go-programming`, `c-programming`, `cpp-programming` -- 150
+  questions, `content/interview-prep/{go,c,cpp}.ts`. Remaining: `csharp-dotnet-fundamentals`,
   `php-web-development`, `kotlin-fundamentals`, `angular-application-development`,
-  `angularjs-legacy-maintenance` (8 remaining).
+  `angularjs-legacy-maintenance` (5 remaining).
 
 ## Phase 10 — Guided chatbot navigator
 
