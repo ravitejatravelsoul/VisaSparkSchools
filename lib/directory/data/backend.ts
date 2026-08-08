@@ -271,7 +271,9 @@ export const backendTechnologies: TechnologyInput[] = [
       "The Common Language Runtime (CLR)",
     ],
     example: {
-      language: "javascript",
+      // Terminal commands, not JavaScript -- runnerLanguageSchema has no
+      // "shell" option, so "none" is the honest label.
+      language: "none",
       code: `// terminal\ndotnet new console -o hello\ncd hello\ndotnet run`,
       explanation:
         "The dotnet CLI scaffolds, builds, and runs .NET projects across platforms -- the same commands work identically on Windows, Linux, or macOS.",
@@ -281,7 +283,8 @@ export const backendTechnologies: TechnologyInput[] = [
       "Desktop applications",
       "Cloud-native applications on Azure",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the C#/.NET Fundamentals course"],
+    courseId: "csharp-dotnet-fundamentals",
     projectIdeas: [
       "Scaffold and run a minimal console app, then a minimal web API, to see how the CLI structures each",
     ],

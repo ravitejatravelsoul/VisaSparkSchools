@@ -248,7 +248,8 @@ export const languageTechnologies: TechnologyInput[] = [
       "Laravel-based web applications",
       "Legacy and modern server-rendered sites alike",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the PHP Web Development course"],
+    courseId: "php-web-development",
     projectIdeas: ["A simple contact form that validates input and writes to a file or database"],
     references: [{ label: "PHP official manual", url: "https://www.php.net/manual/en/" }],
     searchKeywords: ["server-side scripting", "wordpress", "laravel"],
@@ -285,7 +286,10 @@ export const languageTechnologies: TechnologyInput[] = [
       "Compilation to machine code",
     ],
     example: {
-      language: "javascript",
+      // No "c" option exists in runnerLanguageSchema (C has no safe
+      // in-browser execution -- see RUNNER_CAPABILITY_MATRIX.md) -- "none"
+      // is the honest label rather than mislabeling real C as JavaScript.
+      language: "none",
       code: `int add(int a, int b) {\n    return a + b;\n}\n\nint main() {\n    int result = add(2, 3);\n    return 0;\n}`,
       explanation:
         "Every variable has an explicit type and a fixed memory size -- there's no garbage collector; the programmer is responsible for memory C dynamically allocates.",
@@ -295,7 +299,8 @@ export const languageTechnologies: TechnologyInput[] = [
       "Embedded systems",
       "Performance-critical libraries",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the C Programming course"],
+    courseId: "c-programming",
     projectIdeas: ["A simple linked-list implementation, managing memory manually"],
     references: [{ label: "cppreference: C", url: "https://en.cppreference.com/w/c" }],
     searchKeywords: ["systems programming", "pointers", "low-level"],
@@ -332,7 +337,9 @@ export const languageTechnologies: TechnologyInput[] = [
       "References",
     ],
     example: {
-      language: "javascript",
+      // No "cpp" option exists in runnerLanguageSchema (C++ has no safe
+      // in-browser execution) -- "none" is the honest label.
+      language: "none",
       code: `#include <vector>\n#include <iostream>\n\nint main() {\n    std::vector<int> nums = {1, 2, 3};\n    for (int n : nums) std::cout << n << " ";\n}`,
       explanation:
         "std::vector is part of the STL, a generic, type-safe container -- a much safer alternative to C's raw arrays and manual memory management.",
@@ -342,7 +349,8 @@ export const languageTechnologies: TechnologyInput[] = [
       "High-frequency trading systems",
       "Performance-critical libraries and infrastructure",
     ],
-    practiceOptions: [],
+    practiceOptions: ["Take the C++ Programming course"],
+    courseId: "cpp-programming",
     projectIdeas: ["A generic stack or queue implemented with templates"],
     references: [{ label: "cppreference: C++", url: "https://en.cppreference.com/w/cpp" }],
     searchKeywords: ["object-oriented", "stl", "templates", "performance"],
@@ -376,13 +384,16 @@ export const languageTechnologies: TechnologyInput[] = [
       "Nullable reference types",
     ],
     example: {
-      language: "javascript",
+      // No "csharp" option exists in runnerLanguageSchema (C# has no safe
+      // in-browser execution) -- "none" is the honest label.
+      language: "none",
       code: `var numbers = new List<int> { 1, 2, 3, 4 };\nvar evens = numbers.Where(n => n % 2 == 0).ToList();`,
       explanation:
         "LINQ (Where here) lets you query collections declaratively, similar in spirit to JavaScript's array .filter() -- a hallmark of C#'s functional-influenced style.",
     },
     useCases: ["ASP.NET web APIs", "Windows desktop applications", "Unity game development"],
-    practiceOptions: [],
+    practiceOptions: ["Take the C#/.NET Fundamentals course"],
+    courseId: "csharp-dotnet-fundamentals",
     projectIdeas: [
       "A small console app modeling a domain with classes and LINQ queries over a collection",
     ],

@@ -157,4 +157,36 @@ export const tracks: Track[] = [
       "A simple, statically-typed, compiled language built for concurrency and fast builds -- widely used for backend services, CLIs, and cloud infrastructure tooling.",
     order: 19,
   },
+  {
+    id: "c",
+    slug: "c",
+    title: "C Programming",
+    description:
+      "The systems language behind operating systems, embedded devices, and most other languages' runtimes -- manual memory management, pointers, and the C standard library.",
+    order: 20,
+  },
+  {
+    id: "cpp",
+    slug: "cpp",
+    title: "C++ Programming",
+    description:
+      "C's performance and control plus classes, templates, RAII, and the Standard Template Library -- still foundational for games, finance, and high-performance systems.",
+    order: 21,
+  },
+  {
+    id: "csharp",
+    slug: "csharp",
+    title: "C#/.NET Fundamentals",
+    description:
+      "A modern, statically-typed language and the .NET runtime behind it -- from language fundamentals through async/await and building a real console/API application.",
+    order: 22,
+  },
+  {
+    id: "php",
+    slug: "php",
+    title: "PHP Web Development",
+    description:
+      "The language behind a large share of the web's backends -- from request handling and forms through modern PHP practices like Composer and PSR autoloading.",
+    order: 23,
+  },
 ];

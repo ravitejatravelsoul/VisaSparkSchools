@@ -1607,4 +1607,244 @@ export const courses: CourseInput[] = [
       },
     ],
   },
+  {
+    id: "c-programming",
+    slug: "c-programming",
+    trackSlug: "c",
+    title: "C Programming",
+    description:
+      "The systems language behind operating systems and most other languages' runtimes -- from the compile-link-run model through pointers, dynamic memory, and undefined-behavior pitfalls.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    audience:
+      "Learners with some prior programming experience who want to understand manual memory management and how software runs closer to the machine.",
+    learningOutcomes: [
+      "Read and predict the behavior of real C programs covering variables, control flow, functions, and arrays",
+      "Explain how pointers, pointer arithmetic, and malloc/free work, and why C requires manual memory management",
+      "Identify common undefined-behavior pitfalls (buffer overflows, use-after-free, uninitialized variables) in a piece of C code",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: ["cpp-programming"],
+    relatedTechnologySlugs: ["c"],
+    modules: [
+      {
+        id: "c-fundamentals",
+        title: "C Fundamentals",
+        summary: "The compile-link-run model, variables and format specifiers, and control flow.",
+        lessonSlugs: ["c-introduction-and-toolchain", "c-variables-types-and-io", "c-control-flow"],
+      },
+      {
+        id: "c-functions-arrays",
+        title: "Functions & Arrays",
+        summary: "The stack, arrays, string handling, and multi-dimensional arrays.",
+        lessonSlugs: [
+          "c-functions-and-the-stack",
+          "c-arrays-and-strings",
+          "c-multidimensional-arrays",
+        ],
+      },
+      {
+        id: "c-pointers-memory",
+        title: "Pointers & Memory",
+        summary: "Pointers, pointer arithmetic, and dynamic memory with malloc/free.",
+        lessonSlugs: [
+          "c-pointers-basics",
+          "c-pointer-arithmetic-and-arrays",
+          "c-dynamic-memory-malloc-free",
+        ],
+      },
+      {
+        id: "c-structs-program-structure",
+        title: "Structs & Program Structure",
+        summary: "Structs and typedef, multi-file compilation, and undefined-behavior pitfalls.",
+        lessonSlugs: [
+          "c-structs-and-typedef",
+          "c-header-files-and-multifile-compilation",
+          "c-undefined-behavior-pitfalls",
+        ],
+      },
+    ],
+  },
+  {
+    id: "cpp-programming",
+    slug: "cpp-programming",
+    trackSlug: "cpp",
+    title: "C++ Programming",
+    description:
+      "C's performance and control plus classes, RAII, smart pointers, templates, and the Standard Template Library -- still foundational for games, finance, and high-performance systems.",
+    order: 0,
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    audience:
+      "Learners with some C or other programming experience who want to move into object-oriented, resource-safe C++.",
+    learningOutcomes: [
+      "Read and predict the behavior of real C++ programs covering classes, constructors/destructors, and templates",
+      "Explain RAII and why smart pointers are preferred over raw new/delete in modern C++",
+      "Describe how inheritance and virtual functions enable polymorphism, and how the STL's containers/algorithms are used",
+    ],
+    prerequisiteCourseSlugs: ["c-programming"],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["cpp"],
+    modules: [
+      {
+        id: "cpp-fundamentals",
+        title: "C++ Fundamentals",
+        summary: "What C++ adds over C, references and auto, and function overloading.",
+        lessonSlugs: [
+          "cpp-introduction-and-what-cpp-adds",
+          "cpp-variables-references-and-auto",
+          "cpp-control-flow-and-overloading",
+        ],
+      },
+      {
+        id: "cpp-classes-objects",
+        title: "Classes & Objects",
+        summary: "Constructors/destructors, encapsulation, and struct vs class.",
+        lessonSlugs: [
+          "cpp-classes-constructors-destructors",
+          "cpp-encapsulation-and-access-specifiers",
+          "cpp-struct-vs-class",
+        ],
+      },
+      {
+        id: "cpp-modern-memory",
+        title: "Modern C++ & Memory",
+        summary: "RAII, smart pointers, and references vs pointers.",
+        lessonSlugs: ["cpp-raii", "cpp-smart-pointers", "cpp-references-vs-pointers"],
+      },
+      {
+        id: "cpp-templates-stl-inheritance",
+        title: "Templates, STL & Inheritance",
+        summary: "Generic programming with templates, the STL, and inheritance/polymorphism.",
+        lessonSlugs: [
+          "cpp-templates",
+          "cpp-stl-vectors-and-algorithms",
+          "cpp-inheritance-and-polymorphism",
+        ],
+      },
+    ],
+  },
+  {
+    id: "csharp-dotnet-fundamentals",
+    slug: "csharp-dotnet-fundamentals",
+    trackSlug: "csharp",
+    title: "C#/.NET Fundamentals",
+    description:
+      "A modern, statically-typed language and the .NET runtime behind it -- from language fundamentals through LINQ, async/await, and the dotnet CLI.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 6,
+    audience:
+      "Learners with some prior programming experience who want a practical introduction to C# and the .NET ecosystem.",
+    learningOutcomes: [
+      "Read and predict the behavior of real C# programs covering classes, interfaces, and collections",
+      "Explain nullable reference types, LINQ, and the async/await model, and why each exists",
+      "Describe .NET project structure and the dotnet CLI's core commands",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["csharp", "dotnet"],
+    modules: [
+      {
+        id: "csharp-fundamentals",
+        title: "C# & .NET Fundamentals",
+        summary: "What .NET is, variables and interpolation, and control flow.",
+        lessonSlugs: [
+          "csharp-introduction-and-dotnet",
+          "csharp-variables-types-and-interpolation",
+          "csharp-control-flow",
+        ],
+      },
+      {
+        id: "csharp-oop",
+        title: "Object-Oriented C#",
+        summary: "Classes and properties, interfaces and inheritance, and access modifiers.",
+        lessonSlugs: [
+          "csharp-classes-properties-and-constructors",
+          "csharp-interfaces-and-inheritance",
+          "csharp-encapsulation-and-access-modifiers",
+        ],
+      },
+      {
+        id: "csharp-modern-features",
+        title: "Modern C# Features",
+        summary: "Nullable reference types, LINQ, and collections.",
+        lessonSlugs: [
+          "csharp-nullable-reference-types-and-null-operators",
+          "csharp-linq",
+          "csharp-collections",
+        ],
+      },
+      {
+        id: "csharp-async-structure",
+        title: "Async & Project Structure",
+        summary: "Async/await with Task, exception handling, and .NET project structure.",
+        lessonSlugs: [
+          "csharp-async-await-and-tasks",
+          "csharp-exception-handling",
+          "csharp-dotnet-project-structure-and-cli",
+        ],
+      },
+    ],
+  },
+  {
+    id: "php-web-development",
+    slug: "php-web-development",
+    trackSlug: "php",
+    title: "PHP Web Development",
+    description:
+      "The language behind a large share of the web's backends -- request handling, arrays, OOP, Composer, and basic web-security practices.",
+    order: 0,
+    difficulty: "beginner",
+    estimatedHours: 6,
+    audience:
+      "Learners with some prior programming experience who want a practical introduction to PHP for web backends.",
+    learningOutcomes: [
+      "Read and predict the behavior of real PHP programs covering variables, arrays, and control flow",
+      "Explain PHP's request-response model, superglobals, and object-oriented features (interfaces, traits, namespaces)",
+      "Identify basic web-security practices PHP code should follow (prepared statements, output escaping)",
+    ],
+    prerequisiteCourseSlugs: [],
+    nextCourseSlugs: [],
+    relatedTechnologySlugs: ["php"],
+    modules: [
+      {
+        id: "php-fundamentals",
+        title: "PHP Fundamentals",
+        summary: "The request-response model, variables and interpolation, and control flow.",
+        lessonSlugs: [
+          "php-introduction-and-request-response",
+          "php-variables-types-and-string-interpolation",
+          "php-control-flow",
+        ],
+      },
+      {
+        id: "php-functions-arrays",
+        title: "Functions & Arrays",
+        summary: "Functions and arguments, PHP's list-and-map arrays, and superglobals.",
+        lessonSlugs: ["php-functions-and-arguments", "php-arrays", "php-superglobals"],
+      },
+      {
+        id: "php-oop",
+        title: "OOP in PHP",
+        summary: "Classes and objects, interfaces and traits, and namespaces/autoloading.",
+        lessonSlugs: [
+          "php-classes-and-objects",
+          "php-interfaces-and-traits",
+          "php-namespaces-and-autoloading",
+        ],
+      },
+      {
+        id: "php-modern-practices",
+        title: "Modern PHP Practices",
+        summary: "Composer and package management, error handling, and security basics.",
+        lessonSlugs: [
+          "php-composer-and-package-management",
+          "php-error-and-exception-handling",
+          "php-security-basics",
+        ],
+      },
+    ],
+  },
 ];

@@ -1862,4 +1862,270 @@ export const projects: Project[] = [
     ],
     references: [{ label: "How to Write Go Code", url: "https://go.dev/doc/code" }],
   },
+  {
+    id: "c-contact-book",
+    slug: "c-contact-book",
+    title: "C Contact Book",
+    description:
+      "Design (on paper/in guided steps, since this platform can't execute C) a command-line contact book in C, applying structs, arrays, pointers, and manual memory management.",
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    isCapstone: true,
+    trackSlugs: ["c"],
+    prerequisiteLessonIds: [
+      "c-structs-and-typedef",
+      "c-arrays-and-strings",
+      "c-dynamic-memory-malloc-free",
+      "c-pointers-basics",
+    ],
+    objectives: [
+      "Design a Contact struct (name, phone, email) and a dynamically-resizable array of contacts using malloc/realloc",
+      "Write functions to add, search (by name), and remove a contact, passing the contact array by pointer",
+      "Free all allocated memory correctly before the program exits, with no leaks",
+      "Read/write the contact list to a text file so data survives between runs",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the Contact struct and storage",
+        description: "Define a Contact struct and a dynamically-growable array to hold contacts.",
+        checklist: [
+          "Contact struct has at minimum name, phone, and email fields",
+          "The contact array grows via malloc/realloc as contacts are added, not a fixed-size array",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Add and search functions",
+        description:
+          "Write add_contact and find_contact(name) functions operating on the array via a pointer.",
+        checklist: [
+          "add_contact grows the array if it's full before inserting",
+          "find_contact returns a clear 'not found' signal (e.g. NULL or -1) rather than undefined behavior",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Remove a contact without leaking or corrupting memory",
+        description:
+          "Write remove_contact(name) that shifts remaining entries and never double-frees.",
+        checklist: [
+          "Removing a contact doesn't leave a gap or duplicate entry in the array",
+          "No memory is freed twice, and no already-freed memory is accessed afterward",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Persist to a file and clean up",
+        description: "Save/load the contact list to a text file, and free all memory before exit.",
+        checklist: [
+          "Contacts saved on exit can be reloaded correctly on the next run",
+          "Every malloc'd block is freed exactly once before the program ends",
+        ],
+      },
+    ],
+    references: [{ label: "cppreference: C", url: "https://en.cppreference.com/w/c" }],
+  },
+  {
+    id: "cpp-library-catalog",
+    slug: "cpp-library-catalog",
+    title: "C++ Library Catalog",
+    description:
+      "Design (on paper/in guided steps, since this platform can't execute C++) a small book-catalog system in C++, applying classes, a vector of objects, smart pointers, and RAII.",
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    isCapstone: true,
+    trackSlugs: ["cpp"],
+    prerequisiteLessonIds: [
+      "cpp-classes-constructors-destructors",
+      "cpp-smart-pointers",
+      "cpp-stl-vectors-and-algorithms",
+      "cpp-inheritance-and-polymorphism",
+    ],
+    objectives: [
+      "Design a Book class (title, author, ISBN, checked-out status) with a constructor and destructor",
+      "Store the catalog in a std::vector<Book>, using <algorithm> functions to search and sort it",
+      "Use a smart pointer (std::unique_ptr or std::shared_ptr) somewhere a resource needs clear, RAII-driven ownership",
+      "Model at least one derived class (e.g. an EBook or ReferenceBook) using inheritance and a virtual function",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the Book class",
+        description: "Define a Book class with a constructor, destructor, and core fields.",
+        checklist: [
+          "Book has at minimum title, author, ISBN, and a checked-out boolean",
+          "The constructor initializes every field; the destructor is defined even if trivial",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Store and query the catalog",
+        description:
+          "Use std::vector<Book> plus <algorithm> functions (find_if, sort) to search and sort it.",
+        checklist: [
+          "A find-by-title function uses std::find_if rather than a hand-written loop",
+          "The catalog can be sorted by title or author using std::sort with a comparator",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Introduce a smart pointer",
+        description:
+          "Use std::unique_ptr or std::shared_ptr somewhere ownership genuinely needs it.",
+        checklist: [
+          "The smart pointer's ownership rationale is explained (why unique_ptr vs shared_ptr was chosen)",
+          "No raw new/delete is used for that resource",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Add a derived class with polymorphism",
+        description:
+          "Model an EBook or ReferenceBook subclass overriding a virtual function from Book.",
+        checklist: [
+          "The base class declares at least one virtual function (e.g. describe())",
+          "The derived class overrides it, and calling it through a Book* or Book& dispatches to the derived version",
+        ],
+      },
+    ],
+    references: [{ label: "cppreference: C++", url: "https://en.cppreference.com/w/cpp" }],
+  },
+  {
+    id: "csharp-task-console-app",
+    slug: "csharp-task-console-app",
+    title: "C# Console Task Manager",
+    description:
+      "Design (on paper/in guided steps, since this platform can't execute C#) a console-based task manager in C#, applying classes, List<T>, LINQ, and async/await.",
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    isCapstone: true,
+    trackSlugs: ["csharp"],
+    prerequisiteLessonIds: [
+      "csharp-classes-properties-and-constructors",
+      "csharp-linq",
+      "csharp-collections",
+      "csharp-async-await-and-tasks",
+    ],
+    objectives: [
+      "Design a TaskItem class (title, due date, completed status) with auto-properties",
+      "Store tasks in a List<TaskItem> and use LINQ (Where/OrderBy) to filter and sort them",
+      "Write an async method simulating loading tasks from a file or API, awaited from Main",
+      "Handle a 'task not found' case with proper exception handling (try/catch)",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the TaskItem class",
+        description:
+          "Define a TaskItem class with auto-properties for title, due date, and completed status.",
+        checklist: [
+          "TaskItem uses auto-properties (get; set;), not public fields",
+          "A constructor sets Title and DueDate; Completed defaults to false",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Store and query with LINQ",
+        description:
+          "Use a List<TaskItem> plus LINQ to filter incomplete tasks and sort by due date.",
+        checklist: [
+          "A LINQ query using Where filters to only incomplete tasks",
+          "A LINQ query using OrderBy sorts tasks by due date",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Add an async loading method",
+        description:
+          "Write an async Task<List<TaskItem>> method simulating a file/API load, awaited from Main.",
+        checklist: [
+          "The method is declared async and returns Task<List<TaskItem>>",
+          "Main (or an async entry point) awaits it rather than blocking synchronously",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Handle errors with try/catch",
+        description:
+          "Add a CompleteTask(id) method that throws for an unknown id, handled by the caller.",
+        checklist: [
+          "CompleteTask throws a specific exception type (not a bare Exception) for an unknown id",
+          "The calling code catches that specific exception and prints a clear message",
+        ],
+      },
+    ],
+    references: [
+      {
+        label: "C# official documentation (Microsoft Learn)",
+        url: "https://learn.microsoft.com/en-us/dotnet/csharp/",
+      },
+    ],
+  },
+  {
+    id: "php-blog-crud-backend",
+    slug: "php-blog-crud-backend",
+    title: "PHP Blog CRUD Backend",
+    description:
+      "Design (on paper/in guided steps, since this platform can't execute PHP) a small server-rendered blog backend in PHP, applying classes, arrays, and basic web-security practices.",
+    difficulty: "intermediate",
+    estimatedHours: 6,
+    isCapstone: true,
+    trackSlugs: ["php"],
+    prerequisiteLessonIds: [
+      "php-classes-and-objects",
+      "php-arrays",
+      "php-security-basics",
+      "php-superglobals",
+    ],
+    objectives: [
+      "Design a Post class (title, body, author, created-at) and a PostRepository for CRUD operations",
+      "Handle form submission via $_POST to create a new post, validating input before saving",
+      "Use prepared statements (conceptually) for any database query, never string-concatenated SQL",
+      "Escape all output with htmlspecialchars() to prevent XSS when rendering posts back to HTML",
+    ],
+    milestones: [
+      {
+        id: "m1",
+        title: "Design the Post class and repository",
+        description:
+          "Define a Post class and a PostRepository with create/read/update/delete methods.",
+        checklist: [
+          "Post has at minimum title, body, author, and a created-at timestamp",
+          "PostRepository's methods are named clearly (create, findById, update, delete)",
+        ],
+      },
+      {
+        id: "m2",
+        title: "Handle form submission safely",
+        description:
+          "Read $_POST data to create a new post, validating that required fields aren't empty.",
+        checklist: [
+          "Missing/empty required fields are rejected with a clear error, not silently saved",
+          "Input is validated before it reaches the repository, not after",
+        ],
+      },
+      {
+        id: "m3",
+        title: "Use prepared statements for any database access",
+        description:
+          "Describe (conceptually, no live database here) how every query uses bound parameters, never concatenated SQL.",
+        checklist: [
+          "No example query concatenates raw user input directly into SQL text",
+          "Parameter binding is used for every value that comes from user input",
+        ],
+      },
+      {
+        id: "m4",
+        title: "Escape output to prevent XSS",
+        description:
+          "Ensure every place a post's title/body is rendered back into HTML uses htmlspecialchars().",
+        checklist: [
+          "Every user-supplied field rendered into HTML is passed through htmlspecialchars()",
+          "The design explains why this matters even for content from 'trusted' logged-in users",
+        ],
+      },
+    ],
+    references: [{ label: "PHP official manual", url: "https://www.php.net/manual/en/" }],
+  },
 ];
