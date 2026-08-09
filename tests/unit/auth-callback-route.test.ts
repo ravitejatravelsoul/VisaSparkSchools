@@ -79,4 +79,64 @@ describe("/auth/callback route", () => {
     expect(res.headers.get("location")).toContain("/sign-in");
     expect(verifyOtp).not.toHaveBeenCalled();
   });
+
+  describe("type=recovery (password reset)", () => {
+    it("verifies a valid recovery token and redirects straight to /update-password, never through /welcome", async () => {
+      verifyOtp.mockResolvedValue({ error: null });
+      const { GET } = await import("@/app/auth/callback/route");
+      const req = new NextRequest(
+        "https://visasparkschools.example/auth/callback?token_hash=abc123&type=recovery&next=%2Fupdate-password",
+      );
+      const res = await GET(req);
+      expect(res.status).toBe(307);
+      const location = res.headers.get("location")!;
+      expect(location).toBe("https://visasparkschools.example/update-password");
+      expect(location).not.toContain("/welcome");
+      expect(verifyOtp).toHaveBeenCalledWith({ type: "recovery", token_hash: "abc123" });
+    });
+
+    it("defaults to /update-password when a recovery link has no explicit next param", async () => {
+      verifyOtp.mockResolvedValue({ error: null });
+      const { GET } = await import("@/app/auth/callback/route");
+      const req = new NextRequest(
+        "https://visasparkschools.example/auth/callback?token_hash=abc123&type=recovery",
+      );
+      const res = await GET(req);
+      expect(res.headers.get("location")).toBe("https://visasparkschools.example/update-password");
+    });
+
+    it("rejects an open-redirect attempt in a recovery link's next, falling back to /update-password", async () => {
+      verifyOtp.mockResolvedValue({ error: null });
+      const { GET } = await import("@/app/auth/callback/route");
+      const req = new NextRequest(
+        "https://visasparkschools.example/auth/callback?token_hash=abc123&type=recovery&next=https://evil.example.com",
+      );
+      const res = await GET(req);
+      const location = res.headers.get("location")!;
+      expect(location).toBe("https://visasparkschools.example/update-password");
+      expect(location).not.toContain("evil.example.com");
+    });
+
+    it("rejects a protocol-relative open-redirect attempt in a recovery link's next", async () => {
+      verifyOtp.mockResolvedValue({ error: null });
+      const { GET } = await import("@/app/auth/callback/route");
+      const req = new NextRequest(
+        "https://visasparkschools.example/auth/callback?token_hash=abc123&type=recovery&next=%2F%2Fevil.example.com",
+      );
+      const res = await GET(req);
+      const location = res.headers.get("location")!;
+      expect(location).toBe("https://visasparkschools.example/update-password");
+      expect(location).not.toContain("evil.example.com");
+    });
+
+    it("redirects to a recovery-specific sign-in error state when the link is invalid, expired, or already used", async () => {
+      verifyOtp.mockResolvedValue({ error: { message: "Token has expired" } });
+      const { GET } = await import("@/app/auth/callback/route");
+      const req = new NextRequest(
+        "https://visasparkschools.example/auth/callback?token_hash=abc123&type=recovery",
+      );
+      const res = await GET(req);
+      expect(res.headers.get("location")).toContain("/sign-in?recovery=error");
+    });
+  });
 });

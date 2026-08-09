@@ -72,6 +72,7 @@ const routes = [
   "/search",
   "/playground",
   "/sign-in",
+  "/update-password",
   "/privacy",
   "/this-page-does-not-exist",
   "/learn",

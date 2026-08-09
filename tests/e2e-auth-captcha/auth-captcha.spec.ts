@@ -132,7 +132,9 @@ test.describe("password reset", () => {
     },
   });
 
-  test("sends the solved token to the recovery endpoint", async ({ page }) => {
+  test("sends the solved token and the /update-password callback redirect to the recovery endpoint", async ({
+    page,
+  }) => {
     await page.goto("/reset-password");
     await page.getByLabel("Email").fill("learner@example.test");
 
@@ -143,6 +145,33 @@ test.describe("password reset", () => {
     await expect.poll(() => calls.length).toBeGreaterThan(0);
     expect(calls[0].pathname).toBe("/auth/v1/recover");
     expect(calls[0].captchaToken).toMatch(/^fake-turnstile-token-/);
+    // Proves the real Supabase SDK call -- not just the component's own
+    // call-construction, already covered at the unit level -- actually
+    // carries the callback URL that makes a recovery link land on
+    // /update-password instead of the signup-specific /welcome page.
+    expect(calls[0].redirectTo).toBe(`http://127.0.0.1:3101/auth/callback?next=%2Fupdate-password`);
+  });
+});
+
+test.describe("update-password", () => {
+  test.use({ mockRoutes: { routes: [turnstileScriptMock, turnstileFrameMock] } });
+
+  test("never renders the password form for a direct visit with no recovery session -- shows a safe invalid-link message instead", async ({
+    page,
+  }) => {
+    // No Supabase auth/v1 mock registered on purpose: the session check
+    // (getUser()) that gates this page runs server-side, so page-level
+    // interception can't reach it either way, and the isolated `.invalid`
+    // hostname guarantees that server-side call fails rather than reaching
+    // anything real -- the page must treat that exactly like "no session".
+    await page.goto("/update-password");
+
+    await expect(page.getByText(/invalid or has expired/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /request a new reset link/i })).toHaveAttribute(
+      "href",
+      "/reset-password",
+    );
+    await expect(page.getByLabel("New password")).toHaveCount(0);
   });
 });
 

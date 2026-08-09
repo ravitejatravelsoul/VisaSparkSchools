@@ -164,7 +164,7 @@ describe("AuthForm", () => {
     await waitFor(() => expect(push).toHaveBeenCalledWith("/dashboard"));
   });
 
-  it("passes the current CAPTCHA token to resetPasswordForEmail and resets the challenge after it resolves", async () => {
+  it("passes the current CAPTCHA token and the /update-password callback redirect to resetPasswordForEmail, then resets the challenge", async () => {
     resetPasswordForEmail.mockResolvedValue({ error: null });
     render(<AuthForm mode="reset" />);
 
@@ -174,6 +174,7 @@ describe("AuthForm", () => {
     await waitFor(() => expect(resetPasswordForEmail).toHaveBeenCalledTimes(1));
     expect(resetPasswordForEmail).toHaveBeenCalledWith("a@example.test", {
       captchaToken: "test-captcha-token",
+      redirectTo: `${window.location.origin}/auth/callback?next=%2Fupdate-password`,
     });
     expect(await screen.findByText(/check your email for a reset link/i)).toBeInTheDocument();
     expect(widgetResetSpy).toHaveBeenCalledTimes(1);

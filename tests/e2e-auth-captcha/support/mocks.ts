@@ -87,6 +87,8 @@ export const turnstileFrameMock: MockRoute = {
 export interface SupabaseAuthCall {
   pathname: string;
   captchaToken: string | null;
+  /** From the `redirect_to` query param GoTrue expects `redirectTo` as (see fetch.js's `qs['redirect_to']`), not the request body -- only meaningful for /recover. */
+  redirectTo: string | null;
 }
 
 /**
@@ -127,7 +129,11 @@ export function supabaseSignupSuccessMock(
       } catch {
         captchaToken = null;
       }
-      onCall({ pathname: url.pathname, captchaToken });
+      onCall({
+        pathname: url.pathname,
+        captchaToken,
+        redirectTo: url.searchParams.get("redirect_to"),
+      });
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -154,7 +160,11 @@ export function supabaseAuthMock(
       } catch {
         captchaToken = null;
       }
-      onCall({ pathname: url.pathname, captchaToken });
+      onCall({
+        pathname: url.pathname,
+        captchaToken,
+        redirectTo: url.searchParams.get("redirect_to"),
+      });
       await route.fulfill({
         status: 400,
         contentType: "application/json",

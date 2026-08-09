@@ -96,6 +96,14 @@ test("sign-in page explains accounts aren't configured, and guest mode still wor
   await expect(page).toHaveURL(/\/courses$/);
 });
 
+test("update-password page explains accounts aren't configured in guest mode, and never renders the password form", async ({
+  page,
+}) => {
+  await page.goto("/update-password");
+  await expect(page.getByText(/aren't configured for this deployment/i)).toBeVisible();
+  await expect(page.getByLabel("New password")).toHaveCount(0);
+});
+
 test("keyboard-only user can tab to and activate the skip link", async ({ page }) => {
   await page.goto("/");
   await page.keyboard.press("Tab");

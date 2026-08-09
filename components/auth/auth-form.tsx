@@ -10,6 +10,7 @@ import { Card, CardBody } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ArrowRightIcon } from "@/components/ui/icons";
 import { safeRedirectPath } from "@/lib/auth/safe-redirect";
+import { buildAuthCallbackUrl } from "@/lib/auth/callback-url";
 import { useTurnstileCaptcha } from "@/components/auth/use-turnstile-captcha";
 
 type Mode = "sign-in" | "reset";
@@ -98,6 +99,12 @@ export function AuthForm({ mode, next }: { mode: Mode; next?: string }) {
     if (mode === "reset") {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         captchaToken: captcha.token ?? undefined,
+        // Without this, the recovery link falls back to Supabase's
+        // dashboard-configured default Site URL with no `next`, which the
+        // callback route can't distinguish from a plain signup-confirmation
+        // link -- this is what makes the recovery link land on the
+        // dedicated /update-password step instead of /welcome.
+        redirectTo: buildAuthCallbackUrl(window.location.origin, "/update-password"),
       });
       // The form stays mounted either way (no navigation for "reset"), so a
       // Turnstile token -- single-use regardless of outcome -- must always
