@@ -53,8 +53,8 @@ export const placementPrepTechnologies: TechnologyInput[] = [
     ],
     references: [
       {
-        label: "Wikipedia: Quantitative reasoning",
-        url: "https://en.wikipedia.org/wiki/Quantitative_reasoning",
+        label: "Wikipedia: Numerical reasoning",
+        url: "https://en.wikipedia.org/wiki/Numerical_reasoning",
       },
     ],
     searchKeywords: ["aptitude", "quant", "placement test", "numerical reasoning"],

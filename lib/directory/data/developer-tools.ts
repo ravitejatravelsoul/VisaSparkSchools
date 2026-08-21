@@ -200,8 +200,8 @@ export const developerToolsTechnologies: TechnologyInput[] = [
     ],
     references: [
       {
-        label: "MDN: Firefox/Chrome DevTools guide",
-        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Testing/Cross_browser_testing/Your_own_testing_toolbox",
+        label: "MDN: What are browser developer tools?",
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Tools_and_setup/What_are_browser_developer_tools",
       },
     ],
     searchKeywords: ["devtools", "debugging", "editor", "terminal"],

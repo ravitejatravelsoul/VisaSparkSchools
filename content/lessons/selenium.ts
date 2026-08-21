@@ -2623,8 +2623,8 @@ console.log(diagnoseSeleniumFailure("SomeOtherException", null));`,
     lastReviewed: "2026-08-03",
     references: [
       {
-        label: "Selenium docs: Continuous integration",
-        url: "https://www.selenium.dev/documentation/test_practices/continuous_integration/",
+        label: "Selenium docs: Test practices",
+        url: "https://www.selenium.dev/documentation/test_practices/",
       },
     ],
     keywords: ["reporting", "ci", "headless", "maven surefire", "selenium"],

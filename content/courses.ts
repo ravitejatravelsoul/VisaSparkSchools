@@ -247,11 +247,12 @@ export const courses: CourseInput[] = [
     description: "Collaborate with version control, consume APIs, and query relational data.",
     order: 0,
     difficulty: "intermediate",
-    estimatedHours: 7,
+    estimatedHours: 8,
     audience:
       "Learners who can already program and now need the three tools every development team expects: version control, HTTP APIs, and a database.",
     learningOutcomes: [
       "Track work with Git and collaborate through branches and pull requests",
+      "Push, pull, and clone with a remote repository, and recover safely from a rejected push",
       "Explain how JSON and HTTP carry data between a client and a server",
       "Consume a REST API, including authentication and error handling",
       "Query, modify, aggregate, and join relational data with SQL",
@@ -267,8 +268,8 @@ export const courses: CourseInput[] = [
       {
         id: "git-module",
         title: "Version control with Git",
-        summary: "History, branching, and team workflow.",
-        lessonSlugs: ["git-basics", "git-branching-merging"],
+        summary: "History, branching, remotes, and team workflow.",
+        lessonSlugs: ["git-basics", "git-branching-merging", "git-remotes-push-pull"],
       },
       {
         id: "api-module",

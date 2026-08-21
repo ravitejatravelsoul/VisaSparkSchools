@@ -39,8 +39,8 @@ export const softwareTestingLessons: LessonInput[] = [
     lastReviewed: "2026-08-02",
     references: [
       {
-        label: "ISO/IEC 25010 System and Software Quality Models",
-        url: "https://iso25000.com/index.php/en/iso-25000-standards/iso-25010",
+        label: "ISO/IEC 25010:2011 System and Software Quality Models (official standard)",
+        url: "https://www.iso.org/standard/35733.html",
       },
     ],
     keywords: ["software testing", "quality", "QA", "quality assurance", "defects"],

@@ -27,8 +27,8 @@ export const gitApiSqlLessons: LessonInput[] = [
     lastReviewed: "2026-06-01",
     references: [
       {
-        label: "Git: Getting Started - Git Basics",
-        url: "https://git-scm.com/book/en/v2/Getting-Started-Git-Basics",
+        label: "Git: Git Basics - Getting a Git Repository",
+        url: "https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository",
       },
       { label: "Git: git-commit documentation", url: "https://git-scm.com/docs/git-commit" },
     ],
@@ -46,112 +46,184 @@ Because commits are snapshots layered on top of each other, they naturally form 
 
 **Diffs** are how Git shows you *what changed* between two snapshots (or between your working files and the last commit). A diff highlights added lines and removed lines, line by line, so a reviewer — or future you — can see precisely what was touched without re-reading the entire file. \`git diff\` shows unstaged changes; once something is staged, Git can diff that too.
 
-There's no real terminal in this lesson's exercises, so instead you'll represent commit histories as structured lists — the same idea \`git log\` shows you, just rendered as HTML instead of terminal text. The mental model is identical: a repository is a folder Git watches, changes get staged and committed as snapshots, and those snapshots stack up into a history you can read, diff, and trust.`,
-    example: {
-      language: "html",
-      description:
-        "A repository's commit history rendered as a simple ordered list, newest commit first — the same information `git log` would print, one entry per commit hash and message.",
-      code: `<!doctype html>
-<html>
-  <body>
-    <h1>my-project/ — commit history</h1>
-    <ol>
-      <li><strong>i7j8k9l</strong> — Fix typo in homepage heading</li>
-      <li><strong>e4f5g6h</strong> — Add styles.css</li>
-      <li><strong>a1b2c3d</strong> — Initial commit: add index.html</li>
-    </ol>
-  </body>
-</html>`,
-      editable: false,
-    },
-    guidedExercise: {
-      id: "git-basics-guided",
-      kind: "guided",
-      language: "html",
-      prompt:
-        "Add three commits to the history below, in order: 'Initial commit', 'Add README', and 'Fix homepage bug'. Represent each as an <li> with a short fake hash followed by a dash and the message.",
-      starterCode: `<!doctype html>
-<html>
-  <body>
-    <h1>practice-repo/ — commit history</h1>
-    <ol>
-      <!-- add three <li> commits here -->
-    </ol>
-  </body>
-</html>`,
-      solutionCode: `<!doctype html>
-<html>
-  <body>
-    <h1>practice-repo/ — commit history</h1>
-    <ol>
-      <li>abc1234 — Initial commit</li>
-      <li>def5678 — Add README</li>
-      <li>ghi9012 — Fix homepage bug</li>
-    </ol>
-  </body>
-</html>`,
-      harness: `
-        window.__report('t1', document.querySelectorAll('ol li').length === 3, 'The <ol> should contain exactly three <li> commit entries.');
-        window.__report('t2', document.body.textContent.includes('Initial commit'), 'Include a commit message for the initial commit.');
-        window.__report('t3', /README/i.test(document.body.textContent), 'Include a commit message that mentions README.');
-      `,
-      tests: [
-        { id: "t1", description: "The <ol> has exactly three <li> commits", hidden: false },
-        { id: "t2", description: "One commit message mentions the initial commit", hidden: false },
-        { id: "t3", description: "One commit message mentions README", hidden: true },
+This platform never runs Git commands for you — the guided local lab below has you install nothing beyond Git itself and practice this exact stage-then-commit workflow for real, in your own terminal, against a small disposable folder. The mental model stays identical either way: a repository is a folder Git watches, changes get staged and committed as snapshots, and those snapshots stack up into a history you can read, diff, and trust.`,
+    guidedLocalLab: {
+      id: "git-basics-gll-first-repo",
+      title: "Initialize a Repository and Make Your First Commits",
+      scenario:
+        "Create a real Git repository on your own machine and practice the stage-then-commit workflow against real files -- every command below runs in YOUR terminal; this platform does not execute any of them.",
+      requiredTools: [
+        { name: "Git", version: "2.x or newer" },
+        { name: "A terminal (or Git Bash on Windows)", version: "any current version" },
+      ],
+      setupSteps: [
+        "Open a terminal.",
+        "Create a dedicated, disposable practice folder: `mkdir git-basics-practice && cd git-basics-practice` — everything in this lab stays inside this one folder, so nothing outside it is ever at risk.",
+      ],
+      projectStructure: `git-basics-practice/
+  .git/            (created by git init)
+  README.md`,
+      starterFiles: [
+        {
+          path: "README.md",
+          content: `TODO: create this file yourself with: echo "# Git Basics Practice" > README.md
+It is listed here only to show the expected final structure -- you create it
+for real, in your own terminal, using the commands below.
+`,
+        },
+      ],
+      requirements: [
+        "The folder is a real Git repository (has a .git directory, created by `git init`).",
+        "README.md exists and was committed in an initial commit.",
+        "A second commit adds a line to README.md.",
+        "`git log` shows exactly two commits, newest first.",
+      ],
+      commands: [
+        { description: "Turn the folder into a Git repository", command: "git init" },
+        {
+          description: "Create a real file with real content",
+          command: 'echo "# Git Basics Practice" > README.md',
+        },
+        { description: "Stage the new file", command: "git add README.md" },
+        {
+          description: "Commit the staged change",
+          command: 'git commit -m "Initial commit: add README"',
+        },
+        {
+          description: "Add a second line to the file",
+          command: 'echo "Learning Git one commit at a time." >> README.md',
+        },
+        { description: "See exactly what changed before staging it", command: "git diff" },
+        {
+          description: "Stage and commit the second change",
+          command: 'git add README.md && git commit -m "Add description to README"',
+        },
+        { description: "Review the commit history", command: "git log" },
+      ],
+      expectedBehavior:
+        "`git log` prints two commits, newest first, each with its own commit hash (a string like `a1b2c3d` — an example placeholder; your actual hash will differ and that's expected, only that two distinct commits exist matters), author, date, and message: 'Add description to README' above 'Initial commit: add README'. `git diff` (run before the second commit) prints a `+` line showing exactly the sentence you added; once that change is staged and committed, `git diff` prints nothing at all.",
+      verificationSteps: [
+        {
+          command: "git log --oneline",
+          expectedResult:
+            "exactly two lines, each starting with a short commit hash followed by its message -- 'Add description to README' first (newest), then 'Initial commit: add README'",
+        },
+        {
+          command: "git status",
+          expectedResult:
+            "prints 'nothing to commit, working tree clean' -- confirming every change was committed",
+        },
+        {
+          command: "cat README.md",
+          expectedResult: "prints both lines you added, in the order you added them",
+        },
+      ],
+      troubleshooting: [
+        {
+          issue: "`fatal: not a git repository`",
+          fix: "You ran a git command outside git-basics-practice, or before `git init` succeeded -- confirm your location with `pwd` and that `git init` ran first.",
+        },
+        {
+          issue: "`git commit` opens a text editor instead of committing",
+          fix: 'You omitted `-m "message"` -- git commit needs either -m with a quoted message, or it opens your default editor to write one. Save and close that editor, or re-run the command with -m.',
+        },
+        {
+          issue: "Unsure whether a command here affects anything outside this folder",
+          fix: "Every command in this lab only touches git-basics-practice/ and the hidden .git/ folder inside it -- nothing outside this one folder is ever read, created, or changed.",
+        },
       ],
       hints: [
-        "Remember: a commit is a saved snapshot, and `git log` lists commits from newest to oldest.",
-        "Add your three commits as <li> items inside the existing <ol>, keeping the newest-first convention if you like.",
-        "Each <li> should read like a hash followed by a dash and the message, e.g. 'abc1234 — Initial commit'.",
-        "Example line: <li>abc1234 — Initial commit</li>",
+        "`git add` only stages a change for the next commit -- it does not send anything anywhere, and nothing is permanent in the history until `git commit` runs.",
+        "Run `git status` any time you're unsure what's staged, unstaged, or already committed -- it's always safe to run and never changes anything.",
+        "`git log` always lists commits newest-first, exactly the order you'd want to see 'what did I just do.'",
       ],
+      referenceSolution: {
+        summary:
+          "git init creates the repository. The first echo+add+commit sequence produces one commit containing README.md with one line. The second echo adds a line, git diff shows that addition before it's staged, and the second add+commit sequence produces a second commit. git log then shows both commits, newest first.",
+        files: [
+          {
+            path: "README.md",
+            content: `# Git Basics Practice
+Learning Git one commit at a time.
+`,
+          },
+        ],
+      },
+      extensionChallenge:
+        "Run `git log -p` (instead of plain `git log`) to see the full diff embedded in each commit's log entry -- notice it's the same information `git diff` showed you before committing, now permanently attached to the commit it belongs to.",
     },
-    independentExercise: {
-      id: "git-basics-independent",
-      kind: "independent",
-      language: "html",
+    guidedOutputLab: {
+      id: "git-basics-lab-init-add-commit-log",
+      title: "Guided walkthrough: git init, add, commit, log, diff",
+      language: "Git / Bash",
+      mode: "guided-editing",
       prompt:
-        "Build a five-commit history for a project called 'todo-app'. Use an <ol> with one <li> per commit, include at least one message containing the word 'Add' and one containing the word 'Fix'.",
-      starterCode: `<!doctype html>
-<html>
-  <body>
-    <h1>todo-app/ — commit history</h1>
-    <ol>
-      <!-- build five commits here -->
-    </ol>
-  </body>
-</html>`,
-      solutionCode: `<!doctype html>
-<html>
-  <body>
-    <h1>todo-app/ — commit history</h1>
-    <ol>
-      <li>1a2b3c4 — Fix crash when list is empty</li>
-      <li>5d6e7f8 — Add due-date field to tasks</li>
-      <li>9g0h1i2 — Add checkbox styling</li>
-      <li>3j4k5l6 — Fix typo in button label</li>
-      <li>7m8n9o0 — Initial commit: project skeleton</li>
-    </ol>
-  </body>
-</html>`,
-      harness: `
-        const items = document.querySelectorAll('ol li');
-        window.__report('t1', items.length >= 5, 'Add at least five <li> commit entries.');
-        const text = document.body.textContent;
-        window.__report('t2', /add/i.test(text), 'Include at least one commit message containing the word "Add".');
-        window.__report('t3', /fix/i.test(text), 'Include at least one commit message containing the word "Fix".');
-      `,
-      tests: [
-        { id: "t1", description: "At least five commits are listed", hidden: false },
-        { id: "t2", description: "At least one commit message contains 'Add'", hidden: false },
-        { id: "t3", description: "At least one commit message contains 'Fix'", hidden: true },
+        "Follow each step to see exactly what Git prints for the core stage-then-commit workflow -- this reads through the same commands as the guided local lab above; try them for real there when you're ready.",
+      steps: [
+        {
+          description:
+            "git init creates a hidden .git directory and starts tracking the folder. It prints a one-line confirmation.",
+          code: "git init",
+          expectedOutput:
+            "Initialized empty Git repository in /path/to/git-basics-practice/.git/",
+        },
+        {
+          description:
+            "After creating README.md and staging it with git add, git status shows it staged and ready to commit.",
+          code: `echo "# Git Basics Practice" > README.md
+git add README.md
+git status`,
+          expectedOutput: `On branch main
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+\tnew file:   README.md`,
+        },
+        {
+          description:
+            "git commit turns the staged snapshot into a permanent commit. The hash shown (a1b2c3d) is an EXAMPLE placeholder -- your real hash will be a different, unique string every time you run this.",
+          code: 'git commit -m "Initial commit: add README"',
+          expectedOutput: `[main (root-commit) a1b2c3d] Initial commit: add README
+ 1 file changed, 1 insertion(+)
+ create mode 100644 README.md`,
+        },
+        {
+          description:
+            "git diff shows unstaged changes -- here, the new line added to README.md before it's staged.",
+          code: `echo "Learning Git one commit at a time." >> README.md
+git diff`,
+          expectedOutput: `diff --git a/README.md b/README.md
+index 1234567..89abcde 100644
+--- a/README.md
++++ b/README.md
+@@ -1 +1,2 @@
+ # Git Basics Practice
++Learning Git one commit at a time.`,
+        },
+        {
+          description:
+            "git log lists commits newest-first. Both commit hashes shown here (d4e5f6a, a1b2c3d) are example placeholders, not real values you'll see.",
+          code: `git add README.md
+git commit -m "Add description to README"
+git log`,
+          expectedOutput: `commit d4e5f6a (HEAD -> main)
+Author: Your Name <you@example.com>
+Date:   [commit date]
+
+    Add description to README
+
+commit a1b2c3d
+Author: Your Name <you@example.com>
+Date:   [commit date]
+
+    Initial commit: add README`,
+        },
       ],
       hints: [
-        "Plan five short, distinct changes to a fictional to-do app before you start writing markup.",
-        "Each commit is one <li> inside the <ol>; keep messages short and specific, like a real commit message would be.",
-        "You need the literal words 'Add' and 'Fix' to appear (capitalization doesn't matter) inside at least one message each.",
-        "Example pair: <li>...— Add due-date field</li> and <li>...— Fix crash when list is empty</li>",
+        "The exact commit hashes you see in your own terminal will never match the examples here -- that's expected and correct; only the structure and message text matter.",
+        "git status is always safe to run and never changes anything -- use it whenever you're unsure what state you're in.",
       ],
     },
     commonMistakes: [
@@ -285,127 +357,160 @@ A pull request itself is not a Git concept — Git only knows about branches, co
       description:
         "main: commit 1 → commit 2 → commit 3 → (merge commit 6). feature/login-page branches off commit 2, adds commit 4 → commit 5, then a pull request merges commits 4 and 5 into main as merge commit 6, after which main contains all six commits' work.",
     },
-    example: {
-      language: "html",
-      description:
-        "Two branches represented as separate commit lists, followed by a note describing the merge that reunited them.",
-      code: `<!doctype html>
-<html>
-  <body>
-    <h1>main</h1>
-    <ol>
-      <li>3f3f3f3 — Set up project skeleton</li>
-      <li>2e2e2e2 — Add landing page</li>
-    </ol>
-    <h2>feature/login-page</h2>
-    <ol>
-      <li>5d5d5d5 — Add login form styling</li>
-      <li>4c4c4c4 — Add login form markup</li>
-    </ol>
-    <p>Merged pull request #4: feature/login-page into main.</p>
-  </body>
-</html>`,
-      editable: false,
-    },
-    guidedExercise: {
-      id: "git-branching-merging-guided",
-      kind: "guided",
-      language: "html",
-      prompt:
-        "Below is the 'main' branch history. Add a heading <h2>feature/nav-bar</h2>, an <ol> with two commits on that branch, and a closing <p> noting it was merged into main.",
-      starterCode: `<!doctype html>
-<html>
-  <body>
-    <h1>main</h1>
-    <ol>
-      <li>aaa1111 — Initial commit</li>
-    </ol>
-    <!-- add the feature/nav-bar branch and a merge note below -->
-  </body>
-</html>`,
-      solutionCode: `<!doctype html>
-<html>
-  <body>
-    <h1>main</h1>
-    <ol>
-      <li>aaa1111 — Initial commit</li>
-    </ol>
-    <h2>feature/nav-bar</h2>
-    <ol>
-      <li>bbb2222 — Add nav-bar markup</li>
-      <li>ccc3333 — Style nav-bar links</li>
-    </ol>
-    <p>Merged pull request #2: feature/nav-bar into main.</p>
-  </body>
-</html>`,
-      harness: `
-        window.__report('t1', /feature\\/nav-bar/.test(document.body.textContent), 'Add a heading naming the feature/nav-bar branch.');
-        window.__report('t2', document.querySelectorAll('h2 ~ ol li, ol li').length >= 3, 'The feature branch needs its own <ol> with two commits, in addition to main\\'s commit.');
-        window.__report('t3', /merged/i.test(document.body.textContent), 'Add a closing paragraph noting the branch was merged.');
-      `,
-      tests: [
-        { id: "t1", description: "Names the feature/nav-bar branch in a heading", hidden: false },
-        { id: "t2", description: "Feature branch has its own two-commit list", hidden: false },
-        { id: "t3", description: "A paragraph notes the merge happened", hidden: true },
+    guidedLocalLab: {
+      id: "git-branching-merging-gll-branch-and-merge",
+      title: "Create a Feature Branch, Make Commits, and Merge It Back",
+      scenario:
+        "Practice the real branch-then-commit-then-merge workflow in a disposable local repository, including seeing a fast-forward merge and reading `git log --graph` -- every command below runs in YOUR terminal; this platform does not execute any of them.",
+      requiredTools: [
+        { name: "Git", version: "2.x or newer" },
+        { name: "A terminal (or Git Bash on Windows)", version: "any current version" },
       ],
-      hints: [
-        "A branch is just a separate line of commits that started from an existing one — represent it as its own heading and list.",
-        "Add <h2>feature/nav-bar</h2> after the existing main history, followed by its own <ol>.",
-        "The feature branch's <ol> needs exactly two <li> commits describing nav-bar work.",
-        "Finish with something like: <p>Merged pull request #2: feature/nav-bar into main.</p>",
+      setupSteps: [
+        "Open a terminal.",
+        "Create a fresh practice repository: `mkdir git-branching-practice && cd git-branching-practice && git init`.",
+        'Make one commit on main so there\'s a starting point to branch from: `echo "# Branching Practice" > README.md && git add README.md && git commit -m "Initial commit"`.',
       ],
-    },
-    independentExercise: {
-      id: "git-branching-merging-independent",
-      kind: "independent",
-      language: "html",
-      prompt:
-        "Model a full pull request page: a heading naming a branch, at least three commits for that branch in an <ol>, and a paragraph stating 'Merged pull request' together with a PR number such as #7.",
-      starterCode: `<!doctype html>
-<html>
-  <body>
-    <!-- build the branch history and merge note here -->
-  </body>
-</html>`,
-      solutionCode: `<!doctype html>
-<html>
-  <body>
-    <h1>main</h1>
-    <ol>
-      <li>0a0a0a0 — Initial commit</li>
-    </ol>
-    <h2>feature/search-box</h2>
-    <ol>
-      <li>1b1b1b1 — Add search input</li>
-      <li>2c2c2c2 — Wire up search results list</li>
-      <li>3d3d3d3 — Add empty-results message</li>
-    </ol>
-    <p>Merged pull request #7: feature/search-box into main.</p>
-  </body>
-</html>`,
-      harness: `
-        const text = document.body.textContent;
-        window.__report('t1', /feature\\//.test(text), 'Name a feature branch (e.g. feature/search-box) in a heading.');
-        const listItems = document.querySelectorAll('ol li');
-        window.__report('t2', listItems.length >= 3, 'List at least three commits for the feature branch (main\\'s own commits may add more).');
-        window.__report('t3', /merged pull request/i.test(text), 'Include the phrase "Merged pull request".');
-        window.__report('t4', /#\\d+/.test(text), 'Include a PR number written like #7.');
-      `,
-      tests: [
-        { id: "t1", description: "Names a feature branch", hidden: false },
+      projectStructure: `git-branching-practice/
+  .git/
+  README.md
+  nav.md         (added on the feature branch)`,
+      starterFiles: [
         {
-          id: "t2",
-          description: "At least three commits are listed for the branch",
-          hidden: false,
+          path: "README.md",
+          content: "TODO: create this yourself with the setup command above.\n",
         },
-        { id: "t3", description: "Mentions 'Merged pull request'", hidden: false },
-        { id: "t4", description: "Includes a PR number like #7", hidden: true },
+      ],
+      requirements: [
+        "A branch named feature/nav-bar exists, created from main.",
+        "At least two commits exist on feature/nav-bar that do not exist on main.",
+        "feature/nav-bar is merged back into main.",
+        "`git log --oneline --graph --all` shows both the branch point and the merge.",
+      ],
+      commands: [
+        {
+          description: "Create and switch to a new branch in one step",
+          command: "git checkout -b feature/nav-bar",
+        },
+        { description: "Add a new file for the feature", command: 'printf "- Home\\n- About\\n" > nav.md' },
+        {
+          description: "Stage and commit it",
+          command: 'git add nav.md && git commit -m "Add nav-bar markup"',
+        },
+        {
+          description: "Make a second commit on the same branch",
+          command:
+            'printf "- Contact\\n" >> nav.md && git add nav.md && git commit -m "Add Contact link to nav-bar"',
+        },
+        { description: "Switch back to main", command: "git checkout main" },
+        { description: "Merge the feature branch into main", command: "git merge feature/nav-bar" },
+        {
+          description: "View the branch and merge in the commit graph",
+          command: "git log --oneline --graph --all",
+        },
+        {
+          description: "Delete the now-merged branch (safe: git refuses if it isn't fully merged)",
+          command: "git branch -d feature/nav-bar",
+        },
+      ],
+      expectedBehavior:
+        "Because nothing changed on main while feature/nav-bar was being worked on, `git merge feature/nav-bar` performs a fast-forward: main's pointer simply moves forward to the branch's latest commit, with no separate merge commit. `git log --oneline --graph --all` shows a single straight line of commits, not a diverging-then-rejoining shape -- that straight line is exactly what a fast-forward merge looks like.",
+      verificationSteps: [
+        {
+          command: "git branch",
+          expectedResult:
+            "lists only 'main' (feature/nav-bar was deleted in the last command, since it was safely merged first)",
+        },
+        {
+          command: "cat nav.md",
+          expectedResult:
+            "prints all three lines (Home, About, Contact) -- confirming both feature-branch commits are now part of main",
+        },
+        {
+          command: "git log --oneline",
+          expectedResult:
+            "shows all commits from both the initial commit and the two feature-branch commits, in one combined history",
+        },
+      ],
+      troubleshooting: [
+        {
+          issue: "`error: branch 'feature/nav-bar' is not fully merged`",
+          fix: "This means `git branch -d` correctly refused to delete a branch with unmerged work -- go back and confirm `git merge feature/nav-bar` actually completed successfully first.",
+        },
+        {
+          issue: "`git merge` opens a text editor for a merge commit message",
+          fix: "This only happens for a real (non-fast-forward) merge, which needs a message describing the merge itself -- save and close the editor to accept the default message, exactly like `git commit` without -m.",
+        },
+        {
+          issue: "Merge conflict markers (<<<<<<<, =======, >>>>>>>) appear in a file",
+          fix: "This lab is designed to avoid a real conflict, but if you experiment further and hit one: open the file, manually keep the correct lines, delete the marker lines themselves, then `git add` the file and `git commit` to complete the merge -- never force through a conflict without reading what both sides changed.",
+        },
       ],
       hints: [
-        "Think of a small feature (like a search box) and imagine three separate commits that built it up.",
-        "Use a heading for the branch name and an <ol> with three <li> commits underneath it.",
-        "The closing paragraph needs the exact phrase 'Merged pull request' plus a number written with a hash, like #7.",
-        "Example ending: <p>Merged pull request #7: feature/search-box into main.</p>",
+        "`git checkout -b <name>` is shorthand for creating a branch AND switching to it in one command.",
+        "A fast-forward merge just moves main's pointer forward -- it happens exactly when main hasn't diverged at all since the branch was created.",
+        "`git log --graph` is the easiest way to actually see branch/merge shape instead of just imagining it from a flat list.",
+      ],
+      referenceSolution: {
+        summary:
+          "git checkout -b creates and switches to feature/nav-bar. Two commits are made there (nav.md created, then extended). Switching back to main and merging fast-forwards main's pointer to include both commits, since main never diverged. The graph shows one straight line; the branch is then safely deleted since it's fully merged.",
+        files: [{ path: "nav.md", content: "- Home\n- About\n- Contact\n" }],
+      },
+      extensionChallenge:
+        "Before merging, make a NEW commit directly on main (e.g. edit README.md and commit it) so main and feature/nav-bar have both diverged -- then merge feature/nav-bar and compare: this time Git creates a real merge commit with two parents, and `git log --graph` shows the branches actually diverging and rejoining instead of one straight line.",
+    },
+    guidedOutputLab: {
+      id: "git-branching-merging-lab-branch-merge",
+      title: "Guided walkthrough: branch, commit, and fast-forward merge",
+      language: "Git / Bash",
+      mode: "guided-editing",
+      prompt:
+        "Follow each step to see exactly what Git prints when creating a branch, committing on it, and merging it back -- this reads through the same commands as the guided local lab above; try them for real there when you're ready.",
+      steps: [
+        {
+          description: "git checkout -b creates a new branch and switches to it in one step.",
+          code: "git checkout -b feature/nav-bar",
+          expectedOutput: "Switched to a new branch 'feature/nav-bar'",
+        },
+        {
+          description:
+            "A commit is made on the new branch. The hash shown (b2c3d4e) is an EXAMPLE placeholder -- your real hash will differ.",
+          code: `printf "- Home\\n- About\\n" > nav.md
+git add nav.md
+git commit -m "Add nav-bar markup"`,
+          expectedOutput: `[feature/nav-bar b2c3d4e] Add nav-bar markup
+ 1 file changed, 2 insertions(+)
+ create mode 100644 nav.md`,
+        },
+        {
+          description:
+            "Switching back to main and merging: because main never changed, Git performs a fast-forward -- no separate merge commit is created. Hashes shown are example placeholders.",
+          code: `git checkout main
+git merge feature/nav-bar`,
+          expectedOutput: `Switched to branch 'main'
+Updating a1b2c3d..c3d4e5f
+Fast-forward
+ nav.md | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 nav.md`,
+        },
+        {
+          description:
+            "git log --graph visualizes the history shape -- a fast-forward merge shows as one straight line, since main and the branch never diverged.",
+          code: "git log --oneline --graph --all",
+          expectedOutput: `* c3d4e5f (HEAD -> main, feature/nav-bar) Add nav-bar markup
+* a1b2c3d Initial commit`,
+        },
+        {
+          description:
+            "Once merged, the branch pointer is no longer needed. git branch -d (lowercase) only deletes a branch that's fully merged -- it refuses otherwise, as a safety check. The uppercase -D force-deletes even unmerged work, which is why this lab always uses lowercase -d.",
+          code: "git branch -d feature/nav-bar",
+          expectedOutput: "Deleted branch feature/nav-bar (was c3d4e5f).",
+        },
+      ],
+      hints: [
+        "A fast-forward merge (no separate merge commit) only happens when the target branch hasn't moved since the feature branch was created.",
+        "`git branch -d` refuses to delete an unmerged branch -- that refusal is a safety feature, not a bug, and is worth remembering before ever reaching for the force-delete `-D` instead.",
       ],
     },
     commonMistakes: [
@@ -472,6 +577,371 @@ A pull request itself is not a Git concept — Git only knows about branches, co
       "Branches let work happen in parallel without disturbing main, and pull requests turn the act of merging into a reviewed, collaborative conversation.",
     summary:
       "A branch is a pointer to a commit that lets you diverge from main safely; merging reunites two histories, occasionally producing a conflict a human must resolve. GitHub's pull-request workflow layers review and discussion on top of that merge.",
+    nextLessonSlug: "git-remotes-push-pull",
+  },
+  {
+    id: "git-remotes-push-pull",
+    slug: "git-remotes-push-pull",
+    title: "Remote Repositories, Push, Pull & Collaboration",
+    description:
+      "How a local repository connects to a remote one (GitHub or otherwise): configuring origin, pushing, fetching, pulling, cloning, and recovering from a rejected push.",
+    trackSlug: "git-api-sql",
+    courseSlug: "git-apis-sql",
+    order: 2,
+    difficulty: "beginner",
+    estimatedMinutes: 26,
+    prerequisites: ["git-branching-merging"],
+    objectives: [
+      "Explain the difference between a local repository and a remote repository",
+      "Configure, inspect, and correct a remote with git remote -v / add / rename / set-url",
+      "Explain what -u (--set-upstream) does on the first push, and why later pushes don't need it",
+      "Distinguish git fetch from git pull, and explain what git clone does",
+      "Read a non-fast-forward push rejection and recover from it safely, without force-pushing or resetting",
+    ],
+    skills: ["version-control", "git-remotes", "collaboration", "github"],
+    tech: [],
+    author: "VisaSparkSchools Curriculum Team",
+    reviewer: "VisaSparkSchools Curriculum Team",
+    lastReviewed: "2026-08-21",
+    references: [
+      {
+        label: "Git: Working with Remotes",
+        url: "https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes",
+      },
+      { label: "Git: git-push documentation", url: "https://git-scm.com/docs/git-push" },
+      { label: "Git: git-fetch documentation", url: "https://git-scm.com/docs/git-fetch" },
+      { label: "Git: git-pull documentation", url: "https://git-scm.com/docs/git-pull" },
+      { label: "Git: git-clone documentation", url: "https://git-scm.com/docs/git-clone" },
+    ],
+    keywords: [
+      "git remote",
+      "origin",
+      "git push",
+      "git pull",
+      "git fetch",
+      "git clone",
+      "upstream",
+      "non-fast-forward",
+      "collaboration",
+      "pull request",
+    ],
+    explanation: `Everything in the first two lessons happened in one place: your own \`.git\` folder, on your own machine. A **local repository** is exactly that -- private to you until you connect it to something else. A **remote repository** is a copy of that same repository hosted somewhere reachable over a network (GitHub, GitLab, a company server, or -- for this lesson's safe hands-on practice -- another folder on your own machine standing in for one). Git tracks the relationship between your local repository and any remotes it knows about; nothing is shared automatically. Nothing leaves your machine until you explicitly run a command that says so.
+
+**Remotes are just named URLs.** \`git remote -v\` lists every remote your repository currently knows about (nothing, for a brand-new repository). \`git remote add origin <repository-url>\` registers one, under a name -- almost always \`origin\` by convention for "the main remote this repository was cloned from or primarily pushes to." That name is just a label Git lets you choose; \`origin\` isn't special to Git itself, it's a near-universal human convention. If you typo'd a URL or need to point at a different host, \`git remote set-url origin <corrected-url>\` fixes it in place, and \`git remote rename origin upstream\` renames it without touching anything else.
+
+**The first push needs \`-u\` (or its long form, \`--set-upstream\`).** \`git push -u origin main\` does two things at once: it uploads your commits, and it records that your local \`main\` branch **tracks** \`origin/main\` -- meaning Git now remembers which remote branch \`main\` corresponds to. Every push or pull after that first one can just be \`git push\` or \`git pull\` with no arguments, because Git already knows where "there" is. \`git status\` and \`git branch -vv\` both show this tracking relationship, including whether you're ahead of, behind, or in sync with the remote.
+
+**\`git fetch\` and \`git pull\` are not the same command**, even though they're easy to conflate. \`git fetch\` downloads whatever's new on the remote and updates Git's *record* of it (visible as \`origin/main\`), but it never touches your working files or your current branch -- it's always safe to run, purely informational. \`git pull\` does a fetch, then immediately merges the fetched changes into your current branch -- it's really \`git fetch\` + \`git merge\` in one step. When you're not sure what a pull would change, fetching first and looking at the difference is the more cautious move.
+
+**\`git clone <repository-url>\` creates a brand-new local repository** by copying an existing remote one in full -- history and all -- and automatically sets up \`origin\` pointing back at it. It's how you'd start working on a project someone else already created, instead of running \`git init\` yourself.
+
+**A non-fast-forward rejection** is Git protecting you, not a sign of a broken repository. It happens when you try to push, but the remote branch has commits your local branch doesn't have yet -- usually because a teammate pushed first. Git refuses to silently overwrite work it can't see. **Before doing anything else, understand what this means**: your local history and the remote's history have diverged, and Git needs you to reconcile them, not discard one side. The safe fix is almost always \`git pull\` (which fetches the missing commits and merges them in, prompting you to resolve any real conflict) and *then* \`git push\` again, now that your branch actually contains everything the remote has. **Do not reach for \`git reset --hard\` or a force push as a routine fix for this** -- \`git reset --hard\` discards your own local work, and a force push (\`git push --force\`) can discard a teammate's pushed work from the remote entirely, permanently. If a force push is ever genuinely necessary (rewriting your own already-pushed history), \`git push --force-with-lease\` is the safer form -- it refuses to overwrite anything if the remote has changed since you last looked, unlike a bare \`--force\`. Neither is something a beginner workflow should need.
+
+**Authentication** happens outside of any command shown here: most setups today use a credential manager your OS or Git already has configured, an SSH key, or a browser-based sign-in prompt the first time you push to a new host -- never a token typed directly into a repository URL, which would leave it sitting in your shell history and Git's own remote configuration in plain text.
+
+**Pull requests, once more:** a pull request is not a Git command -- Git has no concept of one. It's a review workflow that GitHub (and similar platforms) builds on top of ordinary push, fetch, and branches: you push a branch, the platform lets you open a pull request comparing it to \`main\`, and once approved, the platform performs the actual merge (or you do, locally, then push the result) -- exactly as covered in the previous lesson.`,
+    guidedLocalLab: {
+      id: "git-remotes-gll-push-pull-clone",
+      title: "Push, Pull, Fetch, and Recover From a Rejected Push -- With a Real (Local) Remote",
+      scenario:
+        "Practice every remote command for real, without needing a GitHub account or network access: a second folder on your own machine, created as a Git \"bare\" repository, stands in for a real remote exactly the way GitHub would -- push, fetch, pull, and clone all work against it for real. A third folder plays a \"teammate\" so you can see a genuine non-fast-forward rejection and recover from it safely. Every command below runs in YOUR terminal; this platform does not execute any of them.",
+      requiredTools: [
+        { name: "Git", version: "2.x or newer" },
+        { name: "A terminal (or Git Bash on Windows)", version: "any current version" },
+      ],
+      setupSteps: [
+        "Open a terminal.",
+        "Create a dedicated, disposable practice folder: `mkdir git-remotes-practice && cd git-remotes-practice` — everything in this lab stays inside this one folder, so nothing outside it is ever at risk.",
+      ],
+      projectStructure: `git-remotes-practice/
+  project/            (your working repository)
+  fake-remote.git/    (a bare repo standing in for GitHub -- created by you)
+  teammate-clone/      (a second clone, standing in for a collaborator)`,
+      starterFiles: [
+        {
+          path: "project/README.md",
+          content: "TODO: create this yourself with the setup commands below.\n",
+        },
+      ],
+      requirements: [
+        "project/ is a real Git repository with an initial commit, pushed to fake-remote.git via a remote named origin.",
+        "teammate-clone/ is a real clone of fake-remote.git that has pushed at least one change back.",
+        "project/ has fetched and pulled the teammate's change.",
+        "A non-fast-forward push rejection was reproduced and recovered from with git pull, not a force push or reset.",
+      ],
+      commands: [
+        {
+          description: "Create the working repository and its first commit",
+          command:
+            'mkdir project && cd project && git init && echo "# Remote Practice" > README.md && git add README.md && git commit -m "Initial commit"',
+        },
+        {
+          description:
+            "Create a bare repository one level up to stand in for a real remote (GitHub, GitLab, etc.) -- entirely on your own machine, no account or network needed",
+          command: "cd .. && git init --bare fake-remote.git",
+        },
+        {
+          description: "Back in project/, confirm no remote is configured yet",
+          command: "cd project && git remote -v",
+        },
+        {
+          description: "Add the bare repo as a remote named origin (the conventional name)",
+          command: "git remote add origin ../fake-remote.git",
+        },
+        { description: "Confirm origin is registered, for both fetch and push", command: "git remote -v" },
+        {
+          description:
+            "Rename it, then rename it back -- this is exactly what you'd run to fix a mistyped remote name",
+          command: "git remote rename origin upstream && git remote rename upstream origin",
+        },
+        {
+          description:
+            "Push and set the upstream tracking relationship in one step (only needed this first time)",
+          command: "git push -u origin main",
+        },
+        {
+          description: "Confirm the tracking relationship git push -u just set up",
+          command: "git branch -vv",
+        },
+        {
+          description: "Simulate a teammate: clone the same remote into a second folder",
+          command: "cd .. && git clone fake-remote.git teammate-clone",
+        },
+        {
+          description: "As the teammate, make a change and push it (a normal push -- no -u needed, clone set tracking up automatically)",
+          command:
+            'cd teammate-clone && echo "Added by teammate" >> README.md && git add README.md && git commit -m "Teammate: update README" && git push',
+        },
+        {
+          description:
+            "Back in your own project/, fetch: this downloads the teammate's commit but does NOT touch your files",
+          command: "cd ../project && git fetch origin",
+        },
+        {
+          description: "Confirm fetch alone changed nothing in your working files",
+          command: "cat README.md",
+        },
+        {
+          description: "Now pull, which fetches AND merges -- this is the step that actually updates your files",
+          command: "git pull",
+        },
+        {
+          description: "Confirm your file now has the teammate's change too",
+          command: "cat README.md",
+        },
+        {
+          description:
+            "Set up a rejection on purpose: as the teammate, push another change first",
+          command:
+            'cd ../teammate-clone && echo "Second teammate change" >> README.md && git add README.md && git commit -m "Teammate: second update" && git push',
+        },
+        {
+          description:
+            "Meanwhile, without pulling first, make your own local commit in project/",
+          command:
+            'cd ../project && echo "Your own local change" >> README.md && git add README.md && git commit -m "Your own change"',
+        },
+        {
+          description:
+            "Try to push: Git REJECTS this (non-fast-forward) because origin/main now has a commit you don't have locally",
+          command: "git push",
+        },
+        {
+          description:
+            "The safe recovery: pull first (fetches and merges the teammate's commit into yours), THEN push",
+          command: "git pull && git push",
+        },
+      ],
+      expectedBehavior:
+        "The first `git push -u origin main` succeeds and prints a line ending in something like \"Branch 'main' set up to track 'origin/main'.\" After the teammate pushes, your `git fetch` prints an update to `origin/main` but `cat README.md` shows no change; `git pull` then updates it for real. The rejected push prints a line containing `[rejected]` and `(non-fast-forward)`, with a hint to \"Integrate the remote changes ... before pushing again\" -- that hint IS the recovery: `git pull` (which may open an editor for a merge commit message, exactly as in the previous lesson) followed by a normal `git push`, which then succeeds.",
+      verificationSteps: [
+        {
+          command: "git remote -v",
+          expectedResult:
+            "origin listed twice (fetch and push), pointing at ../fake-remote.git",
+        },
+        {
+          command: "git log --oneline",
+          expectedResult:
+            "shows your initial commit plus both the teammate's commits and your own change, all combined",
+        },
+        {
+          command: "git branch -vv",
+          expectedResult: "shows main tracking origin/main, with no \"ahead\"/\"behind\" count remaining after the final push succeeds",
+        },
+      ],
+      troubleshooting: [
+        {
+          issue: "`fatal: 'origin' does not appear to be a git repository` (or similar) when pushing",
+          fix: "Confirm `git remote -v` shows origin pointing at ../fake-remote.git, and that you're running the command from inside project/, not git-remotes-practice/ itself.",
+        },
+        {
+          issue: "`! [rejected] main -> main (non-fast-forward)`",
+          fix: "This is expected at the step that deliberately reproduces it -- it means the remote has a commit you don't have locally yet. Run `git pull` to merge it in, then `git push` again. Never `git push --force` or `git reset --hard` to make a rejection like this \"go away\" -- that discards real work instead of integrating it.",
+        },
+        {
+          issue: "A real GitHub/GitLab push instead asks for a username/password or hangs waiting for authentication",
+          fix: "This lab's local bare-repo remote never needs authentication, but a real hosted remote will use your OS credential manager, an SSH key, or a browser sign-in prompt -- never type a token directly into the remote URL; if a real push ever prompts unexpectedly, stop and confirm you're pushing to the repository you intend to before entering anything.",
+        },
+      ],
+      hints: [
+        "`git fetch` is always safe to run and never changes your working files -- when in doubt about what a pull would do, fetch first and look.",
+        "The tracking relationship set by `git push -u` is why every command after the first push can drop the `origin main` part.",
+        "A non-fast-forward rejection means 'the remote has something you don't,' not 'something is broken' -- `git pull` is almost always the right next step.",
+      ],
+      referenceSolution: {
+        summary:
+          "A bare repo (fake-remote.git) stands in for GitHub. project/ adds it as origin and pushes with -u to establish tracking. teammate-clone/ (a real clone) pushes changes that project/ must fetch-then-pull to receive. A deliberately unpulled local commit reproduces a real non-fast-forward rejection, recovered from with git pull followed by git push -- never a force push or reset.",
+        files: [
+          {
+            path: "project/README.md",
+            content: `# Remote Practice
+Added by teammate
+Second teammate change
+Your own local change
+`,
+          },
+        ],
+      },
+      extensionChallenge:
+        "Run `git log --oneline --graph --all` inside project/ after the final push and identify which commits came from you and which came from teammate-clone/ -- then run `git remote show origin` to see the full tracking-branch summary Git keeps for a configured remote.",
+    },
+    guidedOutputLab: {
+      id: "git-remotes-lab-real-remote-walkthrough",
+      title: "Guided walkthrough: connecting to a real hosted remote (e.g. GitHub)",
+      language: "Git / Bash",
+      mode: "guided-editing",
+      prompt:
+        "The guided local lab above uses a local folder as a safe stand-in for a real remote. This walkthrough shows what the exact same commands look like against a REAL hosted remote such as GitHub -- read it here; the repository URL, username, and commit hashes below are EXAMPLE PLACEHOLDERS, not real values.",
+      steps: [
+        {
+          description:
+            "Adding a real hosted remote works identically -- only the URL differs from the local practice lab. <repository-url> and <your-username> are placeholders here, never real values to copy.",
+          code: "git remote add origin https://github.com/<your-username>/<repository-name>.git",
+          expectedOutput: "(no output -- git remote add succeeds silently)",
+        },
+        {
+          description: "git remote -v confirms it's registered, exactly as in the local lab.",
+          code: "git remote -v",
+          expectedOutput: `origin  https://github.com/<your-username>/<repository-name>.git (fetch)
+origin  https://github.com/<your-username>/<repository-name>.git (push)`,
+        },
+        {
+          description:
+            "The first push authenticates via your OS credential manager, an SSH key, or a browser sign-in prompt -- never a token pasted into the URL itself.",
+          code: "git push -u origin main",
+          expectedOutput: `Enumerating objects: 3, done.
+Writing objects: 100% (3/3), 245 bytes | 245.00 KiB/s, done.
+To https://github.com/<your-username>/<repository-name>.git
+ * [new branch]      main -> main
+branch 'main' set up to track 'origin/main'.`,
+        },
+        {
+          description: "Every later push, with tracking already set up, needs no extra arguments.",
+          code: "git push",
+          expectedOutput: "Everything up-to-date",
+        },
+        {
+          description: "git clone recreates the full repository, history included, from the remote URL.",
+          code: "git clone https://github.com/<your-username>/<repository-name>.git",
+          expectedOutput: `Cloning into '<repository-name>'...
+remote: Enumerating objects: 3, done.
+Receiving objects: 100% (3/3), done.`,
+        },
+        {
+          description:
+            "A non-fast-forward rejection looks identical to the local lab, whether the remote is GitHub or a folder on your own disk.",
+          code: "git push",
+          expectedOutput: ` ! [rejected]        main -> main (non-fast-forward)
+error: failed to push some refs to 'https://github.com/<your-username>/<repository-name>.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.`,
+        },
+      ],
+      hints: [
+        "Every command here is byte-for-byte the same as the guided local lab -- only the URL points somewhere real instead of a local folder.",
+        "A commit hash, byte count, or object count you see in a real terminal will never match these examples exactly -- only the structure and the words Git prints around them matter.",
+      ],
+    },
+    commonMistakes: [
+      "Typing a personal access token or password directly into a remote URL (`https://TOKEN@github.com/...`) -- it ends up saved in plain text in `.git/config` and your shell history.",
+      "Treating a non-fast-forward rejection as something to force past with `git push --force` -- that can permanently discard a teammate's already-pushed commits.",
+      "Reaching for `git reset --hard` to 'clean up' after a rejected push -- that discards your OWN uncommitted or unpushed work instead of integrating it.",
+      "Assuming `git fetch` updates your working files -- it only updates Git's record of the remote; only `git pull` (or a later manual merge) actually changes what you see.",
+      "Forgetting `-u` on the very first push, then being confused why later `git push` alone fails with no upstream configured.",
+    ],
+    quiz: [
+      {
+        id: "q1",
+        prompt: "What does `git push -u origin main` do that a later plain `git push` doesn't need to repeat?",
+        choices: [
+          "It creates the remote repository for the first time",
+          "It sets up a tracking relationship between local main and origin/main, so future push/pull need no arguments",
+          "It deletes the local branch after pushing",
+          "It permanently disables force pushes",
+        ],
+        correctIndex: 1,
+        explanation:
+          "-u (--set-upstream) records that local main tracks origin/main; every later push or pull can then omit the remote and branch name.",
+      },
+      {
+        id: "q2",
+        prompt: "What is the key difference between `git fetch` and `git pull`?",
+        choices: [
+          "They are identical; fetch is just an older name for pull",
+          "fetch downloads and updates Git's record of the remote without touching your files; pull does that AND merges into your current branch",
+          "pull only works on the main branch; fetch works on any branch",
+          "fetch requires authentication; pull does not",
+        ],
+        correctIndex: 1,
+        explanation:
+          "git pull is effectively git fetch followed by git merge -- fetch alone is always safe and never changes your working files.",
+      },
+      {
+        id: "q3",
+        prompt: "What does a non-fast-forward push rejection mean?",
+        choices: [
+          "Your repository is corrupted and needs to be reset",
+          "The remote branch has commits your local branch doesn't have yet, so Git refuses to silently overwrite them",
+          "You don't have permission to push to this repository",
+          "Your commit messages are formatted incorrectly",
+        ],
+        correctIndex: 1,
+        explanation:
+          "It's Git protecting existing remote history from being silently discarded -- the safe fix is to pull the missing commits in, then push again.",
+      },
+      {
+        id: "q4",
+        prompt: "What is the safest recommended recovery from a non-fast-forward rejection?",
+        choices: [
+          "git push --force",
+          "git reset --hard origin/main",
+          "git pull, then git push again",
+          "Delete the local repository and clone it fresh",
+        ],
+        correctIndex: 2,
+        explanation:
+          "git pull integrates the remote's commits into yours (prompting for a merge if needed), after which a normal push succeeds without discarding anyone's work.",
+      },
+      {
+        id: "q5",
+        prompt: "Where should real authentication credentials for a hosted remote live?",
+        choices: [
+          "Typed directly into the remote URL, e.g. https://TOKEN@github.com/...",
+          "In a commit message, so teammates know which account pushed",
+          "In an OS credential manager, an SSH key, or via a provider's browser-based sign-in -- never embedded in the URL itself",
+          "Committed to a .env file inside the repository",
+        ],
+        correctIndex: 2,
+        explanation:
+          "Embedding a token in a URL leaves it in .git/config and shell history in plain text; a credential manager, SSH key, or browser auth flow avoids that entirely.",
+      },
+    ],
+    takeaway:
+      "A remote is just a named URL Git can push to and pull from; -u sets up that relationship once, fetch is always safe, pull merges, and a rejected push means 'integrate first' -- never 'force past it.'",
+    summary:
+      "git remote -v/add/rename manage named connections to other repositories (conventionally origin). git push -u origin main pushes and sets up tracking for every later plain git push. git fetch downloads without touching files; git pull fetches and merges. git clone recreates a whole repository from a remote. A non-fast-forward rejection means the remote has commits you don't -- pull, then push again, never force or reset.",
     nextLessonSlug: "json-http-basics",
   },
   {
@@ -482,10 +952,10 @@ A pull request itself is not a Git concept — Git only knows about branches, co
       "The data format (JSON) and vocabulary (HTTP methods and status codes) almost every web API uses to exchange information.",
     trackSlug: "git-api-sql",
     courseSlug: "git-apis-sql",
-    order: 2,
+    order: 3,
     difficulty: "beginner",
     estimatedMinutes: 20,
-    prerequisites: ["git-branching-merging"],
+    prerequisites: ["git-remotes-push-pull"],
     objectives: [
       "Read and write valid JSON, including nested objects and arrays",
       "Explain what GET, POST, PUT, and DELETE requests are typically used for",
@@ -746,7 +1216,7 @@ console.log(JSON.stringify(apiResponse.body));`,
       "How REST APIs organize functionality around resources and URLs, and how API keys and tokens prove who's calling.",
     trackSlug: "git-api-sql",
     courseSlug: "git-apis-sql",
-    order: 3,
+    order: 4,
     difficulty: "beginner",
     estimatedMinutes: 22,
     prerequisites: ["json-http-basics"],
@@ -993,7 +1463,7 @@ console.log(callApi("/me", "demo-key-123"));`,
       "How relational databases organize data into tables, and how foreign keys connect those tables to each other.",
     trackSlug: "git-api-sql",
     courseSlug: "git-apis-sql",
-    order: 4,
+    order: 5,
     difficulty: "beginner",
     estimatedMinutes: 22,
     prerequisites: ["api-rest-basics"],
@@ -1158,7 +1628,7 @@ WHERE id = ___;`,
       "Narrowing down a table to just the rows you want with WHERE, and controlling their order with ORDER BY.",
     trackSlug: "git-api-sql",
     courseSlug: "git-apis-sql",
-    order: 5,
+    order: 6,
     difficulty: "beginner",
     estimatedMinutes: 24,
     prerequisites: ["sql-tables-relationships"],
@@ -1321,7 +1791,7 @@ WHERE price < ___;`,
     description: "Adding new rows, modifying existing ones, and removing rows you no longer need.",
     trackSlug: "git-api-sql",
     courseSlug: "git-apis-sql",
-    order: 6,
+    order: 7,
     difficulty: "beginner",
     estimatedMinutes: 26,
     prerequisites: ["sql-select-filtering"],
@@ -1505,7 +1975,7 @@ SELECT id, customer_name FROM orders ORDER BY id ASC;`,
       "Summarizing rows into totals and counts with GROUP BY, and pulling related data together across tables with JOIN.",
     trackSlug: "git-api-sql",
     courseSlug: "git-apis-sql",
-    order: 7,
+    order: 8,
     difficulty: "beginner",
     estimatedMinutes: 28,
     prerequisites: ["sql-insert-update-delete"],

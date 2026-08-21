@@ -605,7 +605,7 @@ Reaching for the semantically correct element over a generic \`<div>\` costs not
     references: [
       {
         label: "MDN: Web forms",
-        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Webforms",
+        url: "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms",
       },
       {
         label: "MDN: The label element",

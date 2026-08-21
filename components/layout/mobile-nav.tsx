@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { PrimaryNavMobile } from "@/components/layout/primary-nav";
 import { AccountNav } from "@/components/auth/account-nav";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { MenuIcon, CloseIcon } from "@/components/ui/icons";
 import { useModalA11y } from "@/lib/hooks/use-modal-a11y";
 
@@ -24,14 +25,14 @@ export function MobileNav() {
   });
 
   return (
-    <div className="md:hidden">
+    <div className="xl:hidden">
       <button
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-expanded={open}
         aria-controls={dialogId}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-border-strong) text-(--color-ink) transition-colors hover:bg-(--color-surface-sunken)"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-(--color-border-strong) text-(--color-ink) transition-colors hover:bg-(--color-surface-sunken)"
         aria-label="Open navigation menu"
       >
         <MenuIcon width={20} height={20} />
@@ -55,15 +56,20 @@ export function MobileNav() {
             >
               <div className="mb-6 flex items-center justify-between">
                 <span className="font-semibold">Menu</span>
-                <button
-                  ref={closeButtonRef}
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-(--color-border-strong) hover:bg-(--color-surface-sunken)"
-                  aria-label="Close navigation menu"
-                >
-                  <CloseIcon width={16} height={16} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="sm:hidden">
+                    <ThemeToggle />
+                  </span>
+                  <button
+                    ref={closeButtonRef}
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-(--color-border-strong) hover:bg-(--color-surface-sunken)"
+                    aria-label="Close navigation menu"
+                  >
+                    <CloseIcon width={16} height={16} />
+                  </button>
+                </div>
               </div>
               <PrimaryNavMobile onNavigate={() => setOpen(false)} />
               <ul className="mt-1 flex flex-col gap-1">

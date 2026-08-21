@@ -532,6 +532,7 @@ ok(
     "studyinthestates.dhs.gov",
     "uscis.gov",
     "travel.state.gov",
+    "usa.gov",
     "canada.ca",
     "gov.uk",
     "homeaffairs.gov.au",

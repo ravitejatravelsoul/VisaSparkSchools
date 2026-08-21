@@ -221,8 +221,8 @@ console.log(firstAndLast([42]));`,
     lastReviewed: "2026-08-03",
     references: [
       {
-        label: "MDN: Big O notation primer (Web Performance glossary)",
-        url: "https://developer.mozilla.org/en-US/docs/Glossary/Big_O_notation",
+        label: "Wikipedia: Big O notation",
+        url: "https://en.wikipedia.org/wiki/Big_O_notation",
       },
     ],
     keywords: ["big o", "time complexity", "space complexity", "asymptotic analysis"],

@@ -463,9 +463,8 @@ console.log(insertEnrollment(learners, courses, { learnerId: 1, courseId: 999 })
     lastReviewed: "2026-08-03",
     references: [
       {
-        label:
-          "PostgreSQL Wiki — Database normalization (community reference, links to formal treatments)",
-        url: "https://wiki.postgresql.org/wiki/Database_design",
+        label: "IBM: What is database normalization?",
+        url: "https://www.ibm.com/think/topics/database-normalization",
       },
     ],
     keywords: ["normalization", "1nf", "2nf", "functional dependency", "database design"],
@@ -673,8 +672,8 @@ console.log(violates2NF(["learner_id", "course_id"], "enrolled_at", ["learner_id
     lastReviewed: "2026-08-03",
     references: [
       {
-        label: "PostgreSQL Wiki — Database design resources",
-        url: "https://wiki.postgresql.org/wiki/Database_design",
+        label: "IBM: What is database normalization?",
+        url: "https://www.ibm.com/think/topics/database-normalization",
       },
     ],
     keywords: [

@@ -4,7 +4,7 @@ test("nav to Study Abroad directory to a country roadmap, then expand a step", a
   page,
   isMobile,
 }) => {
-  // The desktop PrimaryNav (components/layout/header.tsx) is `hidden md:block`;
+  // The desktop PrimaryNav (components/layout/header.tsx) is `hidden xl:block`;
   // on mobile the same link only exists inside the drawer nav, which
   // technology-directory.spec.ts's equivalent nav test already covers
   // separately -- same skip convention used there.

@@ -35,6 +35,7 @@ describe("Study Abroad content registry", () => {
       "studyinthestates.dhs.gov",
       "uscis.gov",
       "travel.state.gov",
+      "usa.gov",
       "canada.ca",
       "gov.uk",
       "homeaffairs.gov.au",

@@ -587,8 +587,8 @@ describe("the real content registry", () => {
     expect(selenium.prerequisiteCourseSlugs).toContain("java-programming-foundations");
   });
 
-  it("the platform-wide guided-local-lab total is exactly 21 (12 pre-Phase-5C + 9 new: 3 each for Playwright, Selenium, Linux/Shell) plus Test Automation Framework Engineering's 3, for 24 total", () => {
+  it("the platform-wide guided-local-lab total is exactly 27 (the prior 24, plus git-basics and git-branching-merging converted from a misleading live-runner HTML exercise to real guided git-command practice, plus the new git-remotes-push-pull lesson)", () => {
     const totalLabs = allLessons.filter((l) => l.guidedLocalLab).length;
-    expect(totalLabs).toBe(24);
+    expect(totalLabs).toBe(27);
   });
 });

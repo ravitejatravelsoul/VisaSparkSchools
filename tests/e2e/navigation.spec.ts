@@ -61,3 +61,85 @@ test("mobile: header nav drawer traps Tab focus and restores it to the trigger o
   await expect(dialog).not.toBeVisible();
   await expect(trigger).toBeFocused();
 });
+
+test("mobile header shows the full brand name, an auth CTA, and a >=44px menu button, with no horizontal overflow", async ({
+  page,
+}) => {
+  for (const width of [320, 360, 375, 390, 412, 430]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+
+    // Never icon-only: some form of the brand name is always visible.
+    const brandLink = page.locator("header a[aria-label]").first();
+    await expect(brandLink).toContainText(/VisaSpark/);
+
+    // Exactly one auth CTA, and it meets the 44px touch-target minimum.
+    const signIn = page.getByRole("link", { name: "Sign in" });
+    await expect(signIn).toBeVisible();
+    const signInBox = await signIn.boundingBox();
+    expect(signInBox?.height).toBeGreaterThanOrEqual(44);
+
+    const menuButton = page.getByRole("button", { name: "Open navigation menu" });
+    const menuBox = await menuButton.boundingBox();
+    expect(menuBox?.width).toBeGreaterThanOrEqual(44);
+    expect(menuBox?.height).toBeGreaterThanOrEqual(44);
+
+    const overflowX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflowX, `horizontal overflow at ${width}px`).toBe(false);
+  }
+});
+
+test("tablet/small-laptop widths (768-1279) use the mobile drawer, not a cramped full nav", async ({
+  page,
+}) => {
+  for (const width of [768, 1024, 1152]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+
+    await expect(page.getByRole("button", { name: "Open navigation menu" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Primary" })).toBeHidden();
+
+    // The full, untruncated brand name has room now that the link list is
+    // deferred to the drawer -- this is the specific regression a previous
+    // version of this layout had at these exact widths.
+    await expect(page.getByRole("link", { name: "VisaSparkSchools" }).first()).toBeVisible();
+
+    const overflowX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflowX, `horizontal overflow at ${width}px`).toBe(false);
+  }
+});
+
+test("desktop widths (1280+) show the full primary nav without wrapping or truncation", async ({
+  page,
+}) => {
+  for (const width of [1280, 1920]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/");
+
+    await expect(page.getByRole("button", { name: "Open navigation menu" })).toBeHidden();
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    await expect(nav).toBeVisible();
+    await expect(page.getByRole("link", { name: "VisaSparkSchools" }).first()).toBeVisible();
+
+    // Every nav link and header button stays on a single line -- text
+    // wrapping onto a second line was the concrete symptom of the
+    // container-too-narrow regression this test guards against.
+    const singleLineTargets = await page
+      .locator('header a[href], header button:not([aria-label="Toggle theme"])')
+      .all();
+    for (const el of singleLineTargets) {
+      if (!(await el.isVisible())) continue;
+      const box = await el.boundingBox();
+      expect(box?.height ?? 0, `${await el.textContent()} wrapped at ${width}px`).toBeLessThan(48);
+    }
+
+    const overflowX = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    );
+    expect(overflowX, `horizontal overflow at ${width}px`).toBe(false);
+  }
+});

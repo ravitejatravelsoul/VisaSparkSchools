@@ -2043,8 +2043,8 @@ function buildErrorEnvelope(code, message) {
     lastReviewed: "2026-08-03",
     references: [
       {
-        label: "Node.js docs: Error handling in Node.js — general strategies",
-        url: "https://nodejs.org/en/learn/asynchronous-work/error-handling-in-nodejs",
+        label: "Node.js docs: Errors — general strategies",
+        url: "https://nodejs.org/api/errors.html",
       },
     ],
     keywords: ["nodejs", "structured errors", "operational errors", "error taxonomy"],

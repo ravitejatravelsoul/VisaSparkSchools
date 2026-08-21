@@ -13,7 +13,11 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
         {items.map((item, i) => {
           const isLast = i === items.length - 1;
           return (
-            <li key={item.label} className="flex items-center gap-1">
+            // Keyed by label+index, not label alone: a track and its course
+            // can legitimately share the exact same display name (e.g. "Git,
+            // APIs & SQL"), which produced a real React duplicate-key error
+            // on those lesson pages before this.
+            <li key={`${item.label}-${i}`} className="flex items-center gap-1">
               {i > 0 && (
                 <span aria-hidden="true" className="px-0.5">
                   /

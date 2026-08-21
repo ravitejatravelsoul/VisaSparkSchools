@@ -27,6 +27,13 @@ export const siteConfig = {
   /** Brand wording used specifically on the certificate document itself -- see docs/product-expansion/DECISIONS.md. */
   certificateBrand: "VS Schools",
   certificateSignatory: { name: "Naga Malleswararao Boddu", title: "CEO, VS Schools" },
+  /**
+   * Exact, owner-approved footer attribution -- uppercase, this precise word
+   * order/spacing, is intentional and must not be reformatted, abbreviated,
+   * or merged into `certificateSignatory` (a separate, differently-formatted
+   * value used only for certificates, not touched by this).
+   */
+  footerCeoName: "BODDU NAGA MALLESWARA RAO",
   brand: {
     logo: "/brand/logo.svg",
     logoDark: "/brand/logo-dark.svg",

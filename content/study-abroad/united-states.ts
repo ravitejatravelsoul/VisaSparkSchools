@@ -22,8 +22,8 @@ export const unitedStatesRoadmap: CountryRoadmapInput = {
       url: "https://www.uscis.gov/working-in-the-united-states/students-and-exchange-visitors",
     },
     {
-      label: "U.S. Department of State — Student Visas",
-      url: "https://travel.state.gov/content/travel/en/us-visas/study-exchange-visitor-visas.html",
+      label: "USA.gov — Student Visas",
+      url: "https://www.usa.gov/student-visa",
     },
   ],
   steps: [
@@ -374,8 +374,8 @@ export const unitedStatesRoadmap: CountryRoadmapInput = {
       ],
       officialSourceLinks: [
         {
-          label: "U.S. Department of State — Student Visa process",
-          url: "https://travel.state.gov/content/travel/en/us-visas/study-exchange-visitor-visas.html",
+          label: "USA.gov — Student Visa process",
+          url: "https://www.usa.gov/student-visa",
         },
       ],
       typicalTiming:

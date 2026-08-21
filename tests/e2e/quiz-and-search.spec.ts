@@ -18,11 +18,30 @@ test("completing a quiz shows a score", async ({ page }) => {
 test("search finds a lesson by keyword and links to it", async ({ page }) => {
   await page.goto("/search");
   await page.getByPlaceholder(/search lessons, courses, projects/i).fill("flexbox");
-  await expect(page.getByText(/result/i)).toBeVisible();
+  // Not `getByText(/result/i)`: that regex also matches any lesson card
+  // whose own description happens to contain the word "result" (e.g. "...
+  // seeing a result on screen"), a strict-mode violation once more than one
+  // card is present. Waiting directly for the specific expected result link
+  // is both more precise and already implies filtering completed.
   const resultLink = page.getByRole("link", { name: /flexbox/i }).first();
   await expect(resultLink).toBeVisible();
   await resultLink.click();
   await expect(page).toHaveURL(/flexbox/);
+});
+
+test("a shared/bookmarked search URL (?q=) reproduces the same filtered result set, not a blank search box", async ({
+  page,
+}) => {
+  await page.goto("/search?q=flexbox");
+  await expect(page.getByPlaceholder(/search lessons, courses, projects/i)).toHaveValue("flexbox");
+  await expect(page.getByRole("link", { name: /flexbox/i }).first()).toBeVisible();
+
+  // Typing further updates the URL too, so the address bar always matches
+  // what's on screen and stays shareable.
+  await page
+    .getByPlaceholder(/search lessons, courses, projects/i)
+    .fill("css grid");
+  await expect(page).toHaveURL(/[?&]q=css(\+|%20)grid/);
 });
 
 test("search finds Phase 5B content by keyword across Java, DSA, and PostgreSQL courses", async ({

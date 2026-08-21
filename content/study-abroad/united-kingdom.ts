@@ -73,8 +73,8 @@ export const unitedKingdomRoadmap: CountryRoadmapInput = {
       checklist: ["Shortlist built", "Licensed sponsor status confirmed for each university"],
       officialSourceLinks: [
         {
-          label: "GOV.UK — Student sponsor list",
-          url: "https://www.gov.uk/government/publications/student-sponsor-list",
+          label: "GOV.UK — Register of licensed sponsors: students",
+          url: "https://www.gov.uk/government/publications/register-of-licensed-sponsors-students",
         },
       ],
       typicalTiming: "10-15 months before start.",

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Fuse from "fuse.js";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardBody } from "@/components/ui/card";
@@ -23,11 +24,51 @@ const TYPE_LABELS: Record<SearchDocument["type"], string> = {
   "study-abroad": "Study Abroad",
 };
 
+interface Filters {
+  q: string;
+  type: SearchDocument["type"] | "all";
+  difficulty: string;
+}
+
+/**
+ * Filters are derived directly from the URL (not local state kept in sync
+ * via an effect) -- same convention as TechnologyDirectoryClient. This is
+ * what makes `/search?q=react` actually show React results instead of
+ * silently rendering an empty search box, and what makes a shared or
+ * bookmarked search URL reproduce the exact same result set.
+ */
+function filtersFromParams(params: URLSearchParams): Filters {
+  return {
+    q: params.get("q") ?? "",
+    type: (params.get("type") as SearchDocument["type"] | null) ?? "all",
+    difficulty: params.get("difficulty") ?? "all",
+  };
+}
+
+function paramsFromFilters(filters: Filters): string {
+  const params = new URLSearchParams();
+  if (filters.q) params.set("q", filters.q);
+  if (filters.type !== "all") params.set("type", filters.type);
+  if (filters.difficulty !== "all") params.set("difficulty", filters.difficulty);
+  return params.toString();
+}
+
 export function SearchClient() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const filters = useMemo(() => filtersFromParams(searchParams), [searchParams]);
+  const updateFilters = useCallback(
+    (next: Partial<Filters>) => {
+      const merged = { ...filters, ...next };
+      const qs = paramsFromFilters(merged);
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [filters, pathname, router],
+  );
+  const { q: query, type: typeFilter, difficulty: difficultyFilter } = filters;
+
   const [docs, setDocs] = useState<SearchDocument[]>([]);
-  const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<SearchDocument["type"] | "all">("all");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
 
   useEffect(() => {
     fetch("/search-index.json")
@@ -68,14 +109,14 @@ export function SearchClient() {
           <input
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateFilters({ q: e.target.value })}
             placeholder="Search lessons, courses, projects…"
             className="w-full rounded-lg border border-(--color-border-strong) bg-(--color-surface) px-4 py-2.5 text-sm"
           />
         </label>
         <select
           value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value as SearchDocument["type"] | "all")}
+          onChange={(e) => updateFilters({ type: e.target.value as SearchDocument["type"] | "all" })}
           aria-label="Filter by content type"
           className="rounded-lg border border-(--color-border-strong) bg-(--color-surface) px-3 py-2.5 text-sm"
         >
@@ -92,7 +133,7 @@ export function SearchClient() {
         </select>
         <select
           value={difficultyFilter}
-          onChange={(e) => setDifficultyFilter(e.target.value)}
+          onChange={(e) => updateFilters({ difficulty: e.target.value })}
           aria-label="Filter by difficulty"
           className="rounded-lg border border-(--color-border-strong) bg-(--color-surface) px-3 py-2.5 text-sm"
         >

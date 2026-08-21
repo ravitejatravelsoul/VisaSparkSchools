@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { difficultyTone } from "@/lib/ui/difficulty";
 import { Markdown } from "@/components/lesson/markdown";
+import { LessonDiagram } from "@/components/lesson/lesson-diagram";
 import { ExampleBlock } from "@/components/lesson/example-block";
 import { ExercisePanel } from "@/components/lesson/exercise-panel";
 import { GuidedLocalLabPanel } from "@/components/lesson/guided-local-lab-panel";
@@ -132,6 +133,7 @@ export default async function LessonPage({ params }: { params: Params }) {
             <Markdown>{lesson.explanation}</Markdown>
             {lesson.visual && (
               <div className="mt-3 rounded-xl border border-(--color-border) bg-(--color-canvas) p-4">
+                <LessonDiagram lessonSlug={lesson.slug} title={lesson.visual.title} />
                 <p className="mb-1 text-sm font-semibold">{lesson.visual.title}</p>
                 <p className="text-sm text-(--color-ink-muted)">{lesson.visual.description}</p>
               </div>

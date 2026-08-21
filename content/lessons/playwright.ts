@@ -46,7 +46,10 @@ export const playwrightLessons: LessonInput[] = [
     reviewer: "VisaSparkSchools Curriculum Team",
     lastReviewed: "2026-08-03",
     references: [
-      { label: "Playwright docs: Core concepts", url: "https://playwright.dev/docs/core-concepts" },
+      {
+        label: "Playwright docs: Test configuration",
+        url: "https://playwright.dev/docs/test-configuration",
+      },
       { label: "Playwright docs: Installation", url: "https://playwright.dev/docs/intro" },
     ],
     keywords: ["playwright", "browser", "context", "page", "architecture"],
