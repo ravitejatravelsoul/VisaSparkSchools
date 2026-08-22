@@ -243,7 +243,10 @@ async function main() {
 
   const rateLimited = problems.filter((e) => e.outcome.status === "rate-limited");
   const unverified = problems.filter(
-    (e) => e.outcome.status === "failed" && e.outcome.error !== undefined && e.outcome.httpStatus === undefined,
+    (e) =>
+      e.outcome.status === "failed" &&
+      e.outcome.error !== undefined &&
+      e.outcome.httpStatus === undefined,
   );
   const realFailures = problems.filter(
     (e) => e.outcome.status === "failed" && e.outcome.httpStatus !== undefined,
@@ -260,7 +263,9 @@ async function main() {
   console.log(`Not HTTPS: ${notHttps.length}`);
   console.log(`Malformed URL: ${malformed.length}`);
   console.log(`Rate-limited (429) -- unresolved, re-run later: ${rateLimited.length}`);
-  console.log(`Unverified (network/timeout error, no status) -- treat as unresolved, not failing: ${unverified.length}`);
+  console.log(
+    `Unverified (network/timeout error, no status) -- treat as unresolved, not failing: ${unverified.length}`,
+  );
 
   function printGroup(title: string, list: typeof problems) {
     if (list.length === 0) return;
@@ -300,9 +305,16 @@ async function main() {
       2,
     ),
   );
-  console.log(`\nFull machine-readable report (this run only, ${runStartedAt}) written to ${reportPath}`);
+  console.log(
+    `\nFull machine-readable report (this run only, ${runStartedAt}) written to ${reportPath}`,
+  );
 
-  if (realFailures.length > 0 || suspiciousRedirects.length > 0 || notHttps.length > 0 || malformed.length > 0) {
+  if (
+    realFailures.length > 0 ||
+    suspiciousRedirects.length > 0 ||
+    notHttps.length > 0 ||
+    malformed.length > 0
+  ) {
     process.exitCode = 1;
   }
 }

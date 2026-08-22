@@ -116,7 +116,9 @@ export function SearchClient() {
         </label>
         <select
           value={typeFilter}
-          onChange={(e) => updateFilters({ type: e.target.value as SearchDocument["type"] | "all" })}
+          onChange={(e) =>
+            updateFilters({ type: e.target.value as SearchDocument["type"] | "all" })
+          }
           aria-label="Filter by content type"
           className="rounded-lg border border-(--color-border-strong) bg-(--color-surface) px-3 py-2.5 text-sm"
         >

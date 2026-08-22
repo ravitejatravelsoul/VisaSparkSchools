@@ -38,9 +38,7 @@ test("a shared/bookmarked search URL (?q=) reproduces the same filtered result s
 
   // Typing further updates the URL too, so the address bar always matches
   // what's on screen and stays shareable.
-  await page
-    .getByPlaceholder(/search lessons, courses, projects/i)
-    .fill("css grid");
+  await page.getByPlaceholder(/search lessons, courses, projects/i).fill("css grid");
   await expect(page).toHaveURL(/[?&]q=css(\+|%20)grid/);
 });
 

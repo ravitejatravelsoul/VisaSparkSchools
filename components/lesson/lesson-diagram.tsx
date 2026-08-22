@@ -55,8 +55,18 @@ const mutedTextProps: SVGProps<SVGTextElement> = {
 function BoxModelDiagram({ title }: { title: string }) {
   const layers = [
     { label: "margin", size: 160, fill: "none", stroke: "var(--color-border)" },
-    { label: "border", size: 130, fill: "var(--color-surface-sunken)", stroke: "var(--color-border-strong)" },
-    { label: "padding", size: 100, fill: "var(--color-brand-contrast)", stroke: "var(--color-border)" },
+    {
+      label: "border",
+      size: 130,
+      fill: "var(--color-surface-sunken)",
+      stroke: "var(--color-border-strong)",
+    },
+    {
+      label: "padding",
+      size: 100,
+      fill: "var(--color-brand-contrast)",
+      stroke: "var(--color-border)",
+    },
     { label: "content", size: 60, fill: "var(--color-brand)", stroke: "none" },
   ];
   return (
@@ -119,12 +129,28 @@ function FlexboxAxesDiagram({ title }: { title: string }) {
         />
       ))}
       {/* main axis arrow (row, left to right) */}
-      <line x1={20} y1={140} x2={220} y2={140} stroke="var(--color-brand)" strokeWidth={2} markerEnd="url(#arrow-main)" />
+      <line
+        x1={20}
+        y1={140}
+        x2={220}
+        y2={140}
+        stroke="var(--color-brand)"
+        strokeWidth={2}
+        markerEnd="url(#arrow-main)"
+      />
       <text x={120} y={155} textAnchor="middle" {...textProps} fill="var(--color-brand-strong)">
         main axis — justify-content
       </text>
       {/* cross axis arrow (column, top to bottom) */}
-      <line x1={20} y1={20} x2={20} y2={130} stroke="var(--color-accent)" strokeWidth={2} markerEnd="url(#arrow-cross)" />
+      <line
+        x1={20}
+        y1={20}
+        x2={20}
+        y2={130}
+        stroke="var(--color-accent)"
+        strokeWidth={2}
+        markerEnd="url(#arrow-cross)"
+      />
       <text x={24} y={30} {...mutedTextProps} fill="var(--color-accent)">
         cross axis
       </text>
@@ -161,7 +187,15 @@ function GridTracksDiagram({ title }: { title: string }) {
       ))}
       {cols.map((x, i) => (
         <g key={x}>
-          <line x1={x} y1={10} x2={x} y2={120} stroke="var(--color-border-strong)" strokeWidth={1.5} strokeDasharray="3 2" />
+          <line
+            x1={x}
+            y1={10}
+            x2={x}
+            y2={120}
+            stroke="var(--color-border-strong)"
+            strokeWidth={1.5}
+            strokeDasharray="3 2"
+          />
           <text x={x} y={8} textAnchor="middle" {...mutedTextProps}>
             {i + 1}
           </text>
@@ -180,7 +214,14 @@ function GitBranchDiagram({ title }: { title: string }) {
   return (
     <DiagramFrame title={title} viewBox="0 0 280 130">
       {/* main branch line */}
-      <line x1={20} y1={mainY} x2={260} y2={mainY} stroke="var(--color-border-strong)" strokeWidth={2} />
+      <line
+        x1={20}
+        y1={mainY}
+        x2={260}
+        y2={mainY}
+        stroke="var(--color-border-strong)"
+        strokeWidth={2}
+      />
       {/* feature branch line */}
       <path
         d={`M 80,${mainY} C 90,${mainY} 90,${featureY} 100,${featureY} L 180,${featureY} C 190,${featureY} 190,${mainY} 200,${mainY}`}
@@ -195,7 +236,14 @@ function GitBranchDiagram({ title }: { title: string }) {
         { x: 240, y: mainY, label: "6", merge: true },
       ].map((c) => (
         <g key={`main-${c.x}`}>
-          <circle cx={c.x} cy={c.y} r={c.merge ? 8 : 6} fill="var(--color-surface)" stroke="var(--color-border-strong)" strokeWidth={2} />
+          <circle
+            cx={c.x}
+            cy={c.y}
+            r={c.merge ? 8 : 6}
+            fill="var(--color-surface)"
+            stroke="var(--color-border-strong)"
+            strokeWidth={2}
+          />
           <text x={c.x} y={c.y + 4} textAnchor="middle" fontSize={9} fill="var(--color-ink)">
             {c.label}
           </text>
@@ -206,7 +254,14 @@ function GitBranchDiagram({ title }: { title: string }) {
         { x: 170, y: featureY, label: "5" },
       ].map((c) => (
         <g key={`feature-${c.x}`}>
-          <circle cx={c.x} cy={c.y} r={6} fill="var(--color-brand-contrast)" stroke="var(--color-brand)" strokeWidth={2} />
+          <circle
+            cx={c.x}
+            cy={c.y}
+            r={6}
+            fill="var(--color-brand-contrast)"
+            stroke="var(--color-brand)"
+            strokeWidth={2}
+          />
           <text x={c.x} y={c.y + 4} textAnchor="middle" fontSize={9} fill="var(--color-ink)">
             {c.label}
           </text>

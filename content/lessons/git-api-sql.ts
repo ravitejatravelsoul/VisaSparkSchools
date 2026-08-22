@@ -164,8 +164,7 @@ Learning Git one commit at a time.
           description:
             "git init creates a hidden .git directory and starts tracking the folder. It prints a one-line confirmation.",
           code: "git init",
-          expectedOutput:
-            "Initialized empty Git repository in /path/to/git-basics-practice/.git/",
+          expectedOutput: "Initialized empty Git repository in /path/to/git-basics-practice/.git/",
         },
         {
           description:
@@ -392,7 +391,10 @@ A pull request itself is not a Git concept — Git only knows about branches, co
           description: "Create and switch to a new branch in one step",
           command: "git checkout -b feature/nav-bar",
         },
-        { description: "Add a new file for the feature", command: 'printf "- Home\\n- About\\n" > nav.md' },
+        {
+          description: "Add a new file for the feature",
+          command: 'printf "- Home\\n- About\\n" > nav.md',
+        },
         {
           description: "Stage and commit it",
           command: 'git add nav.md && git commit -m "Add nav-bar markup"',
@@ -644,7 +646,7 @@ Fast-forward
       id: "git-remotes-gll-push-pull-clone",
       title: "Push, Pull, Fetch, and Recover From a Rejected Push -- With a Real (Local) Remote",
       scenario:
-        "Practice every remote command for real, without needing a GitHub account or network access: a second folder on your own machine, created as a Git \"bare\" repository, stands in for a real remote exactly the way GitHub would -- push, fetch, pull, and clone all work against it for real. A third folder plays a \"teammate\" so you can see a genuine non-fast-forward rejection and recover from it safely. Every command below runs in YOUR terminal; this platform does not execute any of them.",
+        'Practice every remote command for real, without needing a GitHub account or network access: a second folder on your own machine, created as a Git "bare" repository, stands in for a real remote exactly the way GitHub would -- push, fetch, pull, and clone all work against it for real. A third folder plays a "teammate" so you can see a genuine non-fast-forward rejection and recover from it safely. Every command below runs in YOUR terminal; this platform does not execute any of them.',
       requiredTools: [
         { name: "Git", version: "2.x or newer" },
         { name: "A terminal (or Git Bash on Windows)", version: "any current version" },
@@ -688,7 +690,10 @@ Fast-forward
           description: "Add the bare repo as a remote named origin (the conventional name)",
           command: "git remote add origin ../fake-remote.git",
         },
-        { description: "Confirm origin is registered, for both fetch and push", command: "git remote -v" },
+        {
+          description: "Confirm origin is registered, for both fetch and push",
+          command: "git remote -v",
+        },
         {
           description:
             "Rename it, then rename it back -- this is exactly what you'd run to fix a mistyped remote name",
@@ -708,7 +713,8 @@ Fast-forward
           command: "cd .. && git clone fake-remote.git teammate-clone",
         },
         {
-          description: "As the teammate, make a change and push it (a normal push -- no -u needed, clone set tracking up automatically)",
+          description:
+            "As the teammate, make a change and push it (a normal push -- no -u needed, clone set tracking up automatically)",
           command:
             'cd teammate-clone && echo "Added by teammate" >> README.md && git add README.md && git commit -m "Teammate: update README" && git push',
         },
@@ -722,7 +728,8 @@ Fast-forward
           command: "cat README.md",
         },
         {
-          description: "Now pull, which fetches AND merges -- this is the step that actually updates your files",
+          description:
+            "Now pull, which fetches AND merges -- this is the step that actually updates your files",
           command: "git pull",
         },
         {
@@ -730,14 +737,12 @@ Fast-forward
           command: "cat README.md",
         },
         {
-          description:
-            "Set up a rejection on purpose: as the teammate, push another change first",
+          description: "Set up a rejection on purpose: as the teammate, push another change first",
           command:
             'cd ../teammate-clone && echo "Second teammate change" >> README.md && git add README.md && git commit -m "Teammate: second update" && git push',
         },
         {
-          description:
-            "Meanwhile, without pulling first, make your own local commit in project/",
+          description: "Meanwhile, without pulling first, make your own local commit in project/",
           command:
             'cd ../project && echo "Your own local change" >> README.md && git add README.md && git commit -m "Your own change"',
         },
@@ -757,8 +762,7 @@ Fast-forward
       verificationSteps: [
         {
           command: "git remote -v",
-          expectedResult:
-            "origin listed twice (fetch and push), pointing at ../fake-remote.git",
+          expectedResult: "origin listed twice (fetch and push), pointing at ../fake-remote.git",
         },
         {
           command: "git log --oneline",
@@ -767,20 +771,23 @@ Fast-forward
         },
         {
           command: "git branch -vv",
-          expectedResult: "shows main tracking origin/main, with no \"ahead\"/\"behind\" count remaining after the final push succeeds",
+          expectedResult:
+            'shows main tracking origin/main, with no "ahead"/"behind" count remaining after the final push succeeds',
         },
       ],
       troubleshooting: [
         {
-          issue: "`fatal: 'origin' does not appear to be a git repository` (or similar) when pushing",
+          issue:
+            "`fatal: 'origin' does not appear to be a git repository` (or similar) when pushing",
           fix: "Confirm `git remote -v` shows origin pointing at ../fake-remote.git, and that you're running the command from inside project/, not git-remotes-practice/ itself.",
         },
         {
           issue: "`! [rejected] main -> main (non-fast-forward)`",
-          fix: "This is expected at the step that deliberately reproduces it -- it means the remote has a commit you don't have locally yet. Run `git pull` to merge it in, then `git push` again. Never `git push --force` or `git reset --hard` to make a rejection like this \"go away\" -- that discards real work instead of integrating it.",
+          fix: 'This is expected at the step that deliberately reproduces it -- it means the remote has a commit you don\'t have locally yet. Run `git pull` to merge it in, then `git push` again. Never `git push --force` or `git reset --hard` to make a rejection like this "go away" -- that discards real work instead of integrating it.',
         },
         {
-          issue: "A real GitHub/GitLab push instead asks for a username/password or hangs waiting for authentication",
+          issue:
+            "A real GitHub/GitLab push instead asks for a username/password or hangs waiting for authentication",
           fix: "This lab's local bare-repo remote never needs authentication, but a real hosted remote will use your OS credential manager, an SSH key, or a browser sign-in prompt -- never type a token directly into the remote URL; if a real push ever prompts unexpectedly, stop and confirm you're pushing to the repository you intend to before entering anything.",
         },
       ],
@@ -842,7 +849,8 @@ branch 'main' set up to track 'origin/main'.`,
           expectedOutput: "Everything up-to-date",
         },
         {
-          description: "git clone recreates the full repository, history included, from the remote URL.",
+          description:
+            "git clone recreates the full repository, history included, from the remote URL.",
           code: "git clone https://github.com/<your-username>/<repository-name>.git",
           expectedOutput: `Cloning into '<repository-name>'...
 remote: Enumerating objects: 3, done.
@@ -874,7 +882,8 @@ hint: 'git pull ...') before pushing again.`,
     quiz: [
       {
         id: "q1",
-        prompt: "What does `git push -u origin main` do that a later plain `git push` doesn't need to repeat?",
+        prompt:
+          "What does `git push -u origin main` do that a later plain `git push` doesn't need to repeat?",
         choices: [
           "It creates the remote repository for the first time",
           "It sets up a tracking relationship between local main and origin/main, so future push/pull need no arguments",

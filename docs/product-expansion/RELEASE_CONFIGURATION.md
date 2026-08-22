@@ -110,11 +110,11 @@ work does not have and must not attempt.
 
 ## 5. New environment variables summary (names only, no values)
 
-| Variable                          | Required for                                       | Notes                                                     |
-| ---------------------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
-| `NEXT_PUBLIC_TURNSTILE_ENABLED`   | Turning CAPTCHA on at all                          | Not set for this release -- defaults to disabled           |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`  | CAPTCHA widgets (sign-up, sign-in, reset, resend)  | Public key only; only read when the flag above is `true`   |
-| `NEXT_PUBLIC_VISASPARK_URL`       | Study Abroad CTA                                   | Optional; safe fallback if unset                           |
+| Variable                         | Required for                                      | Notes                                                    |
+| -------------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| `NEXT_PUBLIC_TURNSTILE_ENABLED`  | Turning CAPTCHA on at all                         | Not set for this release -- defaults to disabled         |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CAPTCHA widgets (sign-up, sign-in, reset, resend) | Public key only; only read when the flag above is `true` |
+| `NEXT_PUBLIC_VISASPARK_URL`      | Study Abroad CTA                                  | Optional; safe fallback if unset                         |
 
 Existing variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 `NEXT_PUBLIC_SITE_URL`) are unchanged and already configured per the prior deployment session.
@@ -187,14 +187,14 @@ the Supabase credentials, not as part of any local implementation task:
 **Status: migration 0007 is applied and verified in production. CAPTCHA is shipping OFF (behind
 `NEXT_PUBLIC_TURNSTILE_ENABLED`, unset) in this release — none of the Cloudflare/Supabase
 CAPTCHA-configuration steps below are required for this release to go out.** They're kept here as
-the ordered procedure for the *future* release that turns CAPTCHA on. Steps are labeled
+the ordered procedure for the _future_ release that turns CAPTCHA on. Steps are labeled
 **[prepare]** — safe to do in advance, does not change live Auth behavior — or **[live]** —
 changes what currently-deployed production Auth actually does.
 
 1. ~~**[live]** Apply migration 0007~~ — **done**, applied and verified against production.
-2. ~~**[live]** Push this release's local commits~~ — this release ships the CAPTCHA *toggle*,
+2. ~~**[live]** Push this release's local commits~~ — this release ships the CAPTCHA _toggle_,
    defaulted off; no Cloudflare/Supabase configuration is a prerequisite for it.
-3. **[prepare]** *(future CAPTCHA-activation release)* Verify backup/recovery readiness (§6) is
+3. **[prepare]** _(future CAPTCHA-activation release)_ Verify backup/recovery readiness (§6) is
    still current before that release, independent of this one.
 4. **[prepare]** Create/configure the Turnstile widget for the exact production and preview
    hostnames (§1).

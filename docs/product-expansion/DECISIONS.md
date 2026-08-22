@@ -38,8 +38,8 @@
   protection settings -- never in this repository, never in a browser-visible env var.
 - **Gated behind its own explicit flag, `NEXT_PUBLIC_TURNSTILE_ENABLED`** (`lib/site-config.ts`'s
   `featureFlags.turnstileEnabled`) -- deliberately independent of whether
-  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` happens to be set, since a key being *configured* and the
-  feature being *active* are different questions (a key could land in Vercel ahead of the flag
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` happens to be set, since a key being _configured_ and the
+  feature being _active_ are different questions (a key could land in Vercel ahead of the flag
   being flipped on, e.g. during a staged rollout). Same `=== "true"` fail-closed string comparison
   as every other flag in this file: missing, `"false"`, or anything else all resolve to disabled --
   nothing except the literal string `"true"` turns it on.
@@ -52,7 +52,7 @@
 - Local/CI test profile: the isolated `tests/e2e-auth-captcha/` suite forces both
   `NEXT_PUBLIC_TURNSTILE_ENABLED=true` and the site key to Cloudflare's published "always passes"
   test key `1x00000000000000000000AA` -- see `scripts/playwright-env-profiles.ts` and
-  `RELEASE_CONFIGURATION.md`. Production must have both the flag *and* a real site key set before
+  `RELEASE_CONFIGURATION.md`. Production must have both the flag _and_ a real site key set before
   Supabase-side CAPTCHA enforcement is ever turned on, and the signup form still fails closed
   (blocks submit with a configuration-error message) if the flag is on but no site key is present,
   so a misconfigured production deployment can't silently skip bot protection once the flag is on.
