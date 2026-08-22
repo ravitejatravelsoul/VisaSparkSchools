@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRightIcon } from "@/components/ui/icons";
+import { ArrowRightIcon, CheckIcon } from "@/components/ui/icons";
 import { trackAccent } from "@/lib/ui/track-accent";
 import { accentClasses } from "@/lib/ui/category-accent";
 import { siteConfig } from "@/lib/site-config";
@@ -20,6 +20,29 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   alternates: { canonical: siteConfig.url },
 };
+
+const learningBenefits = [
+  {
+    title: "Learn step by step",
+    description:
+      "Follow structured lessons that explain each concept clearly and build from foundations to advanced skills.",
+  },
+  {
+    title: "Practice as you go",
+    description:
+      "Run real code in browser-based learning environments and get immediate feedback while concepts are still fresh.",
+  },
+  {
+    title: "Build guided projects",
+    description:
+      "Apply what you learn through practical projects designed to connect individual lessons into complete solutions.",
+  },
+  {
+    title: "Prove your progress",
+    description:
+      "Use quizzes, saved progress, and certificates to review your understanding and demonstrate completed learning.",
+  },
+] as const;
 
 const steps = [
   {
@@ -79,6 +102,33 @@ export default function HomePage() {
               No account required — your progress is saved on this device, and you can sign up any
               time to sync it.
             </p>
+
+            <div className="mt-8">
+              <h2 className="text-base font-semibold text-(--color-ink)">How you&rsquo;ll learn</h2>
+              <p className="mt-1 text-sm text-(--color-ink-muted)">
+                Build practical skills through a clear learning cycle—not passive reading.
+              </p>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                {learningBenefits.map((benefit) => (
+                  <li
+                    key={benefit.title}
+                    className="flex gap-2.5 rounded-lg border border-(--color-border) bg-(--color-surface-sunken) p-3"
+                  >
+                    <CheckIcon
+                      width={16}
+                      height={16}
+                      className="mt-0.5 shrink-0 text-(--color-brand-strong)"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-(--color-ink)">{benefit.title}</p>
+                      <p className="mt-0.5 text-sm text-(--color-ink-muted)">
+                        {benefit.description}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           <Card className="animate-fade-up">
