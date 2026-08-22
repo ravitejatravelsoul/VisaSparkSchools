@@ -57,7 +57,7 @@ export default function HomePage() {
         }}
       />
       <section className="border-b border-(--color-border) bg-(--color-surface)">
-        <Container className="grid gap-10 py-12 lg:grid-cols-[3fr_2fr] lg:items-center lg:py-14">
+        <Container className="grid gap-10 py-12 lg:grid-cols-[3fr_2fr] lg:items-start lg:py-14">
           <div className="animate-fade-up">
             <Badge tone="brand">Public beta</Badge>
             <h1 className="mt-4 text-3xl leading-tight font-bold sm:text-4xl lg:text-5xl">
