@@ -32,6 +32,7 @@ import type { NextConfig } from "next";
  * - `script-src`/`frame-src` additionally allow-list
  *   `https://challenges.cloudflare.com` (Cloudflare Turnstile's widget
  *   script and its challenge iframe) only when
+ *   `NEXT_PUBLIC_TURNSTILE_ENABLED` is "true" AND
  *   `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is configured, same least-privilege,
  *   same-conditional-entry pattern as the Supabase URL above.
  *
@@ -50,7 +51,14 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
 const isValidSupabaseUrl = supabaseUrl && /^https:\/\/[a-z0-9.-]+$/i.test(supabaseUrl);
-const turnstileEnabled = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
+// Gated on the explicit feature flag, not just key presence -- a site key
+// could be configured in Vercel ahead of the flag being flipped on, and CSP
+// shouldn't allow-list Cloudflare's domain for a script this deployment
+// never actually loads. Same `=== "true"` fail-closed pattern as
+// featureFlags.turnstileEnabled in lib/site-config.ts.
+const turnstileEnabled =
+  process.env.NEXT_PUBLIC_TURNSTILE_ENABLED === "true" &&
+  Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
 const CSP = [
   "default-src 'self'",

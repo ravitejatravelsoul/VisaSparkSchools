@@ -23,7 +23,7 @@ declare global {
   }
 }
 
-export type TurnstileStatus = "loading" | "ready" | "solved" | "expired" | "error";
+export type TurnstileStatus = "loading" | "ready" | "solved" | "expired" | "error" | "disabled";
 
 export interface TurnstileWidgetHandle {
   reset: () => void;

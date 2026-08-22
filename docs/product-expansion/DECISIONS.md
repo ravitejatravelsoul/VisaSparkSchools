@@ -32,16 +32,30 @@
 
 ## CAPTCHA choice
 
-- Cloudflare Turnstile, via Supabase Auth's native `options.captchaToken` support on `signUp`
-  (and `signInWithPassword`, if bot protection is enabled for sign-in too). No parallel reCAPTCHA
+- Cloudflare Turnstile, via Supabase Auth's native `options.captchaToken` support on `signUp`,
+  `signInWithPassword`, `resetPasswordForEmail`, and `auth.resend`. No parallel reCAPTCHA
   integration. The secret key is configured only in the hosted Supabase Auth dashboard's bot
   protection settings -- never in this repository, never in a browser-visible env var.
-- Local/CI test profile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` unset (or set to Cloudflare's published
-  "always passes" test site key `1x00000000000000000000AA` for widget-rendering tests) --
-  documented in `RELEASE_CONFIGURATION.md`. Production must have a real site key configured, and
-  the signup form fails closed (blocks submit with a configuration-error message) if
-  `featureFlags.supabaseEnabled` is true but no site key is present, so a misconfigured production
-  deployment can't silently skip bot protection.
+- **Gated behind its own explicit flag, `NEXT_PUBLIC_TURNSTILE_ENABLED`** (`lib/site-config.ts`'s
+  `featureFlags.turnstileEnabled`) -- deliberately independent of whether
+  `NEXT_PUBLIC_TURNSTILE_SITE_KEY` happens to be set, since a key being *configured* and the
+  feature being *active* are different questions (a key could land in Vercel ahead of the flag
+  being flipped on, e.g. during a staged rollout). Same `=== "true"` fail-closed string comparison
+  as every other flag in this file: missing, `"false"`, or anything else all resolve to disabled --
+  nothing except the literal string `"true"` turns it on.
+  - **Flag off** (this release's default): no Cloudflare script loads, no widget renders, no
+    configuration-error message appears, `captchaToken` is never sent (not even as an empty
+    string), and every protected form's submit button is gated only by its own ordinary
+    validation -- never by CAPTCHA readiness. See `components/auth/use-turnstile-captcha.tsx`.
+  - **Flag on**: the widget renders as before, and fails closed exactly as previously documented
+    below if `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is then missing.
+- Local/CI test profile: the isolated `tests/e2e-auth-captcha/` suite forces both
+  `NEXT_PUBLIC_TURNSTILE_ENABLED=true` and the site key to Cloudflare's published "always passes"
+  test key `1x00000000000000000000AA` -- see `scripts/playwright-env-profiles.ts` and
+  `RELEASE_CONFIGURATION.md`. Production must have both the flag *and* a real site key set before
+  Supabase-side CAPTCHA enforcement is ever turned on, and the signup form still fails closed
+  (blocks submit with a configuration-error message) if the flag is on but no site key is present,
+  so a misconfigured production deployment can't silently skip bot protection once the flag is on.
 
 ## Email delivery and branding
 

@@ -90,7 +90,14 @@ export const featureFlags = {
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   ),
   aiTutorEnabled: process.env.NEXT_PUBLIC_AI_TUTOR_ENABLED === "true",
-  turnstileEnabled: Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY),
+  /**
+   * Deliberately independent of `turnstileSiteKey` below -- presence of a
+   * site key means "a key is configured," not "this deployment wants
+   * CAPTCHA active." Same strict `=== "true"` pattern as aiTutorEnabled:
+   * missing, "false", or any other value all fail closed to disabled;
+   * nothing except the exact string "true" turns it on.
+   */
+  turnstileEnabled: process.env.NEXT_PUBLIC_TURNSTILE_ENABLED === "true",
 } as const;
 
 /** Public Turnstile site key -- see docs/product-expansion/RELEASE_CONFIGURATION.md; the secret is never in this repo. */

@@ -9,34 +9,47 @@ file is documentation only; every dashboard/DNS/deployment action listed remains
 courses; 26 technical + 4 exam-prep = 30 applicable courses each with a full 50-question
 interview/preparation bank; 3 justified exemptions) and `npm run test:rls` proves the Row Level
 Security policies in every migration file (0001-0007) execute correctly against a real local
-Postgres engine (PGlite/WASM), 148/148 passing. **This is local, pre-migration evidence only** — it
-does not prove migration 0007 has been correctly applied to the live, hosted Supabase project.
+Postgres engine (PGlite/WASM), 148/148 passing. **Migration 0007 has since been applied to and
+verified against the live, hosted Supabase project** — see the migration preflight/execution
+reports for the full backup, rehearsal, and post-migration verification record.
 
-**Release-blocker status as of the CAPTCHA preflight review**: a controlled-release preflight found
-that Supabase CAPTCHA protection can apply to more than just sign-up (sign-in, password-reset
-request, and confirmation-email resend all support it too), and the frontend previously only
-covered sign-up. That gap has been fixed locally (see the CAPTCHA coverage matrix in the release
-report) but **enabling Supabase CAPTCHA enforcement is still not safe until the fixed frontend is
-actually deployed** — see the cutover order in §8. Separately, missing custom SMTP is corrected
-below from a cosmetic/branding concern to a **functional release blocker**.
+**CAPTCHA status**: shipping this release **behind an explicit, off-by-default feature flag**
+(`NEXT_PUBLIC_TURNSTILE_ENABLED`) rather than as an unresolved release blocker — see §1 and §8. The
+frontend already covers every credential-submitting flow (sign-up, sign-in, password-reset
+request, confirmation-email resend) whenever the flag is turned on; turning it on is deferred to a
+future release, not required for this one. Custom SMTP + sending-domain configuration (§2) is
+confirmed live and working (a real user's confirmation email was successfully delivered and
+confirmed in production).
 
-## 1. Cloudflare Turnstile
+## 1. Cloudflare Turnstile — **deferred, OFF by default for this release**
 
-- Create a Turnstile site at the Cloudflare dashboard for the exact production hostname and every
-  preview hostname that will run this app (Turnstile validates against the hostname the widget is
-  served from — a site configured for one hostname will fail on another).
-- Add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (the public site key only) to Vercel Production + Preview
-  environment variables.
-- The **Turnstile secret key** goes only into **Supabase Authentication → Bot and Abuse
-  Protection** — never into Vercel, never into this repo, never into any client-reachable code.
-  `npm run security:scan-client-secrets` (added as part of the CAPTCHA fix) statically verifies no
-  `"use client"` file references a non-`NEXT_PUBLIC_` environment variable, and — after `npm run
-build` — greps the built client bundles for known secret-shaped literals.
-- CAPTCHA is now wired into every credential-submitting Supabase Auth flow this app implements:
-  sign-up, sign-in, password-reset request, and confirmation-email resend. See the CAPTCHA coverage
-  matrix in the preflight report for the full per-flow audit. **Do not enable enforcement in
-  Supabase until the build containing that fix is the one actually running in production** — §8
-  covers the safe order.
+CAPTCHA is intentionally **disabled** for this release, behind an explicit feature flag,
+`NEXT_PUBLIC_TURNSTILE_ENABLED` (`lib/site-config.ts`'s `featureFlags.turnstileEnabled`). While
+that flag is unset or `false`: no Cloudflare account is required, no site key or secret is needed,
+no Turnstile script ever loads, and sign-in/sign-up/password-reset/resend all work through their
+normal non-CAPTCHA paths. This is a real disabled state, not a stubbed-out or fake-passing CAPTCHA
+-- see `docs/product-expansion/DECISIONS.md`'s "CAPTCHA choice" for the exact gating logic.
+
+**To activate in a future release**, in this order:
+
+1. Create a Turnstile site at the Cloudflare dashboard for the exact production hostname and every
+   preview hostname that will run this app (Turnstile validates against the hostname the widget is
+   served from — a site configured for one hostname will fail on another).
+2. Add `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (the public site key only) to Vercel Production + Preview
+   environment variables.
+3. The **Turnstile secret key** goes only into **Supabase Authentication → Bot and Abuse
+   Protection** — never into Vercel, never into this repo, never into any client-reachable code.
+   `npm run security:scan-client-secrets` statically verifies no `"use client"` file references a
+   non-`NEXT_PUBLIC_` environment variable, and — after `npm run build` — greps the built client
+   bundles for known secret-shaped literals.
+4. **Do not enable enforcement in Supabase until** the deployed build actually sends
+   `captchaToken` on every protected flow (sign-up, sign-in, password-reset request,
+   confirmation-email resend — see the CAPTCHA coverage matrix in the preflight report) **and**
+   `NEXT_PUBLIC_TURNSTILE_ENABLED=true` is set in Vercel and the app has been redeployed with it.
+   §8 covers the full safe order.
+5. Only once 1–4 are done and verified, set `NEXT_PUBLIC_TURNSTILE_ENABLED=true` in Vercel,
+   redeploy, and test every protected flow against the real widget before enabling Supabase-side
+   enforcement.
 
 ## 2. Custom SMTP + sending domain — **functional release blocker, not a branding nicety**
 
@@ -97,10 +110,11 @@ work does not have and must not attempt.
 
 ## 5. New environment variables summary (names only, no values)
 
-| Variable                         | Required for                                      | Notes                            |
-| -------------------------------- | ------------------------------------------------- | -------------------------------- |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | CAPTCHA widgets (sign-up, sign-in, reset, resend) | Public key only                  |
-| `NEXT_PUBLIC_VISASPARK_URL`      | Study Abroad CTA                                  | Optional; safe fallback if unset |
+| Variable                          | Required for                                       | Notes                                                     |
+| ---------------------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
+| `NEXT_PUBLIC_TURNSTILE_ENABLED`   | Turning CAPTCHA on at all                          | Not set for this release -- defaults to disabled           |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`  | CAPTCHA widgets (sign-up, sign-in, reset, resend)  | Public key only; only read when the flag above is `true`   |
+| `NEXT_PUBLIC_VISASPARK_URL`       | Study Abroad CTA                                   | Optional; safe fallback if unset                           |
 
 Existing variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 `NEXT_PUBLIC_SITE_URL`) are unchanged and already configured per the prior deployment session.
@@ -170,46 +184,43 @@ the Supabase credentials, not as part of any local implementation task:
 
 ## 8. Safe CAPTCHA cutover order
 
-The previous release plan enabled Supabase CAPTCHA enforcement before the compatible frontend was
-deployed. If the currently-deployed production app doesn't send a `captchaToken` on every
-CAPTCHA-protected flow, enabling enforcement first would break Auth for real users immediately.
-Steps below are labeled **[prepare]** — safe to do in advance, does not change live Auth behavior —
-or **[live]** — changes what currently-deployed production Auth actually does.
+**Status: migration 0007 is applied and verified in production. CAPTCHA is shipping OFF (behind
+`NEXT_PUBLIC_TURNSTILE_ENABLED`, unset) in this release — none of the Cloudflare/Supabase
+CAPTCHA-configuration steps below are required for this release to go out.** They're kept here as
+the ordered procedure for the *future* release that turns CAPTCHA on. Steps are labeled
+**[prepare]** — safe to do in advance, does not change live Auth behavior — or **[live]** —
+changes what currently-deployed production Auth actually does.
 
-1. **[prepare]** Verify backup/recovery readiness (§6). Do not proceed past this step while that
-   status is `BLOCKED`.
-2. **[prepare]** Verify SMTP, sending-domain DNS, templates, and Auth redirect configuration (§2).
-3. **[prepare]** Create/configure the Turnstile widget for the exact production and preview
+1. ~~**[live]** Apply migration 0007~~ — **done**, applied and verified against production.
+2. ~~**[live]** Push this release's local commits~~ — this release ships the CAPTCHA *toggle*,
+   defaulted off; no Cloudflare/Supabase configuration is a prerequisite for it.
+3. **[prepare]** *(future CAPTCHA-activation release)* Verify backup/recovery readiness (§6) is
+   still current before that release, independent of this one.
+4. **[prepare]** Create/configure the Turnstile widget for the exact production and preview
    hostnames (§1).
-4. **[prepare]** Configure the public Turnstile site key (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`) for
-   Vercel Preview and Production.
-5. **[prepare]** Determine whether Supabase allows the Turnstile secret key to be saved while
-   CAPTCHA enforcement itself remains disabled (i.e. whether "configured" and "enforced" are
-   separable in the Supabase dashboard for this project). If they are separable, saving the secret
-   ahead of time is a `[prepare]` step; if not, saving the secret and enabling enforcement happen
-   together and step 12 below is when it actually happens.
-6. **[prepare]** Keep global CAPTCHA enforcement **disabled** in Supabase until every
-   CAPTCHA-protected frontend Auth flow (sign-up, sign-in, password reset, resend) is actually the
-   version running in production — unless the currently-deployed production build is independently
-   verified to already send `captchaToken` on all of them (it is not, as of this review; the
-   sign-in, reset, and resend flows were the defects this review found and fixed locally).
-7. **[live]** Apply migration 0007 (§7) before deploying the new application build — the new
-   profile-upsert code requires the columns it adds, so deploying the new code first would break
-   sign-up/profile sync against the old schema.
-8. **[live]** Push the reviewed local commits and let CI (`quality` + `e2e`) pass.
-9. **[prepare]** Create a non-production Vercel preview deployment and manually test every affected
-   Auth form (sign-up, sign-in, reset, resend) against it, including the CAPTCHA widget itself.
+5. **[prepare]** Configure the public Turnstile site key (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`) for
+   Vercel Preview and Production. The flag (`NEXT_PUBLIC_TURNSTILE_ENABLED`) stays `false` at this
+   point — a configured key with the flag still off changes nothing live (see §1).
+6. **[prepare]** Save the Turnstile secret key in Supabase's Bot and Abuse Protection settings,
+   leaving enforcement itself disabled if the dashboard allows saving the two separately.
+7. **[live]** Set `NEXT_PUBLIC_TURNSTILE_ENABLED=true` in Vercel and redeploy — only once the
+   deployed frontend already sends `captchaToken` on every protected flow (sign-up, sign-in,
+   password-reset request, resend), which this release's code already does whenever the flag is on.
+8. **[prepare]** Create a non-production Vercel preview deployment and manually test every affected
+   Auth form (sign-up, sign-in, reset, resend) against it, including the real CAPTCHA widget.
+9. **[live]** Enable Supabase CAPTCHA enforcement — only now, after step 7 is confirmed live and
+   step 8 passed.
 10. **[prepare]** Record the exact currently-aliased production deployment ID/URL as the rollback
     target before promoting anything new — see the rollback-target verification procedure in the
-    preflight release report.
-11. **[live]** Deploy/promote the verified build to production.
-12. **[live]** Enable Supabase CAPTCHA enforcement — only at this point, only after step 11 is
-    confirmed live.
-13. **[live]** Immediately test sign-up, sign-in, password recovery, resend, and a deliberate
+    preflight release report. (Step 7 above already covers deploying the flag-flip itself.)
+11. **[live]** Immediately test sign-up, sign-in, password recovery, resend, and a deliberate
     CAPTCHA failure/expiration case against production.
-14. **[live]** If CAPTCHA validation fails unexpectedly in production, disable enforcement first to
-    restore Auth availability, then diagnose or roll back the application build as appropriate —
-    restoring availability takes priority over root-causing in the moment.
+12. **[live]** If CAPTCHA validation fails unexpectedly in production, disable enforcement first
+    (or set `NEXT_PUBLIC_TURNSTILE_ENABLED` back to `false` and redeploy) to restore Auth
+    availability, then diagnose as appropriate — restoring availability takes priority over
+    root-causing in the moment.
 
-None of steps 1-14 were performed by any implementation session. Steps marked `[live]` require
-explicit, in-the-moment owner authorization even when this document is otherwise followed exactly.
+Steps 1-2 are done, as of this release. Steps 3-12 (the actual Cloudflare/Supabase configuration)
+were not performed by any implementation session and remain a future, separate release. Steps
+marked `[live]` require explicit, in-the-moment owner authorization even when this document is
+otherwise followed exactly.

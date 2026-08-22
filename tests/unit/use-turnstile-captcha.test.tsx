@@ -10,7 +10,17 @@ import { useTurnstileCaptcha } from "@/components/auth/use-turnstile-captcha";
  * auto-resolving stub used in the form-level tests) so the token/expiry/
  * reset lifecycle can be exercised precisely, including the exact defects
  * this task fixes: stale-token reuse and missing reset-on-failure.
+ *
+ * `turnstileEnabled: true` is forced below because every test in this file
+ * exercises the CAPTCHA-*enabled* lifecycle specifically -- the hook's
+ * default-disabled behavior (no NEXT_PUBLIC_TURNSTILE_ENABLED set) has its
+ * own dedicated coverage in use-turnstile-captcha-disabled.test.tsx.
  */
+
+vi.mock("@/lib/site-config", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/site-config")>();
+  return { ...actual, featureFlags: { ...actual.featureFlags, turnstileEnabled: true } };
+});
 
 let latestOnToken: ((token: string | null) => void) | undefined;
 let latestOnStatusChange: ((status: string) => void) | undefined;

@@ -6,6 +6,7 @@ import {
   type TurnstileWidgetHandle,
   type TurnstileStatus,
 } from "@/components/auth/turnstile-widget";
+import { featureFlags } from "@/lib/site-config";
 
 export interface UseTurnstileCaptchaResult {
   /** The current, unconsumed Turnstile token -- null until solved, and null again after `reset()`. */
@@ -49,6 +50,25 @@ export function useTurnstileCaptcha(unavailableMessage?: string): UseTurnstileCa
     // reset() is a no-op) without needing to check the widget's state first.
     setToken(null);
   }, []);
+
+  // Hooks above run unconditionally on every render (featureFlags.turnstileEnabled
+  // is a build-time constant, so this branch never changes between renders,
+  // and the Rules of Hooks are satisfied regardless). When the feature is
+  // off, this is an explicit disabled state, not a fake "solved" CAPTCHA:
+  // no script loads, no widget renders, no token is ever produced, and
+  // `isReady` is unconditionally true so callers never block submission on
+  // a challenge this deployment isn't running. `token` stays null, so every
+  // call site's `captchaToken: captcha.token ?? undefined` naturally omits
+  // the field entirely -- never a fake or empty token sent to Supabase.
+  if (!featureFlags.turnstileEnabled) {
+    return {
+      token: null,
+      status: "disabled",
+      isReady: true,
+      widget: null,
+      reset: () => {},
+    };
+  }
 
   return {
     token,

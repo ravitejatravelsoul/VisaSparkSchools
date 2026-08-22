@@ -20,6 +20,7 @@ const LIVE_LOOKING_PARENT_ENV: NodeJS.ProcessEnv = {
   PATH: "/usr/bin",
   NEXT_PUBLIC_SUPABASE_URL: "https://zebczbxqdboqrfjaxuew.supabase.co",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "real-looking.anon.key",
+  NEXT_PUBLIC_TURNSTILE_ENABLED: "true",
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: "0xreal-turnstile-site-key",
   NEXT_PUBLIC_AI_TUTOR_ENABLED: "true",
   AI_API_KEY: "sk-real-looking-key",
@@ -39,6 +40,7 @@ describe("playwright-env-profiles", () => {
 
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe("");
     expect(env.NEXT_PUBLIC_SUPABASE_ANON_KEY).toBe("");
+    expect(env.NEXT_PUBLIC_TURNSTILE_ENABLED).toBe("false");
     expect(env.NEXT_PUBLIC_TURNSTILE_SITE_KEY).toBe("");
     expect(env.NEXT_PUBLIC_AI_TUTOR_ENABLED).toBe("false");
     expect(env.AI_API_KEY).toBe("");
@@ -58,6 +60,7 @@ describe("playwright-env-profiles", () => {
 
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe("https://playwright-isolated.invalid");
     expect(env.NEXT_PUBLIC_SUPABASE_ANON_KEY).not.toBe("real-looking.anon.key");
+    expect(env.NEXT_PUBLIC_TURNSTILE_ENABLED).toBe("true");
     expect(env.NEXT_PUBLIC_TURNSTILE_SITE_KEY).toBe("1x00000000000000000000AA");
     expect(env.PLAYWRIGHT_ENV_PROFILE).toBe(getProfileMarker("auth-captcha"));
   });

@@ -25,6 +25,7 @@ interface ProfileSpec {
 const GUEST_OVERRIDES: Record<string, string> = {
   NEXT_PUBLIC_SUPABASE_URL: "",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "",
+  NEXT_PUBLIC_TURNSTILE_ENABLED: "false",
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: "",
   NEXT_PUBLIC_AI_TUTOR_ENABLED: "false",
   AI_API_KEY: "",
@@ -44,6 +45,7 @@ const GUEST_OVERRIDES: Record<string, string> = {
 const AUTH_CAPTCHA_OVERRIDES: Record<string, string> = {
   NEXT_PUBLIC_SUPABASE_URL: "https://playwright-isolated.invalid",
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "playwright-isolated-anon-key.e2e-test-only",
+  NEXT_PUBLIC_TURNSTILE_ENABLED: "true",
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: "1x00000000000000000000AA",
   NEXT_PUBLIC_AI_TUTOR_ENABLED: "false",
   AI_API_KEY: "",

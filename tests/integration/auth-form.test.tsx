@@ -21,11 +21,18 @@ import { AuthForm } from "@/components/auth/auth-form";
  * controllable Turnstile stub (rather than sign-up-form.test.tsx's
  * always-auto-resolving one) so both the "solved" and "not yet solved"
  * states can be exercised, plus the single-use reset() call.
+ *
+ * `turnstileEnabled: true` is forced here because these tests exercise the
+ * CAPTCHA-*enabled* lifecycle specifically -- the OFF (default) behavior has
+ * its own dedicated coverage in auth-form-captcha-disabled.test.tsx.
  */
 
 vi.mock("@/lib/site-config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/site-config")>();
-  return { ...actual, featureFlags: { ...actual.featureFlags, supabaseEnabled: true } };
+  return {
+    ...actual,
+    featureFlags: { ...actual.featureFlags, supabaseEnabled: true, turnstileEnabled: true },
+  };
 });
 
 const push = vi.fn();

@@ -2,9 +2,15 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { SignUpForm } from "@/components/auth/sign-up-form";
 
+// turnstileEnabled: true -- this file exercises the CAPTCHA-enabled sign-up
+// lifecycle specifically; the OFF (default) path has its own dedicated
+// coverage in sign-up-form-captcha-disabled.test.tsx.
 vi.mock("@/lib/site-config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/site-config")>();
-  return { ...actual, featureFlags: { ...actual.featureFlags, supabaseEnabled: true } };
+  return {
+    ...actual,
+    featureFlags: { ...actual.featureFlags, supabaseEnabled: true, turnstileEnabled: true },
+  };
 });
 
 const push = vi.fn();
