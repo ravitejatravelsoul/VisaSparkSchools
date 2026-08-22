@@ -2,6 +2,7 @@ import Link from "next/link";
 import { footerLinks, siteConfig } from "@/lib/site-config";
 import { Container } from "@/components/ui/container";
 import { LogoMark } from "@/components/brand/logo-mark";
+import { Badge } from "@/components/ui/badge";
 
 export function Footer() {
   return (
@@ -19,10 +20,15 @@ export function Footer() {
         <FooterColumn title="Legal" links={footerLinks.legal} />
       </Container>
       <Container className="flex flex-col gap-2 border-t border-(--color-border) py-6 text-xs text-(--color-ink-faint) sm:flex-row sm:items-center sm:justify-between">
-        <p>
-          © {new Date().getFullYear()} {siteConfig.name}. Public beta. Developed by{" "}
-          {siteConfig.developerName}. CEO: {siteConfig.footerCeoName}.
-        </p>
+        <div>
+          <p>
+            © {new Date().getFullYear()} {siteConfig.name}. Public beta. Developed by{" "}
+            {siteConfig.developerName}
+          </p>
+          <p className="mt-1.5">
+            <Badge tone="brand">CEO: {siteConfig.footerCeoName}</Badge>
+          </p>
+        </div>
         <p>Built for learning. Not affiliated with any other coding tutorial site.</p>
       </Container>
     </footer>

@@ -1,34 +1,50 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Footer } from "@/components/layout/footer";
+import { siteConfig } from "@/lib/site-config";
 
 describe("Footer", () => {
-  it("attributes both the developer and the CEO by their exact names", () => {
+  it("attributes the developer and the CEO on two separate semantic lines", () => {
     render(<Footer />);
-    const attribution = screen.getByText(/Developed by/i);
-    expect(attribution.textContent).toContain("Raviteja Vemulapelli");
-    expect(attribution.textContent).toContain("BODDU NAGA MALLESWARA RAO");
+    const developerLine = screen.getByText(/Developed by/i);
+    const ceoLine = screen.getByText(/CEO: BODDU NAGA MALLESWARA RAO/);
+
+    expect(developerLine.textContent).toContain("Raviteja Vemulapelli");
+    // The developer credit must NOT also contain the CEO credit -- they are
+    // two distinct paragraphs now, not one combined sentence.
+    expect(developerLine.textContent).not.toContain("CEO");
+    expect(ceoLine).toBeInTheDocument();
+
+    // Two different DOM elements, not one node split visually with a <br>.
+    expect(developerLine.closest("p")).not.toBe(ceoLine.closest("p"));
   });
 
-  it("does not imply the developer is the CEO -- they are two distinct, separately labeled facts", () => {
+  it("gives the CEO credit a distinct, non-interactive visual treatment", () => {
     render(<Footer />);
-    const attribution = screen.getByText(/Developed by/i).textContent ?? "";
-    // "Developed by X." and "CEO: Y." must appear as two separate sentences,
-    // never as a single "Developed by X, CEO of ..." construction.
-    expect(attribution).toMatch(
-      /Developed by Raviteja Vemulapelli\.\s*CEO: BODDU NAGA MALLESWARA RAO\./,
-    );
+    const ceoLine = screen.getByText(/CEO: BODDU NAGA MALLESWARA RAO/);
+
+    // It's a highlighted badge/pill, not a link or button.
+    expect(ceoLine.tagName).toBe("SPAN");
+    expect(ceoLine.closest("a")).toBeNull();
+    expect(ceoLine.closest("button")).toBeNull();
   });
 
   it("uses the exact owner-approved spelling, word order, and uppercase CEO name", () => {
     render(<Footer />);
-    const attribution = screen.getByText(/Developed by/i).textContent ?? "";
+    const ceoLine = screen.getByText(/CEO: BODDU NAGA MALLESWARA RAO/);
     // Regression guard for the exact corrected name: uppercase, "Boddu"
     // first, "Malleswara" and "Rao" as two separate words -- not the earlier
     // "Naga Malleswararao Boddu" ordering/casing/merging.
-    expect(attribution).toContain("CEO: BODDU NAGA MALLESWARA RAO.");
-    expect(attribution).not.toContain("Naga Malleswararao Boddu");
-    expect(attribution).not.toContain("Malleswararao");
+    expect(ceoLine.textContent).toBe("CEO: BODDU NAGA MALLESWARA RAO");
+    expect(ceoLine.textContent).not.toContain("Naga Malleswararao Boddu");
+    expect(ceoLine.textContent).not.toContain("Malleswararao");
+  });
+
+  it("does not change the certificate signatory identity", () => {
+    // The footer credit and the certificate signatory are deliberately
+    // different facts (see lib/site-config.ts) -- this footer change must
+    // not touch that separate, differently-formatted value.
+    expect(siteConfig.certificateSignatory.name).toBe("Naga Malleswararao Boddu");
   });
 
   it("preserves the existing legal/navigation links", () => {
