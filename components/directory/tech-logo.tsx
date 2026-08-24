@@ -59,12 +59,35 @@ export function TechLogo({
   slug,
   size = 40,
   className,
+  /** Skip the default bordered/surfaced container and render only the raw
+   * mark -- for a caller that already supplies its own single elevated
+   * surface (e.g. the hero's technology-constellation badges), so the icon
+   * is never wrapped in two concentric borders at once. */
+  bare = false,
 }: {
   slug: string;
   size?: number;
   className?: string;
+  bare?: boolean;
 }) {
   const icon = TECH_ICONS[slug];
+  const glyphSize = bare ? size : size * 0.5;
+
+  const glyph = icon ? (
+    <svg role="img" viewBox="0 0 24 24" width={glyphSize} height={glyphSize} fill={`#${icon.hex}`}>
+      <path d={icon.path} />
+    </svg>
+  ) : (
+    <CodeGlyphIcon width={glyphSize} height={glyphSize} className="text-(--color-ink-faint)" />
+  );
+
+  if (bare) {
+    return (
+      <span aria-hidden="true" className={className}>
+        {glyph}
+      </span>
+    );
+  }
 
   return (
     <span
@@ -75,23 +98,7 @@ export function TechLogo({
       )}
       style={{ width: size, height: size }}
     >
-      {icon ? (
-        <svg
-          role="img"
-          viewBox="0 0 24 24"
-          width={size * 0.5}
-          height={size * 0.5}
-          fill={`#${icon.hex}`}
-        >
-          <path d={icon.path} />
-        </svg>
-      ) : (
-        <CodeGlyphIcon
-          width={size * 0.5}
-          height={size * 0.5}
-          className="text-(--color-ink-faint)"
-        />
-      )}
+      {glyph}
     </span>
   );
 }

@@ -149,6 +149,48 @@ describe("Homepage learner image panel", () => {
     }
   });
 
+  it("renders exactly six constellation badges, none of them a link or button", () => {
+    render(<HomePage />);
+    const badges = document.querySelectorAll(".constellation-badge");
+    expect(badges).toHaveLength(6);
+    for (const badge of badges) {
+      expect(badge.tagName).not.toBe("A");
+      expect(badge.tagName).not.toBe("BUTTON");
+      expect(badge.closest("a")).toBeNull();
+      expect(badge.closest("button")).toBeNull();
+    }
+  });
+
+  it("badges have a single ring (no nested bordered/surfaced container inside each badge)", () => {
+    render(<HomePage />);
+    const badges = document.querySelectorAll(".constellation-badge");
+    for (const badge of badges) {
+      // Each badge is itself the one bordered/surfaced element; its only
+      // child must be the bare icon glyph, not another TechLogo container
+      // with its own border/background classes (the double-ring bug this
+      // task exists to remove).
+      const innerBorderedBoxes = badge.querySelectorAll(".border, [class*='border-']");
+      expect(innerBorderedBoxes.length).toBe(0);
+    }
+  });
+
+  it("badge sizes vary -- not a uniform ring of identically-sized icons", () => {
+    render(<HomePage />);
+    const badges = Array.from(document.querySelectorAll(".constellation-badge")) as HTMLElement[];
+    const sizes = new Set(badges.map((b) => b.style.width));
+    expect(sizes.size).toBeGreaterThan(1);
+  });
+
+  it("badges animate independently -- no two share the same delay/duration (never a synchronized shared orbit)", () => {
+    render(<HomePage />);
+    const badges = Array.from(document.querySelectorAll(".constellation-badge")) as HTMLElement[];
+    const timings = badges.map(
+      (b) =>
+        `${b.style.getPropertyValue("--constellation-delay")}|${b.style.getPropertyValue("--constellation-duration")}`,
+    );
+    expect(new Set(timings).size).toBe(timings.length);
+  });
+
   it("no longer renders the removed abstract laptop / capability-card composition", () => {
     render(<HomePage />);
     for (const title of REMOVED_CAPABILITY_CARD_TITLES) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
@@ -415,20 +416,54 @@ export default function HomePage() {
 }
 
 /**
- * Positions for the six technology badges floating around the learner
- * image on desktop, tuned to clear the center (face/laptop) area while
- * staying inside the panel's own bounding box (no overflow into neighboring
- * columns), tuned against the real photo's actual proportions (face
- * centered in the top third, laptop spanning the wide middle band, crossed
- * legs at the bottom) so no badge overlaps the face or the laptop.
+ * Organic, asymmetric "technology constellation" around the learner image
+ * -- deliberately NOT a computed ring (no shared radius, no evenly-spaced
+ * angle, no mirrored pairs). Each badge gets its own hand-tuned position,
+ * size and depth, inspired by (not copied from) a portfolio hero reviewed
+ * for this task: irregular distances, varying sizes, a couple of badges
+ * pulled slightly behind the image plane (smaller + more transparent) to
+ * suggest depth rather than a flat pinned-icon ring. Positions were tuned
+ * against the real photo's actual proportions (face centered in the top
+ * third, laptop spanning the wide middle band, crossed legs at the bottom)
+ * so nothing overlaps the face, hands or laptop.
  */
-const HERO_BADGE_POSITIONS = [
-  "top-4 left-0",
-  "top-8 right-0",
-  "top-1/2 -left-4 -translate-y-1/2",
-  "top-1/2 -right-4 -translate-y-1/2",
-  "bottom-10 left-2",
-  "bottom-10 right-2",
+const HERO_CONSTELLATION = [
+  { position: "top-6 left-2", size: 34, depth: "near", animDelay: "0s", animDuration: "5.5s" },
+  {
+    position: "top-1 right-6",
+    size: 42,
+    depth: "far",
+    animDelay: "0.6s",
+    animDuration: "6.5s",
+  },
+  {
+    position: "top-[38%] -left-5",
+    size: 38,
+    depth: "far",
+    animDelay: "1.4s",
+    animDuration: "7s",
+  },
+  {
+    position: "top-[52%] -right-3",
+    size: 30,
+    depth: "near",
+    animDelay: "0.3s",
+    animDuration: "5s",
+  },
+  {
+    position: "bottom-16 left-0",
+    size: 30,
+    depth: "near",
+    animDelay: "2s",
+    animDuration: "6s",
+  },
+  {
+    position: "bottom-4 right-4",
+    size: 38,
+    depth: "far",
+    animDelay: "1s",
+    animDuration: "7.5s",
+  },
 ] as const;
 
 /**
@@ -436,11 +471,10 @@ const HERO_BADGE_POSITIONS = [
  * (public/images/homepage/hero-learner.webp, an original AI-generated
  * VisaSparkSchools asset with a transparent background -- see the task
  * report for the source PNG, alpha-transparency verification, and
- * compression result), surrounded by separate (not baked into the photo)
- * technology-logo badges. No background/border is applied to the image
- * itself -- the transparent PNG/WebP sits directly on the hero's own
- * light/dark surface, per the explicit "no artificial image background"
- * requirement.
+ * compression result). The transparent PNG/WebP sits directly on the
+ * hero's own light/dark surface with no frame/box of its own, over a
+ * very faint dot-grid + soft radial glow for environmental depth --
+ * inspired by, not copied from, a portfolio hero reviewed for this task.
  */
 function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; name: string }[] }) {
   return (
@@ -448,6 +482,22 @@ function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; n
       {/* aspect-[2/3] matches the source image's real 1024x1536 intrinsic
           ratio exactly, so `object-contain` never letterboxes. */}
       <div className="relative aspect-2/3 w-full max-w-[260px]">
+        {/* Subtle background depth: a faint dot-grid plus a soft brand-tinted
+            radial glow, confined to this panel only. Decorative, so
+            aria-hidden; a plain CSS background layer (not a bitmap) keeps
+            it cheap to render. */}
+        <div
+          aria-hidden="true"
+          className="absolute -inset-6 -z-10 rounded-full"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, var(--color-brand-contrast) 0%, transparent 65%), radial-gradient(var(--color-border) 1px, transparent 1px)",
+            backgroundSize: "auto, 26px 26px",
+            backgroundPosition: "center, center",
+            opacity: 0.6,
+          }}
+        />
+
         <Image
           src="/images/homepage/hero-learner.webp"
           alt="Learner practicing technology skills on a laptop"
@@ -457,34 +507,49 @@ function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; n
           className="object-contain object-bottom"
         />
 
-        {/* Desktop: floating badges around the image, hidden from assistive
-            technology (the image's own alt text already describes the
-            learner; these are a decorative visual echo of real, linked
-            technologies shown accessibly in the "Popular Technologies" and
-            "Browse technologies" sections). */}
+        {/* Desktop: the constellation, hidden from assistive technology
+            (the image's own alt text already describes the learner; these
+            are a decorative visual echo of real, linked technologies shown
+            accessibly in the "Popular Technologies" and "Browse
+            technologies" sections). A very small independent float per
+            badge (see .constellation-badge in globals.css) -- different
+            duration/delay per badge so none share a path, and the existing
+            global prefers-reduced-motion rule already neutralizes it. */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
-          {heroBadgeTech.map((tech, i) => (
-            <span
-              key={tech.slug}
-              className={cn(
-                "absolute flex h-11 w-11 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-md)]",
-                HERO_BADGE_POSITIONS[i],
-              )}
-            >
-              <TechLogo slug={tech.slug} size={26} />
-            </span>
-          ))}
+          {heroBadgeTech.map((tech, i) => {
+            const spec = HERO_CONSTELLATION[i];
+            return (
+              <span
+                key={tech.slug}
+                className={cn(
+                  "constellation-badge absolute flex items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]",
+                  spec.position,
+                  spec.depth === "far" && "opacity-75",
+                )}
+                style={
+                  {
+                    width: spec.size,
+                    height: spec.size,
+                    "--constellation-delay": spec.animDelay,
+                    "--constellation-duration": spec.animDuration,
+                  } as CSSProperties
+                }
+              >
+                <TechLogo slug={tech.slug} bare size={Math.round(spec.size * 0.5)} />
+              </span>
+            );
+          })}
         </div>
       </div>
 
-      {/* Mobile/tablet: a compact non-overlapping row instead of floating
-          badges (Phase 5's mobile requirement -- no risky absolute
-          positioning on small screens). */}
+      {/* Mobile/tablet: a compact non-overlapping row instead of the
+          floating constellation (no risky absolute positioning on small
+          screens). */}
       <ul aria-hidden="true" className="flex flex-wrap justify-center gap-2 lg:hidden">
         {heroBadgeTech.map((tech) => (
           <li key={tech.slug}>
             <span className="flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]">
-              <TechLogo slug={tech.slug} size={22} />
+              <TechLogo slug={tech.slug} bare size={20} />
             </span>
           </li>
         ))}

@@ -364,6 +364,36 @@ h4 {
 }
 
 /*
+ * One extremely small independent float for a decorative badge in the
+ * homepage hero's technology constellation (app/(site)/page.tsx) --
+ * deliberately tiny (2px) and slow, with per-badge duration/delay set via
+ * `--constellation-delay`/`--constellation-duration` custom properties so
+ * no two badges share a path or move in sync (never a shared circular
+ * orbit). Neutralized by the global prefers-reduced-motion rule above like
+ * every other animation in this file.
+ */
+@keyframes constellation-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.constellation-badge {
+  animation: constellation-float var(--constellation-duration, 6s) ease-in-out infinite;
+  animation-delay: var(--constellation-delay, 0s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-badge {
+    animation: none;
+  }
+}
+
+/*
  * Pathway motif: a thin connecting line drawn behind a vertical list of
  * step markers (roadmap steps, course lesson nav). Applied to the marker
  * column via `.path-track`, with `.path-track > * + *::before` drawing the
