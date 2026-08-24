@@ -108,18 +108,38 @@ describe("Homepage hero (redesigned)", () => {
 });
 
 describe("Homepage learner image panel", () => {
-  it("has an accessible, clearly-labeled placeholder for the required learner image", () => {
+  it("renders the real learner photo with the required descriptive alt text", () => {
     render(<HomePage />);
-    const placeholder = screen.getByRole("img", {
-      name: /learner studying at a laptop/i,
+    const image = screen.getByRole("img", {
+      name: "Learner practicing technology skills on a laptop",
     });
-    expect(placeholder).toBeInTheDocument();
+    expect(image.tagName).toBe("IMG");
+    // next/image rewrites `src` through its optimizer -- assert the
+    // underlying asset is referenced, not a literal `src` string.
+    expect(decodeURIComponent(image.getAttribute("src") ?? "")).toContain(
+      "/images/homepage/hero-learner.webp",
+    );
+  });
+
+  it("no longer renders the removed placeholder treatment (dashed border, pending label)", () => {
+    render(<HomePage />);
+    expect(screen.queryByText(/pending/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/learner photo pending/i)).not.toBeInTheDocument();
+    const image = screen.getByRole("img", {
+      name: "Learner practicing technology skills on a laptop",
+    });
+    // The image itself carries no background/border box -- it sits
+    // directly on the hero's own surface (className has no
+    // border/dashed/bg- utility).
+    expect(image.className).not.toMatch(/border|dashed|bg-/);
   });
 
   it("surrounds the learner image with six real, accurate technology badges, hidden from assistive technology", () => {
     render(<HomePage />);
-    const placeholder = screen.getByRole("img", { name: /learner studying at a laptop/i });
-    const panel = placeholder.closest("div.animate-fade-up")!;
+    const image = screen.getByRole("img", {
+      name: "Learner practicing technology skills on a laptop",
+    });
+    const panel = image.closest("div.animate-fade-up")!;
     const decorative = panel.querySelectorAll('[aria-hidden="true"]');
     expect(decorative.length).toBeGreaterThan(0);
 

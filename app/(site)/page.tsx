@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
@@ -417,70 +418,47 @@ export default function HomePage() {
  * Positions for the six technology badges floating around the learner
  * image on desktop, tuned to clear the center (face/laptop) area while
  * staying inside the panel's own bounding box (no overflow into neighboring
- * columns). Mirrors Image 2's balanced-but-varied placement rather than a
- * mechanically even ring.
+ * columns), tuned against the real photo's actual proportions (face
+ * centered in the top third, laptop spanning the wide middle band, crossed
+ * legs at the bottom) so no badge overlaps the face or the laptop.
  */
 const HERO_BADGE_POSITIONS = [
-  "top-2 left-2",
-  "top-10 right-0",
-  "top-1/2 -left-3 -translate-y-1/2",
-  "top-1/3 -right-3",
-  "bottom-6 left-4",
-  "bottom-2 right-6",
+  "top-4 left-0",
+  "top-8 right-0",
+  "top-1/2 -left-4 -translate-y-1/2",
+  "top-1/2 -right-4 -translate-y-1/2",
+  "bottom-10 left-2",
+  "bottom-10 right-2",
 ] as const;
 
 /**
- * Column 2 of the hero: the required real learner-at-a-laptop image,
- * surrounded by separate (not baked into the photo) technology-logo
- * badges -- see the task report's "known limitations" section for why the
- * image itself is still a clearly-flagged placeholder rather than a real
- * photo: no image-generation tool is available in this environment, and a
- * pasted reference image's exact pixels cannot be extracted to a local
- * file with the tools available here, so per the task's own explicit
- * fallback instruction this reports the blocker rather than silently
- * reusing the previous abstract illustration or fabricating an
- * unverifiable "sourced" photo.
- *
- * The image slot below is structured so dropping in the real asset is a
- * one-line change: replace the placeholder `<div>` with
- * `<Image src="/images/homepage/hero-learner.jpg" alt="A learner studying at a laptop" fill className="object-cover" sizes="(min-width: 1024px) 34vw, 80vw" priority />`
- * once `public/images/homepage/hero-learner.jpg` exists locally.
+ * Column 2 of the hero: the required real learner-at-a-laptop image
+ * (public/images/homepage/hero-learner.webp, an original AI-generated
+ * VisaSparkSchools asset with a transparent background -- see the task
+ * report for the source PNG, alpha-transparency verification, and
+ * compression result), surrounded by separate (not baked into the photo)
+ * technology-logo badges. No background/border is applied to the image
+ * itself -- the transparent PNG/WebP sits directly on the hero's own
+ * light/dark surface, per the explicit "no artificial image background"
+ * requirement.
  */
 function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; name: string }[] }) {
   return (
     <div className="animate-fade-up mx-auto flex w-full max-w-xs flex-col items-center gap-4 lg:max-w-none">
-      <div className="relative aspect-4/5 w-full max-w-[280px]">
-        {/* Placeholder learner-image slot -- see the doc comment above for
-            the exact swap-in once a real, licensed photo is available.
-            Deliberately styled as an obvious "pending asset" placeholder
-            (dashed border, muted icon) rather than a finished illustration,
-            so it is never mistaken for an intentional design choice. */}
-        <div
-          role="img"
-          aria-label="A learner studying at a laptop (placeholder -- real photo pending)"
-          className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-(--color-border-strong) bg-(--color-surface-sunken) p-6 text-center"
-        >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            width={40}
-            height={40}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            className="text-(--color-ink-faint)"
-          >
-            <rect x="3" y="4" width="18" height="14" rx="2" />
-            <circle cx="9" cy="9.5" r="2" />
-            <path d="m4.5 16 4-4 3 3 5-5 4.5 4.5" />
-          </svg>
-          <p className="text-xs font-medium text-(--color-ink-faint)">
-            Learner photo pending -- see report
-          </p>
-        </div>
+      {/* aspect-[2/3] matches the source image's real 1024x1536 intrinsic
+          ratio exactly, so `object-contain` never letterboxes. */}
+      <div className="relative aspect-2/3 w-full max-w-[260px]">
+        <Image
+          src="/images/homepage/hero-learner.webp"
+          alt="Learner practicing technology skills on a laptop"
+          fill
+          priority
+          sizes="(min-width: 1024px) 26vw, 65vw"
+          className="object-contain object-bottom"
+        />
 
         {/* Desktop: floating badges around the image, hidden from assistive
-            technology (the panel's own aria-label already describes the
+            technology (the image's own alt text already describes the
             learner; these are a decorative visual echo of real, linked
             technologies shown accessibly in the "Popular Technologies" and
             "Browse technologies" sections). */}
