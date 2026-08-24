@@ -74,6 +74,50 @@ export function CloseIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+/** Filled play triangle -- "run this code" affordance, used only as a decorative accent inside a labeled capability card, never as the sole cue for an actual Run control (those already have their own visible "Run" text). */
+export function PlayIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props} fill="currentColor" stroke="none">
+      <path d="M8 5.5v13l11-6.5-11-6.5Z" />
+    </Base>
+  );
+}
+
+/** Stacked layers -- "guided project" motif (a project assembles several lesson-sized pieces into one build). */
+export function LayersIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="m12 3 8 4.5-8 4.5-8-4.5L12 3Z" />
+      <path d="m4 12 8 4.5 8-4.5" />
+      <path d="m4 16.5 8 4.5 8-4.5" />
+    </Base>
+  );
+}
+
+/** A checked list item -- "quiz/review" motif. */
+export function QuizIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="m4.5 7 1.5 1.5L8.5 6" />
+      <path d="M12 7h7.5" />
+      <path d="m4.5 13 1.5 1.5 2.5-2.5" />
+      <path d="M12 13h7.5" />
+      <path d="m4.5 19 1.5 1.5 2.5-2.5" />
+      <path d="M12 19h7.5" />
+    </Base>
+  );
+}
+
+/** Ribbon/seal -- "certificate" motif. */
+export function CertificateIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <circle cx="12" cy="8.5" r="5.5" />
+      <path d="m9 13.5-1.5 7 4.5-2.5 4.5 2.5-1.5-7" />
+    </Base>
+  );
+}
+
 export function BookmarkIcon({
   filled = false,
   ...props
@@ -81,6 +125,16 @@ export function BookmarkIcon({
   return (
     <Base {...props} fill={filled ? "currentColor" : "none"}>
       <path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V20l-6-3.5L6 20V4.5Z" />
+    </Base>
+  );
+}
+
+/** Generic "code/technology" glyph -- the fallback shown for a technology with no accurate official brand mark available (see components/directory/tech-logo.tsx), so it never stands in for a real trademark. */
+export function CodeGlyphIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...props}>
+      <path d="m9 8-4 4 4 4" />
+      <path d="m15 8 4 4-4 4" />
     </Base>
   );
 }
