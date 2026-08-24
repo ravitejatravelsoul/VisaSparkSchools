@@ -20,8 +20,8 @@ test("homepage presents topics as independent choices, not a numbered global pat
   await expect(page.getByText(/one connected path/i)).toHaveCount(0);
   await expect(page.getByText(/,\s*in order\b/i)).toHaveCount(0);
 
-  await expect(page.getByRole("link", { name: "Browse courses" })).toBeVisible();
-  await expect(page.getByText(/start with any course/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Start learning free" })).toBeVisible();
+  await expect(page.getByText(/no account required to begin/i)).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Choose a topic" })).toBeVisible();
   await expect(page.getByText(/nothing here needs to be completed in order/i)).toBeVisible();
