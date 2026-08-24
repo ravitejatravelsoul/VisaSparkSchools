@@ -8,37 +8,53 @@ vi.mock("@/components/seo/json-ld", () => ({
   JsonLd: () => null,
 }));
 
-const CAPABILITY_TITLES = [
-  "Runnable lessons",
-  "Guided projects",
-  "Quizzes & review",
-  "Certificates",
-] as const;
-
-const FEATURE_STRIP_TITLES = [
-  "Interactive lessons",
-  "Code playground",
-  "Quizzes & review",
-  "Guided projects",
-  "Certificates",
-  "Progress sync",
+const HERO_BADGE_TECH_SLUGS = [
+  "javascript",
+  "typescript",
+  "python",
+  "react",
+  "cpp",
+  "nodejs",
 ] as const;
 
 const POPULAR_TECH_SLUGS = [
+  "html",
+  "css",
   "javascript",
-  "python",
   "typescript",
+  "python",
+  "sql",
+  "csharp",
+  "java",
   "react",
   "nodejs",
-  "sql",
-  "git",
-  "html",
+  "dotnet",
+  "php",
+] as const;
+
+const FEATURE_STRIP_TITLES = [
+  "Interactive Lessons",
+  "Code Playground",
+  "Quizzes & Review",
+  "Guided Projects",
+  "Certificates",
+  "Progress Sync",
+] as const;
+
+// A previous iteration of this hero used floating "capability" cards with
+// this exact copy -- confirm none of it survived the refinement back to a
+// real-learner-image composition.
+const REMOVED_CAPABILITY_CARD_TITLES = [
+  "Runnable lessons",
+  "Guided projects",
+  "Quizzes & review",
+  "Recognize completed learning",
 ] as const;
 
 // Every number/percentage/count that would be a fabricated claim if it ever
-// appeared verbatim on the new hero -- this is a regression guard, not an
-// exhaustive scan (real, accurate counts like lesson/hour totals elsewhere
-// on the page are legitimate and out of scope here).
+// appeared verbatim on the hero -- a regression guard, not an exhaustive
+// scan (real, accurate counts like lesson/hour totals elsewhere on the page
+// are legitimate and out of scope here).
 const FORBIDDEN_FAKE_CLAIMS = [
   /trusted by/i,
   /\d[\d,]*\+?\s*(learners|students|users)/i,
@@ -79,68 +95,101 @@ describe("Homepage hero (redesigned)", () => {
       expect(bodyText).not.toMatch(pattern);
     }
   });
+
+  it("does not use the removed fixed-dark hero gradient", () => {
+    render(<HomePage />);
+    const h1 = screen.getByRole("heading", { level: 1 });
+    const heroSection = h1.closest("section")!;
+    expect(heroSection.className).not.toMatch(/brand-gradient/);
+    // The hero must use the site's normal semantic surface token, not a
+    // hard-coded color literal.
+    expect(heroSection.className).toMatch(/bg-\(--color-surface\)/);
+  });
 });
 
-describe("Homepage floating capability cards", () => {
-  it("renders all four factual capability labels exactly once each, with no numbers", () => {
+describe("Homepage learner image panel", () => {
+  it("has an accessible, clearly-labeled placeholder for the required learner image", () => {
     render(<HomePage />);
-    for (const title of CAPABILITY_TITLES) {
-      // Appears twice by design: once in the mobile stacked list, once in
-      // the desktop floating layout (only one is visible at a given
-      // viewport via CSS, both exist in the DOM for responsive reflow).
-      const matches = screen.getAllByText(title, { exact: true });
-      expect(matches.length).toBeGreaterThanOrEqual(1);
-      for (const el of matches) {
-        expect(el.textContent).not.toMatch(/\d/);
-      }
+    const placeholder = screen.getByRole("img", {
+      name: /learner studying at a laptop/i,
+    });
+    expect(placeholder).toBeInTheDocument();
+  });
+
+  it("surrounds the learner image with six real, accurate technology badges, hidden from assistive technology", () => {
+    render(<HomePage />);
+    const placeholder = screen.getByRole("img", { name: /learner studying at a laptop/i });
+    const panel = placeholder.closest("div.animate-fade-up")!;
+    const decorative = panel.querySelectorAll('[aria-hidden="true"]');
+    expect(decorative.length).toBeGreaterThan(0);
+
+    for (const slug of HERO_BADGE_TECH_SLUGS) {
+      const tech = getTechnologyBySlug(slug);
+      expect(tech, `expected a real technology for slug "${slug}"`).toBeDefined();
     }
   });
 
-  it("the decorative learner visual is hidden from assistive technology", () => {
+  it("no longer renders the removed abstract laptop / capability-card composition", () => {
     render(<HomePage />);
-    const heroHeading = screen.getByRole("heading", { level: 1 });
-    const heroSection = heroHeading.closest("section");
-    expect(heroSection).not.toBeNull();
-    const decorative = heroSection!.querySelectorAll('[aria-hidden="true"]');
-    expect(decorative.length).toBeGreaterThan(0);
+    for (const title of REMOVED_CAPABILITY_CARD_TITLES) {
+      expect(screen.queryByText(title, { exact: true })).not.toBeInTheDocument();
+    }
   });
 });
 
 describe("Homepage Popular Technologies panel", () => {
-  it("links every popular technology to its real canonical technology page", () => {
+  it('has a "Popular Technologies" heading and a "View all" link', () => {
+    render(<HomePage />);
+    expect(screen.getByText("Popular Technologies", { exact: true })).toBeInTheDocument();
+    const viewAllLinks = screen.getAllByRole("link", { name: /view all/i });
+    expect(viewAllLinks.some((l) => l.getAttribute("href") === "/technologies")).toBe(true);
+  });
+
+  it("renders every popular technology as a real, working link to its canonical page", () => {
     render(<HomePage />);
     for (const slug of POPULAR_TECH_SLUGS) {
       const tech = getTechnologyBySlug(slug);
       expect(tech, `expected a real technology for slug "${slug}"`).toBeDefined();
-      const link = screen.getByRole("link", { name: tech!.name });
-      expect(link).toHaveAttribute("href", `/technologies/${slug}`);
-    }
-  });
-
-  it("has a working 'view all technologies' link", () => {
-    render(<HomePage />);
-    const links = screen.getAllByRole("link", { name: "View all technologies" });
-    for (const link of links) {
-      expect(link).toHaveAttribute("href", "/technologies");
+      const links = screen.getAllByRole("link", { name: tech!.name });
+      expect(links.some((l) => l.getAttribute("href") === `/technologies/${slug}`)).toBe(true);
     }
   });
 
   it("renders no duplicate technology entries in the popular panel", () => {
-    render(<HomePage />);
     const seen = new Set<string>();
     for (const slug of POPULAR_TECH_SLUGS) {
       expect(seen.has(slug)).toBe(false);
       seen.add(slug);
     }
   });
+
+  it("is a compact multi-column grid, not a single vertical list", () => {
+    render(<HomePage />);
+    const heading = screen.getByText("Popular Technologies", { exact: true });
+    const panel = heading.closest("div")!.parentElement!;
+    const grid = panel.querySelector("ul")!;
+    expect(grid.className).toMatch(/grid-cols-3/);
+  });
+
+  it("shows between 12 and 16 popular technologies", () => {
+    expect(POPULAR_TECH_SLUGS.length).toBeGreaterThanOrEqual(12);
+    expect(POPULAR_TECH_SLUGS.length).toBeLessThanOrEqual(16);
+  });
 });
 
 describe("Homepage feature strip", () => {
-  it("renders all six factual feature-strip items", () => {
+  it("renders exactly the six accurate, unsupported-claim-free feature items", () => {
     render(<HomePage />);
     for (const title of FEATURE_STRIP_TITLES) {
       expect(screen.getAllByText(title, { exact: true }).length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it("does not claim a Community feature or an unsupported career outcome", () => {
+    render(<HomePage />);
+    const bodyText = document.body.textContent ?? "";
+    expect(bodyText).not.toMatch(/\bcommunity\b/i);
+    expect(bodyText).not.toMatch(/boost your career/i);
   });
 });
 
@@ -149,9 +198,6 @@ describe("Homepage Browse Technologies section", () => {
     render(<HomePage />);
     const heading = screen.getByRole("heading", { name: "Browse technologies" });
     expect(heading).toBeInTheDocument();
-    // Every browse-technologies tile is an <a href="/technologies/...">;
-    // confirm at least one well-known technology resolves correctly and
-    // that section contains no unresolved/undefined technology name.
     const jsLinks = screen.getAllByRole("link", { name: /^JavaScript$/ });
     expect(jsLinks.some((l) => l.getAttribute("href") === "/technologies/javascript")).toBe(true);
     expect(screen.queryByText("undefined")).not.toBeInTheDocument();

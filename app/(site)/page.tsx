@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { LinkButton } from "@/components/ui/button";
@@ -36,26 +35,28 @@ export const metadata: Metadata = {
   alternates: { canonical: siteConfig.url },
 };
 
-/**
- * Compact, factual capability cards -- deliberately no numbers (no fake
- * streaks/counts/percentages). If real signed-in progress is ever wired in
- * here, it must reuse the existing progress-store logic already used by
- * /dashboard, not a new hero-only data path.
- */
-const capabilityHighlights = [
-  { icon: PlayIcon, title: "Runnable lessons", body: "Practice directly in your browser" },
-  { icon: LayersIcon, title: "Guided projects", body: "Apply concepts step by step" },
-  { icon: QuizIcon, title: "Quizzes & review", body: "Check your understanding" },
-  { icon: CertificateIcon, title: "Certificates", body: "Recognize completed learning" },
+const featureStrip = [
+  { icon: PlayIcon, title: "Interactive Lessons", body: "Learn by doing" },
+  { icon: LayersIcon, title: "Code Playground", body: "Practice in your browser" },
+  { icon: QuizIcon, title: "Quizzes & Review", body: "Test your skills" },
+  { icon: LayersIcon, title: "Guided Projects", body: "Build complete solutions" },
+  { icon: CertificateIcon, title: "Certificates", body: "Recognize your progress" },
+  { icon: ArrowRightIcon, title: "Progress Sync", body: "Continue across devices" },
 ] as const;
 
-const featureStrip = [
-  { icon: PlayIcon, title: "Interactive lessons", body: "Learn by doing" },
-  { icon: LayersIcon, title: "Code playground", body: "Practice in your browser" },
-  { icon: QuizIcon, title: "Quizzes & review", body: "Check your knowledge" },
-  { icon: LayersIcon, title: "Guided projects", body: "Build complete solutions" },
-  { icon: CertificateIcon, title: "Certificates", body: "Recognize your progress" },
-  { icon: ArrowRightIcon, title: "Progress sync", body: "Continue across devices" },
+/**
+ * Six technologies shown as floating badges around the hero learner image
+ * -- all confirmed to have an accurate official brand mark in the shared
+ * TechLogo registry (no fallback glyphs in the hero itself, so every badge
+ * reads as a real, recognizable brand at a glance).
+ */
+const HERO_BADGE_TECH_SLUGS = [
+  "javascript",
+  "typescript",
+  "python",
+  "react",
+  "cpp",
+  "nodejs",
 ] as const;
 
 /**
@@ -63,31 +64,33 @@ const featureStrip = [
  * here is verified (via a one-off audit script during this task) to exist,
  * be `publicVisibility: true`, and resolve to a real `/technologies/[slug]`
  * page. Linking every tile to the technology guide page (rather than
- * directly to a course) means the link is never dead even for the two
- * entries below with no course yet (`aws`, `data-science`) -- their guide
- * page is still real content, just without a "Start course" action.
+ * directly to a course) means the link is never dead even for entries with
+ * no course yet (e.g. `aws`) -- their guide page is still real content,
+ * just without a "Start course" action.
  */
 const POPULAR_TECH_SLUGS = [
+  "html",
+  "css",
   "javascript",
-  "python",
   "typescript",
+  "python",
+  "sql",
+  "csharp",
+  "java",
   "react",
   "nodejs",
-  "sql",
-  "git",
-  "html",
+  "dotnet",
+  "php",
 ] as const;
 
 const BROWSE_TECH_SLUGS = [
   ...POPULAR_TECH_SLUGS,
-  "css",
+  "git",
   "cpp",
   "c",
-  "csharp",
-  "php",
+  "aws",
   "linux",
   "machine-learning",
-  "aws",
 ] as const;
 
 const steps = [
@@ -110,6 +113,9 @@ export default function HomePage() {
     (t): t is NonNullable<typeof t> => Boolean(t),
   );
   const browseTech = BROWSE_TECH_SLUGS.map((slug) => getTechnologyBySlug(slug)).filter(
+    (t): t is NonNullable<typeof t> => Boolean(t),
+  );
+  const heroBadgeTech = HERO_BADGE_TECH_SLUGS.map((slug) => getTechnologyBySlug(slug)).filter(
     (t): t is NonNullable<typeof t> => Boolean(t),
   );
   const featuredProjects = allProjects.slice(0, 3);
@@ -135,149 +141,102 @@ export default function HomePage() {
       />
 
       {/*
-        Homepage-only dark hero band. Deliberately scoped to this section --
-        the shared Header/nav is untouched (it's rendered by the root layout
-        for every route), so this dark surface reads as "a rich hero on a
-        light site" rather than a site-wide dark-nav redesign. Reuses the
-        existing `.brand-gradient` token (docs/DESIGN_SYSTEM.md: "one
-        gradient, one hero moment per page") rather than inventing a new one.
+        Compact three-column hero on the site's normal light surface -- the
+        shared Header/nav is untouched (it's rendered by the root layout for
+        every route). Padding is deliberately tight (py-6/lg:py-8, not the
+        py-14/py-20 an earlier iteration used) so header + hero + the feature
+        strip below all fit inside one 1366x768+ viewport with no scrolling;
+        verified empirically via Playwright bounding-box checks, not just
+        estimated.
       */}
-      <section className="brand-gradient relative overflow-hidden text-white">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(50% 60% at 15% 20%, white, transparent 70%), radial-gradient(40% 50% at 90% 90%, white, transparent 70%)",
-          }}
-        />
-        <Container className="relative grid gap-12 py-14 lg:grid-cols-[minmax(0,5fr)_minmax(0,4fr)_minmax(0,3fr)] lg:items-center lg:py-20">
-          {/* Left: headline and actions */}
+      <section className="border-b border-(--color-border) bg-(--color-surface)">
+        <Container className="grid gap-8 py-6 lg:grid-cols-[38fr_34fr_28fr] lg:items-center lg:gap-6 lg:py-8">
+          {/* Column 1 (~36%): message */}
           <div className="animate-fade-up">
-            <Badge tone="brand" className="border-white/25 bg-white/10 text-white">
-              Public beta
-            </Badge>
-            <h1 className="mt-4 text-4xl leading-[1.05] font-bold sm:text-5xl">
+            <Badge tone="brand">Public beta</Badge>
+            <h1 className="mt-3 text-3xl leading-[1.08] font-bold lg:text-4xl">
               Learn. Build. Prove.
               <br />
-              <span className="text-(--color-hero-emphasis)">Succeed.</span>
+              <span className="text-(--color-brand-strong)">Succeed.</span>
             </h1>
-            <p className="mt-5 max-w-md text-lg text-white/80">
+            <p className="mt-3 max-w-md text-base text-(--color-ink-muted)">
               Build practical technology skills through structured courses, runnable lessons, guided
               projects, quizzes, and progress you can continue across devices.
             </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <LinkButton href="/courses" size="lg">
-                Start learning free
-              </LinkButton>
-              <LinkButton
-                href="/playground"
-                variant="secondary"
-                size="lg"
-                className="border-white/25 bg-transparent text-white hover:bg-white/10"
-              >
+            <div className="mt-5 flex flex-wrap gap-3">
+              <LinkButton href="/courses">Start learning free</LinkButton>
+              <LinkButton href="/playground" variant="secondary">
                 Try the playground
               </LinkButton>
             </div>
-            <p className="mt-5 text-sm text-white/60">
+            <p className="mt-3 text-sm text-(--color-ink-faint)">
               No account required to begin. Sign up when you&rsquo;re ready to sync your progress.
             </p>
           </div>
 
-          {/* Center: original abstract "learner at a laptop" composition + floating capability cards */}
-          <div className="relative mx-auto flex w-full max-w-sm flex-col items-center gap-3 lg:max-w-none">
-            <LearnerVisual />
-            <ul className="grid w-full max-w-sm grid-cols-2 gap-3 lg:hidden">
-              {capabilityHighlights.map((item) => (
-                <li key={item.title}>
-                  <CapabilityCard item={item} />
-                </li>
-              ))}
-            </ul>
-            {/* Desktop: floating around the visual. Positions keep clear of the
-                face/laptop area in the visual's center per Phase 7. */}
-            <div className="pointer-events-none absolute inset-0 z-10 hidden lg:block">
-              <div className="pointer-events-auto absolute top-2 -left-6 w-40">
-                <CapabilityCard item={capabilityHighlights[0]} compact />
-              </div>
-              <div className="pointer-events-auto absolute top-10 -right-8 w-40">
-                <CapabilityCard item={capabilityHighlights[1]} compact />
-              </div>
-              <div className="pointer-events-auto absolute bottom-8 -left-10 w-40">
-                <CapabilityCard item={capabilityHighlights[2]} compact />
-              </div>
-              <div className="pointer-events-auto absolute -right-6 bottom-0 w-40">
-                <CapabilityCard item={capabilityHighlights[3]} compact />
-              </div>
-            </div>
-          </div>
+          {/* Column 2 (~34%): learner image + surrounding technology badges */}
+          <LearnerImagePanel heroBadgeTech={heroBadgeTech} />
 
-          {/* Right: Popular Technologies panel -- deliberately a fixed light
-              "glass" surface regardless of site theme (it floats over the
-              always-dark hero either way), so every themed token it uses is
-              explicitly pinned to its light-mode value here rather than
-              inheriting the page's dark-mode value, which would otherwise
-              render near-invisible light-on-light text. */}
-          <Card
-            className="animate-fade-up border-white/15 bg-white/95 text-(--color-ink) backdrop-blur"
-            style={
-              {
-                "--color-ink": "#201d17",
-                "--color-ink-faint": "#6b6459",
-                "--color-border": "#e4e1da",
-                "--color-surface": "#ffffff",
-                "--color-surface-sunken": "#f4f2ec",
-                "--color-brand-strong": "#0d3d21",
-              } as CSSProperties
-            }
-          >
-            <CardBody>
-              <p className="mb-4 text-sm font-semibold tracking-wide text-(--color-ink-faint) uppercase">
-                Popular technologies
-              </p>
-              <ul className="flex flex-col gap-1">
+          {/* Column 3 (~30%): Popular Technologies compact grid */}
+          <Card className="animate-fade-up">
+            <CardBody className="p-4">
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold tracking-wide text-(--color-ink-faint) uppercase">
+                  Popular Technologies
+                </p>
+                <Link
+                  href="/technologies"
+                  className="flex shrink-0 items-center gap-1 text-xs font-medium text-(--color-brand-strong) hover:underline"
+                >
+                  View all
+                  <ArrowRightIcon width={12} height={12} />
+                </Link>
+              </div>
+              <ul className="grid grid-cols-3 gap-2">
                 {popularTech.map((tech) => (
                   <li key={tech.slug}>
                     <Link
                       href={`/technologies/${tech.slug}`}
-                      className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium text-(--color-ink) transition-colors duration-[var(--motion-fast)] hover:bg-(--color-surface-sunken)"
+                      aria-label={tech.name}
+                      title={tech.name}
+                      className="flex flex-col items-center gap-1 rounded-lg border border-(--color-border) bg-(--color-canvas) px-1.5 py-2 text-center transition-colors duration-[var(--motion-fast)] hover:border-(--color-brand) hover:bg-(--color-surface-sunken)"
                     >
-                      <TechLogo slug={tech.slug} size={32} />
-                      {tech.name}
+                      <TechLogo slug={tech.slug} size={28} />
+                      <span className="w-full truncate text-[11px] font-medium text-(--color-ink)">
+                        {tech.name}
+                      </span>
                     </Link>
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/technologies"
-                className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-(--color-brand-strong) hover:underline"
-              >
-                View all technologies
-                <ArrowRightIcon width={14} height={14} />
-              </Link>
             </CardBody>
           </Card>
         </Container>
       </section>
 
-      {/* Feature strip */}
-      <section className="border-b border-(--color-border) bg-(--color-surface) py-8">
+      {/* Feature strip -- immediately below the hero, part of the initial
+          desktop viewport composition (see the first-viewport Playwright
+          check added for this task). */}
+      <section className="border-b border-(--color-border) bg-(--color-surface-sunken) py-4">
         <Container>
-          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 lg:gap-3">
-            {featureStrip.map((item) => (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 lg:gap-2">
+            {featureStrip.map((item, i) => (
               <li
                 key={item.title}
-                className="flex flex-col items-center gap-2 rounded-xl px-2 py-3 text-center"
+                className={cn(
+                  "flex flex-col items-center gap-1.5 px-2 py-2 text-center lg:border-l lg:border-(--color-border) lg:first:border-l-0",
+                  i === 0 && "lg:pl-0",
+                )}
               >
                 <span
                   aria-hidden="true"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-(--color-brand-contrast) text-(--color-brand-strong)"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-(--color-brand-contrast) text-(--color-brand-strong)"
                 >
-                  <item.icon width={18} height={18} />
+                  <item.icon width={16} height={16} />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-(--color-ink)">{item.title}</p>
-                  <p className="text-xs text-(--color-ink-faint)">{item.body}</p>
+                  <p className="text-xs font-semibold text-(--color-ink)">{item.title}</p>
+                  <p className="text-[11px] text-(--color-ink-faint)">{item.body}</p>
                 </div>
               </li>
             ))}
@@ -455,67 +414,103 @@ export default function HomePage() {
 }
 
 /**
- * Original abstract illustration standing in for the required central
- * "learner at a laptop" hero image -- see the redesign report's "known
- * limitations" section: no image-generation tool is available in this
- * environment, and no stock-photo license could be verified from here, so
- * per the task's own fallback instruction this is a deliberate, flagged
- * placeholder (pure CSS/SVG, no external asset) rather than a silently
- * omitted image or an unverifiable sourced photo. Purely decorative --
- * every fact it might otherwise convey is already in the surrounding text
- * and capability cards, so it is hidden from assistive technology.
+ * Positions for the six technology badges floating around the learner
+ * image on desktop, tuned to clear the center (face/laptop) area while
+ * staying inside the panel's own bounding box (no overflow into neighboring
+ * columns). Mirrors Image 2's balanced-but-varied placement rather than a
+ * mechanically even ring.
  */
-function LearnerVisual() {
-  return (
-    <div
-      aria-hidden="true"
-      className="relative flex h-64 w-64 items-center justify-center rounded-[2rem] border border-white/15 bg-white/10 shadow-[var(--shadow-lg)] backdrop-blur sm:h-72 sm:w-72"
-    >
-      <div className="absolute inset-4 rounded-2xl border border-white/20 bg-gradient-to-br from-white/15 to-transparent" />
-      {/* Abstract "laptop" motif: screen + keyboard base, with a simple code motif on the screen. */}
-      <svg viewBox="0 0 200 200" className="relative h-32 w-32 text-white/90" fill="none">
-        <rect x="40" y="45" width="120" height="80" rx="8" stroke="currentColor" strokeWidth="4" />
-        <path
-          d="M60 65h50M60 78h70M60 91h40"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M28 138h144l-14 20a10 10 0 0 1-8 4H50a10 10 0 0 1-8-4l-14-20Z"
-          stroke="currentColor"
-          strokeWidth="4"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </div>
-  );
-}
+const HERO_BADGE_POSITIONS = [
+  "top-2 left-2",
+  "top-10 right-0",
+  "top-1/2 -left-3 -translate-y-1/2",
+  "top-1/3 -right-3",
+  "bottom-6 left-4",
+  "bottom-2 right-6",
+] as const;
 
-function CapabilityCard({
-  item,
-  compact = false,
-}: {
-  item: { icon: typeof PlayIcon; title: string; body: string };
-  compact?: boolean;
-}) {
+/**
+ * Column 2 of the hero: the required real learner-at-a-laptop image,
+ * surrounded by separate (not baked into the photo) technology-logo
+ * badges -- see the task report's "known limitations" section for why the
+ * image itself is still a clearly-flagged placeholder rather than a real
+ * photo: no image-generation tool is available in this environment, and a
+ * pasted reference image's exact pixels cannot be extracted to a local
+ * file with the tools available here, so per the task's own explicit
+ * fallback instruction this reports the blocker rather than silently
+ * reusing the previous abstract illustration or fabricating an
+ * unverifiable "sourced" photo.
+ *
+ * The image slot below is structured so dropping in the real asset is a
+ * one-line change: replace the placeholder `<div>` with
+ * `<Image src="/images/homepage/hero-learner.jpg" alt="A learner studying at a laptop" fill className="object-cover" sizes="(min-width: 1024px) 34vw, 80vw" priority />`
+ * once `public/images/homepage/hero-learner.jpg` exists locally.
+ */
+function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; name: string }[] }) {
   return (
-    <div
-      className={cn(
-        "flex items-start gap-2.5 rounded-xl border border-(--color-border) bg-(--color-surface) p-3 shadow-[var(--shadow-md)]",
-        compact && "animate-fade-up",
-      )}
-    >
-      <span
-        aria-hidden="true"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-(--color-brand-contrast) text-(--color-brand-strong)"
-      >
-        <item.icon width={15} height={15} />
-      </span>
-      <div className="min-w-0">
-        <p className="text-xs font-semibold text-(--color-ink)">{item.title}</p>
-        <p className="text-[11px] text-(--color-ink-faint)">{item.body}</p>
+    <div className="animate-fade-up mx-auto flex w-full max-w-xs flex-col items-center gap-4 lg:max-w-none">
+      <div className="relative aspect-4/5 w-full max-w-[280px]">
+        {/* Placeholder learner-image slot -- see the doc comment above for
+            the exact swap-in once a real, licensed photo is available.
+            Deliberately styled as an obvious "pending asset" placeholder
+            (dashed border, muted icon) rather than a finished illustration,
+            so it is never mistaken for an intentional design choice. */}
+        <div
+          role="img"
+          aria-label="A learner studying at a laptop (placeholder -- real photo pending)"
+          className="flex h-full w-full flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-(--color-border-strong) bg-(--color-surface-sunken) p-6 text-center"
+        >
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            width={40}
+            height={40}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            className="text-(--color-ink-faint)"
+          >
+            <rect x="3" y="4" width="18" height="14" rx="2" />
+            <circle cx="9" cy="9.5" r="2" />
+            <path d="m4.5 16 4-4 3 3 5-5 4.5 4.5" />
+          </svg>
+          <p className="text-xs font-medium text-(--color-ink-faint)">
+            Learner photo pending -- see report
+          </p>
+        </div>
+
+        {/* Desktop: floating badges around the image, hidden from assistive
+            technology (the panel's own aria-label already describes the
+            learner; these are a decorative visual echo of real, linked
+            technologies shown accessibly in the "Popular Technologies" and
+            "Browse technologies" sections). */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
+          {heroBadgeTech.map((tech, i) => (
+            <span
+              key={tech.slug}
+              className={cn(
+                "absolute flex h-11 w-11 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-md)]",
+                HERO_BADGE_POSITIONS[i],
+              )}
+            >
+              <TechLogo slug={tech.slug} size={26} />
+            </span>
+          ))}
+        </div>
       </div>
+
+      {/* Mobile/tablet: a compact non-overlapping row instead of floating
+          badges (Phase 5's mobile requirement -- no risky absolute
+          positioning on small screens). */}
+      <ul aria-hidden="true" className="flex flex-wrap justify-center gap-2 lg:hidden">
+        {heroBadgeTech.map((tech) => (
+          <li key={tech.slug}>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]">
+              <TechLogo slug={tech.slug} size={22} />
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

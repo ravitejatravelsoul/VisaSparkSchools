@@ -46,17 +46,6 @@
   --color-code-bg: #f3f1ea;
   --color-focus-ring: #b45309;
 
-  /* Homepage hero only: a deep, near-black forest-green gradient for one
-     "dark, premium" hero band -- see `.brand-gradient` below. Never used
-     for cards or repeated per-item; identical in light and dark mode by
-     design (it IS the dark surface). */
-  --gradient-hero-from: #0a1f13;
-  --gradient-hero-to: #123a22;
-  /* Bright emerald for selective emphasis against the dark hero band only
-     -- not theme-dependent (the hero itself never changes with theme), and
-     never used on a light surface where it would fail contrast. */
-  --color-hero-emphasis: #4ade80;
-
   /* Category accents: a small fixed palette of muted hues used only as
      small accents (an icon chip, a left border, a badge) -- never a full
      card background. Assigned deterministically per category, see
@@ -372,17 +361,6 @@ h4 {
   .animate-fade-up {
     animation: none;
   }
-}
-
-/*
- * Homepage hero only: one deep, near-black-to-forest-green diagonal
- * gradient for a single "dark, premium" hero band. Deliberately not a
- * general-purpose token applied to cards or repeated per-item -- a
- * gradient on every card is exactly the generic "AI template" look this
- * system avoids. Pair with light text.
- */
-.brand-gradient {
-  background: linear-gradient(135deg, var(--gradient-hero-from), var(--gradient-hero-to));
 }
 
 /*

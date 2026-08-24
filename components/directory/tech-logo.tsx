@@ -11,6 +11,7 @@ import {
   siHtml5,
   siCss,
   siLinux,
+  siDotnet,
   type SimpleIcon,
 } from "simple-icons";
 import { CodeGlyphIcon } from "@/components/ui/icons";
@@ -43,6 +44,7 @@ const TECH_ICONS: Partial<Record<string, SimpleIcon>> = {
   html: siHtml5,
   css: siCss,
   linux: siLinux,
+  dotnet: siDotnet,
 };
 
 /**
