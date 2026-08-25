@@ -423,35 +423,44 @@ export default function HomePage() {
 }
 
 /**
- * Orbital paths for the six technology badges around the learner image --
- * reuses the structural motion idea observed on a portfolio hero reviewed
- * for this task (a badge orbits via `rotate(angle) translateX(radius)` on
- * an outer anchor, while counter-rotating itself so the glyph stays
- * upright), not its code, content or branding.
+ * Orbital path for the six technology badges around the learner image.
  *
- * All six share HERO_ORBIT_DURATION and sit exactly 60 degrees apart, so
- * their relative spacing never changes -- two badges can never collide,
- * for any duration, forever. Two different `radius` values (70/88px)
- * give genuinely different path sizes without needing per-badge speed
- * variation, which would risk badges eventually passing through the same
- * point. The anchor point (see LearnerImagePanel below) sits around the
- * torso/laptop area rather than the panel's exact geometric center, so a
- * plain circular sweep at these radii clears the face above and the feet
- * below at every angle -- verified empirically via screenshots, not just
- * calculated.
+ * The learner image itself (260x390) is fixed, centered and untouched --
+ * but that DOM box includes a lot of transparent padding around her
+ * actual silhouette, so the orbit is *not* built from that box. It's
+ * built from the PNG's real alpha channel: for every row of the source
+ * image, the visible (non-transparent) left/right edge was measured,
+ * then offset outward by a constant 28px to get the badges' path -- see
+ * the `.hero-orbit-badge` doc comment in globals.css for the exact
+ * point list and how it was generated. This keeps the badges visually
+ * hugging her body (hair, shoulders, elbows/laptop, knees, shoes) at a
+ * close, constant distance, instead of orbiting the mostly-empty
+ * rectangle around her.
+ *
+ * HERO_ORBIT_CONTAINER_SIZE/HERO_ORBIT_CONTAINER_OFFSET together are
+ * that path's coordinate box: they must match the box the
+ * `.hero-orbit-badge` path is defined in exactly (offset is *not*
+ * symmetric -- the visible silhouette isn't centered in the source PNG).
+ *
+ * All six badges share one path, speed and HERO_ORBIT_DURATION, started
+ * evenly (1/6 of the cycle apart) via `startFraction` below -- so their
+ * spacing along the path never changes, and two badges can never
+ * collide, for any duration, forever.
  */
 const HERO_ORBIT_DURATION = "32s";
+const HERO_ORBIT_CONTAINER_SIZE = { width: 317, height: 415 } as const;
+const HERO_ORBIT_CONTAINER_OFFSET = { left: -31.56, top: -18.86 } as const;
 
 const HERO_ORBIT = [
-  { startAngle: 20, radius: 88 },
-  { startAngle: 80, radius: 70 },
-  { startAngle: 140, radius: 88 },
-  { startAngle: 200, radius: 70 },
-  { startAngle: 260, radius: 88 },
-  { startAngle: 320, radius: 70 },
+  { startFraction: 0 },
+  { startFraction: 1 / 6 },
+  { startFraction: 2 / 6 },
+  { startFraction: 3 / 6 },
+  { startFraction: 4 / 6 },
+  { startFraction: 5 / 6 },
 ] as const;
 
-const HERO_BADGE_SIZES = [34, 40, 30, 40, 34, 38] as const;
+const HERO_BADGE_SIZES = [28, 32, 26, 32, 28, 30] as const;
 
 /**
  * Column 2 of the hero: the required real learner-at-a-laptop image
@@ -498,46 +507,48 @@ function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; n
             image's own alt text already describes the learner; these are
             a decorative visual echo of real, linked technologies shown
             accessibly in the "Popular Technologies" and "Browse
-            technologies" sections). Each badge is two nested elements --
-            see the .hero-orbit-anchor/.hero-orbit-badge doc comment in
-            globals.css for exactly how the outer anchor's orbit rotation
-            is cancelled by the inner badge's counter-rotation, keeping
-            every glyph upright throughout the sweep. The anchor sits
-            around the torso/laptop area (top-[58%]), not the panel's
-            exact center, so the sweep clears the face above and the feet
-            below at every angle. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
+            technologies" sections).
+
+            This layer is positioned outside the 260x390 image box's
+            normal-flow bounds (absolute + offset, on a box with default
+            overflow: visible) precisely so the image's own layout box --
+            and the grid row it sits in -- never changes size: badges
+            travel through the space around her visible silhouette, not
+            through the image element's full (mostly transparent) box.
+            HERO_ORBIT_CONTAINER_SIZE/HERO_ORBIT_CONTAINER_OFFSET must
+            match the box the `.hero-orbit-badge` path in globals.css is
+            defined in, so the position here is derived from them rather
+            than hardcoded twice. Each badge is a single element:
+            `offset-path` (see globals.css) puts its own center directly
+            on the path, and `offset-rotate: 0deg` keeps the glyph
+            upright without any counter-rotation element. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute hidden lg:block"
+          style={{
+            top: HERO_ORBIT_CONTAINER_OFFSET.top,
+            left: HERO_ORBIT_CONTAINER_OFFSET.left,
+            width: HERO_ORBIT_CONTAINER_SIZE.width,
+            height: HERO_ORBIT_CONTAINER_SIZE.height,
+          }}
+        >
           {heroBadgeTech.map((tech, i) => {
             const orbit = HERO_ORBIT[i];
             const size = HERO_BADGE_SIZES[i];
             return (
               <span
                 key={tech.slug}
-                className="hero-orbit-anchor absolute top-[58%] left-1/2 h-0 w-0"
+                className="hero-orbit-badge absolute top-0 left-0 flex items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]"
                 style={
                   {
-                    "--start-angle": `${orbit.startAngle}deg`,
-                    "--orbit-radius": `${orbit.radius}px`,
+                    width: size,
+                    height: size,
+                    "--start-fraction": orbit.startFraction,
                     "--orbit-duration": HERO_ORBIT_DURATION,
                   } as CSSProperties
                 }
               >
-                <span
-                  className={cn(
-                    "hero-orbit-badge absolute top-0 left-0 flex items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]",
-                    orbit.radius > 80 && "opacity-80",
-                  )}
-                  style={
-                    {
-                      width: size,
-                      height: size,
-                      "--start-angle": `${orbit.startAngle}deg`,
-                      "--orbit-duration": HERO_ORBIT_DURATION,
-                    } as CSSProperties
-                  }
-                >
-                  <TechLogo slug={tech.slug} bare size={Math.round(size * 0.5)} />
-                </span>
+                <TechLogo slug={tech.slug} bare size={Math.round(size * 0.5)} />
               </span>
             );
           })}

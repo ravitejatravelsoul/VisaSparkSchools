@@ -365,19 +365,35 @@ h4 {
 
 /*
  * Orbital motion for the homepage hero's technology badges
- * (app/(site)/page.tsx). Two-element technique, reusing the structural
- * idea observed on a portfolio hero reviewed for this task (not its code
- * or content): an outer zero-size anchor sweeps a circle via
- * `rotate(angle) translateX(radius)`, while the inner badge applies the
- * exact opposite rotation, so the icon glyph itself never visually spins
- * or tips upside down -- only its position orbits.
+ * (app/(site)/page.tsx). The learner image stays a fixed, untouched
+ * 260x390 box, but that box is mostly transparent PNG padding -- her
+ * actual silhouette is smaller and off-center within it. Orbiting the
+ * full box (tried first) pushed the badges far enough out that they
+ * read as floating near the column edges instead of around her, and
+ * on narrower viewports risked the neighboring columns/feature strip.
  *
- * All six badges share one `--orbit-duration` and sit 60 degrees apart
- * (see HERO_ORBIT in page.tsx), which keeps their relative spacing fixed
- * forever -- provably no two badges can ever collide, regardless of
- * duration. Two different `--orbit-radius` values give genuinely
- * different path sizes without needing per-badge speed variation (which
- * would risk badges passing through the same point at some moment).
+ * So `.hero-orbit-badge` instead orbits *her*: the path below is a
+ * constant-28px offset of her real silhouette, read directly from the
+ * source PNG's alpha channel (every row's visible left/right edge,
+ * offset outward by 28px, joined into a closed polygon; rounded
+ * semicircular caps above the hair and below the shoes). It's a
+ * measured, badge-hugging contour, not a hand-tuned curve -- see the
+ * task report for the generation method. Every vertex sits close to,
+ * but consistently 28px outside, a real opaque pixel, so a badge
+ * (max radius 16px, see HERO_BADGE_SIZES) clears her by >=12px
+ * everywhere on the path while still reading as "around her," not
+ * "around the image."
+ *
+ * `offset-path` positions each badge's own center (the default
+ * `offset-anchor`) directly on the path, and `offset-rotate: 0deg`
+ * fixes its rotation regardless of the path's local direction -- so the
+ * glyph never spins, with no counter-rotation element required.
+ *
+ * All six badges share one path, one `--orbit-duration` and one speed,
+ * started 1/6 of the cycle apart via a negative `animation-delay` (see
+ * `--start-fraction` in page.tsx) -- so their arc-length spacing along
+ * the path never changes, and two badges can never collide, regardless
+ * of duration.
  *
  * Neutralized by the global prefers-reduced-motion rule above; the media
  * query below also pins each badge to its own intentional starting
@@ -385,44 +401,50 @@ h4 {
  * fallback alone -- matching this file's existing convention for every
  * other animation.
  */
-@keyframes hero-orbit-spin {
-  from {
-    transform: rotate(var(--start-angle, 0deg)) translateX(var(--orbit-radius, 80px));
-  }
-  to {
-    transform: rotate(calc(var(--start-angle, 0deg) + 360deg)) translateX(var(--orbit-radius, 80px));
-  }
-}
-
-@keyframes hero-orbit-counter-spin {
-  from {
-    transform: translate(-50%, -50%) rotate(calc(-1 * var(--start-angle, 0deg)));
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(calc(-1 * var(--start-angle, 0deg) - 360deg));
-  }
-}
-
-.hero-orbit-anchor {
-  animation: hero-orbit-spin var(--orbit-duration, 32s) linear infinite;
-}
-
 .hero-orbit-badge {
-  animation: hero-orbit-counter-spin var(--orbit-duration, 32s) linear infinite;
+  /* Silhouette-hugging path in the 317x415 .hero-orbit-container's own
+     coordinate space (HERO_ORBIT_CONTAINER_SIZE/HERO_ORBIT_CONTAINER_OFFSET
+     in page.tsx). Generated as a true Minkowski-circle offset (24px) of
+     the visible silhouette -- not a same-row horizontal offset, which
+     was tried first and measurably failed: at a rapid width change
+     (her spread pant legs, ~187px wide, narrowing to a single ~15px-wide
+     foot within about 5px of vertical height), a badge's own radius
+     reached sideways into the wider row above even though its center
+     had clearance from its own row. The safe bound at each row instead
+     considers every opaque row within 24px vertically, each contributing
+     `row.left - sqrt(24^2 - dy^2)` / `row.right + sqrt(...)` (the same
+     circle-equation correction used for the rectangle-corner case in an
+     earlier version of this orbit).
+
+     A second, related bug was caught the same way: the first version of
+     this path used that windowed formula for the sides but a separate,
+     naive single-point circle to cap the path above the hair and below
+     the shoes -- the two didn't geometrically agree, leaving an unsafe
+     seam exactly where they joined. This path applies the *same*
+     windowed formula everywhere, including above the head and below the
+     feet, where it naturally tapers to a closed point on its own (no
+     special-cased cap, so no seam to disagree). */
+  offset-path: path(
+    "M167.4,20 L167.4,20 L179.08,22 L188.67,24 L192.99,26 L196.66,28 L199.58,30 L202.06,32 L204.35,34 L206.36,36 L208.14,38 L209.92,40 L211.52,42 L212.96,44 L214.31,46 L215.6,48 L216.66,50 L217.89,52 L218.94,54 L219.86,56 L220.72,58 L221.72,60 L222.53,62 L223.42,64 L224.28,66 L225.19,68 L225.9,70 L226.59,72 L227.2,74 L227.71,76 L228.24,78 L228.95,80 L229.48,82 L230.14,84 L230.78,86 L231.49,88 L232.02,90 L232.56,92 L233.27,94 L233.78,96 L234.9,98 L235.93,100 L236.74,102 L237.64,104 L238.34,106 L238.86,108 L239.2,110 L239.37,112 L239.7,114 L242.74,116 L245.02,118 L246.82,120 L248.26,122 L249.41,124 L250.41,126 L251.22,128 L251.83,130 L252.25,132 L252.57,134 L252.91,136 L253.08,138 L253.08,140 L253.98,142 L255,144 L255.99,146 L256.8,148 L257.79,150 L258.79,152 L259.6,154 L260.49,156 L261.19,158 L261.88,160 L262.64,162 L263.4,164 L264.17,166 L264.8,168 L265.51,170 L266.05,172 L266.55,174 L267.06,176 L267.57,178 L268.08,180 L268.57,182 L268.91,184 L269.35,186 L269.84,188 L270.18,190 L270.6,192 L270.94,194 L271.3,196 L271.63,198 L272.06,200 L272.38,202 L272.71,204 L272.97,206 L273.22,208 L273.66,210 L274.15,212 L274.49,214 L275.42,216 L276.58,218 L277.58,220 L278.39,222 L279,224 L279.42,226 L279.67,228 L279.76,230 L279.76,232 L279.91,234 L280.52,236 L280.95,238 L281.2,240 L281.45,242 L281.54,244 L281.45,246 L281.26,248 L281.09,250 L280.75,252 L280.27,254 L279.76,256 L279.25,258 L279.76,260 L281.84,262 L283.8,264 L285.41,266 L286.93,268 L288.45,270 L289.75,272 L290.8,274 L291.82,276 L292.81,278 L293.62,280 L294.23,282 L294.74,284 L295.25,286 L295.74,288 L296.07,290 L296.24,292 L296.26,294 L296.26,296 L296.26,298 L296.24,300 L296.07,302 L295.82,304 L295.67,306 L295.42,308 L295.16,310 L294.74,312 L294.23,314 L293.69,316 L292.99,318 L292.23,320 L291.46,322 L290.55,324 L289.39,326 L288.26,328 L287.24,330 L286.23,332 L285.18,334 L283.88,336 L282.28,338 L280.32,340 L278.04,342 L275.12,344 L273.84,346 L274.09,348 L274.34,350 L274.6,352 L274.68,354 L274.68,356 L274.6,358 L274.34,360 L273.92,362 L273.41,364 L272.87,366 L272.17,368 L271.25,370 L270.09,372 L268.65,374 L266.86,376 L264.78,378 L262.17,380 L258.49,382 L253.73,384 L242.81,386 L179.78,388 L175.97,390 L171.91,392 L162.32,394 L160.54,394.78 L160.29,394.78 L159.02,394 L149.43,392 L64.57,390 L57.51,388 L52.95,386 L49.9,384 L47.63,382 L45.66,380 L44.06,378 L42.77,376 L41.73,374 L40.92,372 L40.31,370 L39.81,368 L39.32,366 L38.98,364 L38.81,362 L38.79,360 L38.79,358 L38.87,356 L39.12,354 L39.38,352 L39.63,350 L40.06,348 L40.39,346 L40.82,344 L41.33,342 L38.99,340 L36.5,338 L34.42,336 L32.63,334 L31.1,332 L29.67,330 L28.51,328 L27.51,326 L26.7,324 L25.81,322 L25.11,320 L24.57,318 L24.06,316 L23.4,314 L22.64,312 L22.03,310 L21.61,308 L21.27,306 L20.84,304 L20.59,302 L20.34,300 L20.25,298 L20.08,296 L20,294 L20,292 L20.02,290 L20.19,288 L20.53,286 L21.02,284 L21.52,282 L22.03,280 L22.64,278 L23.45,276 L24.45,274 L25.46,272 L26.62,270 L28.06,268 L29.58,266 L31.1,264 L32.9,262 L34.93,260 L37.21,258 L39.87,256 L42.92,254 L46.6,252 L48.77,250 L49.03,248 L49.22,246 L49.2,244 L49.22,242 L49.39,240 L49.73,238 L50.24,236 L50.95,234 L51.74,232 L52.25,230 L52.86,228 L53.67,226 L53.96,224 L54.21,222 L54.28,220 L54.28,218 L54.36,216 L54.53,214 L54.53,212 L54.55,210 L54.72,208 L54.81,206 L54.97,204 L55.04,202 L55.12,200 L55.29,198 L55.38,196 L55.55,194 L55.63,192 L55.88,190 L56.08,188 L56.24,186 L56.5,184 L56.84,182 L57.15,180 L57.41,178 L57.83,176 L58.34,174 L58.85,172 L59.36,170 L59.86,168 L60.37,166 L60.88,164 L61.39,162 L62,160 L62.66,158 L63.19,156 L63.9,154 L64.66,152 L65.3,150 L66.11,148 L67.1,146 L68.12,144 L69.17,142 L70.46,140 L71.98,138 L73.51,136 L75.03,134 L76.82,132 L79.1,130 L81.64,128 L84.56,126 L87.99,124 L92.3,122 L93.9,120 L95.92,118 L97.02,116 L97.44,114 L97.98,112 L98.68,110 L98.79,108 L98.71,106 L98.79,104 L99.05,102 L98.99,100 L98.99,98 L99.15,96 L99.47,94 L99.56,92 L99.81,90 L100.23,88 L100.77,86 L101.48,84 L102.04,82 L102.75,80 L103.67,78 L104.58,76 L105.29,74 L106.18,72 L106.99,70 L107.98,68 L108.97,66 L109.78,64 L110.81,62 L112.02,60 L112.83,58 L113.86,56 L115.09,54 L116.25,52 L117.52,50 L118.79,48 L120.23,46 L121.75,44 L123.27,42 L124.88,40 L126.83,38 L128.62,36 L130.65,34 L132.93,32 L135.47,30 L138.39,28 L141.56,26 L145.62,24 L151.15,22 L161.81,20 L161.81,20 Z"
+  );
+  offset-rotate: 0deg;
+  animation: hero-orbit-perimeter var(--orbit-duration, 32s) linear infinite;
+  animation-delay: calc(var(--orbit-duration, 32s) * var(--start-fraction, 0) * -1);
+}
+
+@keyframes hero-orbit-perimeter {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-orbit-anchor,
   .hero-orbit-badge {
     animation: none;
-  }
-
-  .hero-orbit-anchor {
-    transform: rotate(var(--start-angle, 0deg)) translateX(var(--orbit-radius, 80px));
-  }
-
-  .hero-orbit-badge {
-    transform: translate(-50%, -50%) rotate(calc(-1 * var(--start-angle, 0deg)));
+    offset-distance: calc(var(--start-fraction, 0) * 100%);
   }
 }
 
