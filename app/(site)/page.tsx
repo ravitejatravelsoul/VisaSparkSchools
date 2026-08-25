@@ -201,10 +201,17 @@ export default function HomePage() {
                       href={`/technologies/${tech.slug}`}
                       aria-label={tech.name}
                       title={tech.name}
-                      className="flex flex-col items-center gap-1 rounded-lg border border-(--color-border) bg-(--color-canvas) px-1.5 py-2 text-center transition-colors duration-[var(--motion-fast)] hover:border-(--color-brand) hover:bg-(--color-surface-sunken)"
+                      className="flex flex-col items-center gap-1 rounded-lg border border-(--color-border) bg-(--color-canvas) px-1 py-2 text-center transition-colors duration-[var(--motion-fast)] hover:border-(--color-brand) hover:bg-(--color-surface-sunken)"
                     >
                       <TechLogo slug={tech.slug} size={28} />
-                      <span className="w-full truncate text-[11px] font-medium text-(--color-ink)">
+                      {/* No `truncate` -- at narrower widths near the `lg`
+                          breakpoint (~1024px) three columns don't leave room
+                          for "JavaScript"/"TypeScript" on one line, and an
+                          ellipsis cutoff there failed the "keeps labels
+                          readable" requirement. Wrapping to two short lines
+                          keeps every name fully readable at every grid
+                          width instead. */}
+                      <span className="w-full text-[11px] leading-tight font-medium text-(--color-ink)">
                         {tech.name}
                       </span>
                     </Link>
