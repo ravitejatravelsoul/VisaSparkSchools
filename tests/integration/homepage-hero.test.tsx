@@ -149,9 +149,9 @@ describe("Homepage learner image panel", () => {
     }
   });
 
-  it("renders exactly six constellation badges, none of them a link or button", () => {
+  it("renders exactly six orbiting badges, none of them a link or button", () => {
     render(<HomePage />);
-    const badges = document.querySelectorAll(".constellation-badge");
+    const badges = document.querySelectorAll(".hero-orbit-badge");
     expect(badges).toHaveLength(6);
     for (const badge of badges) {
       expect(badge.tagName).not.toBe("A");
@@ -163,12 +163,12 @@ describe("Homepage learner image panel", () => {
 
   it("badges have a single ring (no nested bordered/surfaced container inside each badge)", () => {
     render(<HomePage />);
-    const badges = document.querySelectorAll(".constellation-badge");
+    const badges = document.querySelectorAll(".hero-orbit-badge");
     for (const badge of badges) {
       // Each badge is itself the one bordered/surfaced element; its only
       // child must be the bare icon glyph, not another TechLogo container
-      // with its own border/background classes (the double-ring bug this
-      // task exists to remove).
+      // with its own border/background classes (the double-ring bug an
+      // earlier pass of this task removed).
       const innerBorderedBoxes = badge.querySelectorAll(".border, [class*='border-']");
       expect(innerBorderedBoxes.length).toBe(0);
     }
@@ -176,19 +176,27 @@ describe("Homepage learner image panel", () => {
 
   it("badge sizes vary -- not a uniform ring of identically-sized icons", () => {
     render(<HomePage />);
-    const badges = Array.from(document.querySelectorAll(".constellation-badge")) as HTMLElement[];
+    const badges = Array.from(document.querySelectorAll(".hero-orbit-badge")) as HTMLElement[];
     const sizes = new Set(badges.map((b) => b.style.width));
     expect(sizes.size).toBeGreaterThan(1);
   });
 
-  it("badges animate independently -- no two share the same delay/duration (never a synchronized shared orbit)", () => {
+  it("badges sit at six distinct 60-degree-apart starting angles, with at least two different orbit radii", () => {
     render(<HomePage />);
-    const badges = Array.from(document.querySelectorAll(".constellation-badge")) as HTMLElement[];
-    const timings = badges.map(
-      (b) =>
-        `${b.style.getPropertyValue("--constellation-delay")}|${b.style.getPropertyValue("--constellation-duration")}`,
-    );
-    expect(new Set(timings).size).toBe(timings.length);
+    // Angle lives on the outer .hero-orbit-anchor (it drives the actual
+    // rotate+translate sweep); radius lives there too. All six share one
+    // --orbit-duration by design -- equal angular speed keeps their
+    // 60-degree spacing constant forever, which is what actually
+    // guarantees badges can never collide (varying speed instead would
+    // risk two badges eventually passing through the same point).
+    const anchors = Array.from(document.querySelectorAll(".hero-orbit-anchor")) as HTMLElement[];
+    expect(anchors).toHaveLength(6);
+    const angles = anchors.map((a) => a.style.getPropertyValue("--start-angle"));
+    expect(new Set(angles).size).toBe(6);
+    const radii = anchors.map((a) => a.style.getPropertyValue("--orbit-radius"));
+    expect(new Set(radii).size).toBeGreaterThan(1);
+    const durations = anchors.map((a) => a.style.getPropertyValue("--orbit-duration"));
+    expect(new Set(durations).size).toBe(1);
   });
 
   it("no longer renders the removed abstract laptop / capability-card composition", () => {

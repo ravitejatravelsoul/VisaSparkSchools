@@ -423,55 +423,35 @@ export default function HomePage() {
 }
 
 /**
- * Organic, asymmetric "technology constellation" around the learner image
- * -- deliberately NOT a computed ring (no shared radius, no evenly-spaced
- * angle, no mirrored pairs). Each badge gets its own hand-tuned position,
- * size and depth, inspired by (not copied from) a portfolio hero reviewed
- * for this task: irregular distances, varying sizes, a couple of badges
- * pulled slightly behind the image plane (smaller + more transparent) to
- * suggest depth rather than a flat pinned-icon ring. Positions were tuned
- * against the real photo's actual proportions (face centered in the top
- * third, laptop spanning the wide middle band, crossed legs at the bottom)
- * so nothing overlaps the face, hands or laptop.
+ * Orbital paths for the six technology badges around the learner image --
+ * reuses the structural motion idea observed on a portfolio hero reviewed
+ * for this task (a badge orbits via `rotate(angle) translateX(radius)` on
+ * an outer anchor, while counter-rotating itself so the glyph stays
+ * upright), not its code, content or branding.
+ *
+ * All six share HERO_ORBIT_DURATION and sit exactly 60 degrees apart, so
+ * their relative spacing never changes -- two badges can never collide,
+ * for any duration, forever. Two different `radius` values (70/88px)
+ * give genuinely different path sizes without needing per-badge speed
+ * variation, which would risk badges eventually passing through the same
+ * point. The anchor point (see LearnerImagePanel below) sits around the
+ * torso/laptop area rather than the panel's exact geometric center, so a
+ * plain circular sweep at these radii clears the face above and the feet
+ * below at every angle -- verified empirically via screenshots, not just
+ * calculated.
  */
-const HERO_CONSTELLATION = [
-  { position: "top-6 left-2", size: 34, depth: "near", animDelay: "0s", animDuration: "5.5s" },
-  {
-    position: "top-1 right-6",
-    size: 42,
-    depth: "far",
-    animDelay: "0.6s",
-    animDuration: "6.5s",
-  },
-  {
-    position: "top-[38%] -left-5",
-    size: 38,
-    depth: "far",
-    animDelay: "1.4s",
-    animDuration: "7s",
-  },
-  {
-    position: "top-[52%] -right-3",
-    size: 30,
-    depth: "near",
-    animDelay: "0.3s",
-    animDuration: "5s",
-  },
-  {
-    position: "bottom-16 left-0",
-    size: 30,
-    depth: "near",
-    animDelay: "2s",
-    animDuration: "6s",
-  },
-  {
-    position: "bottom-4 right-4",
-    size: 38,
-    depth: "far",
-    animDelay: "1s",
-    animDuration: "7.5s",
-  },
+const HERO_ORBIT_DURATION = "32s";
+
+const HERO_ORBIT = [
+  { startAngle: 20, radius: 88 },
+  { startAngle: 80, radius: 70 },
+  { startAngle: 140, radius: 88 },
+  { startAngle: 200, radius: 70 },
+  { startAngle: 260, radius: 88 },
+  { startAngle: 320, radius: 70 },
 ] as const;
+
+const HERO_BADGE_SIZES = [34, 40, 30, 40, 34, 38] as const;
 
 /**
  * Column 2 of the hero: the required real learner-at-a-laptop image
@@ -514,35 +494,50 @@ function LearnerImagePanel({ heroBadgeTech }: { heroBadgeTech: { slug: string; n
           className="object-contain object-bottom"
         />
 
-        {/* Desktop: the constellation, hidden from assistive technology
-            (the image's own alt text already describes the learner; these
-            are a decorative visual echo of real, linked technologies shown
+        {/* Desktop: the orbit, hidden from assistive technology (the
+            image's own alt text already describes the learner; these are
+            a decorative visual echo of real, linked technologies shown
             accessibly in the "Popular Technologies" and "Browse
-            technologies" sections). A very small independent float per
-            badge (see .constellation-badge in globals.css) -- different
-            duration/delay per badge so none share a path, and the existing
-            global prefers-reduced-motion rule already neutralizes it. */}
+            technologies" sections). Each badge is two nested elements --
+            see the .hero-orbit-anchor/.hero-orbit-badge doc comment in
+            globals.css for exactly how the outer anchor's orbit rotation
+            is cancelled by the inner badge's counter-rotation, keeping
+            every glyph upright throughout the sweep. The anchor sits
+            around the torso/laptop area (top-[58%]), not the panel's
+            exact center, so the sweep clears the face above and the feet
+            below at every angle. */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden lg:block">
           {heroBadgeTech.map((tech, i) => {
-            const spec = HERO_CONSTELLATION[i];
+            const orbit = HERO_ORBIT[i];
+            const size = HERO_BADGE_SIZES[i];
             return (
               <span
                 key={tech.slug}
-                className={cn(
-                  "constellation-badge absolute flex items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]",
-                  spec.position,
-                  spec.depth === "far" && "opacity-75",
-                )}
+                className="hero-orbit-anchor absolute top-[58%] left-1/2 h-0 w-0"
                 style={
                   {
-                    width: spec.size,
-                    height: spec.size,
-                    "--constellation-delay": spec.animDelay,
-                    "--constellation-duration": spec.animDuration,
+                    "--start-angle": `${orbit.startAngle}deg`,
+                    "--orbit-radius": `${orbit.radius}px`,
+                    "--orbit-duration": HERO_ORBIT_DURATION,
                   } as CSSProperties
                 }
               >
-                <TechLogo slug={tech.slug} bare size={Math.round(spec.size * 0.5)} />
+                <span
+                  className={cn(
+                    "hero-orbit-badge absolute top-0 left-0 flex items-center justify-center rounded-full border border-(--color-border) bg-(--color-surface) shadow-[var(--shadow-sm)]",
+                    orbit.radius > 80 && "opacity-80",
+                  )}
+                  style={
+                    {
+                      width: size,
+                      height: size,
+                      "--start-angle": `${orbit.startAngle}deg`,
+                      "--orbit-duration": HERO_ORBIT_DURATION,
+                    } as CSSProperties
+                  }
+                >
+                  <TechLogo slug={tech.slug} bare size={Math.round(size * 0.5)} />
+                </span>
               </span>
             );
           })}

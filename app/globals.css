@@ -364,32 +364,65 @@ h4 {
 }
 
 /*
- * One extremely small independent float for a decorative badge in the
- * homepage hero's technology constellation (app/(site)/page.tsx) --
- * deliberately tiny (2px) and slow, with per-badge duration/delay set via
- * `--constellation-delay`/`--constellation-duration` custom properties so
- * no two badges share a path or move in sync (never a shared circular
- * orbit). Neutralized by the global prefers-reduced-motion rule above like
- * every other animation in this file.
+ * Orbital motion for the homepage hero's technology badges
+ * (app/(site)/page.tsx). Two-element technique, reusing the structural
+ * idea observed on a portfolio hero reviewed for this task (not its code
+ * or content): an outer zero-size anchor sweeps a circle via
+ * `rotate(angle) translateX(radius)`, while the inner badge applies the
+ * exact opposite rotation, so the icon glyph itself never visually spins
+ * or tips upside down -- only its position orbits.
+ *
+ * All six badges share one `--orbit-duration` and sit 60 degrees apart
+ * (see HERO_ORBIT in page.tsx), which keeps their relative spacing fixed
+ * forever -- provably no two badges can ever collide, regardless of
+ * duration. Two different `--orbit-radius` values give genuinely
+ * different path sizes without needing per-badge speed variation (which
+ * would risk badges passing through the same point at some moment).
+ *
+ * Neutralized by the global prefers-reduced-motion rule above; the media
+ * query below also pins each badge to its own intentional starting
+ * position explicitly, rather than relying on the blanket 0.01ms
+ * fallback alone -- matching this file's existing convention for every
+ * other animation.
  */
-@keyframes constellation-float {
-  0%,
-  100% {
-    transform: translateY(0);
+@keyframes hero-orbit-spin {
+  from {
+    transform: rotate(var(--start-angle, 0deg)) translateX(var(--orbit-radius, 80px));
   }
-  50% {
-    transform: translateY(-2px);
+  to {
+    transform: rotate(calc(var(--start-angle, 0deg) + 360deg)) translateX(var(--orbit-radius, 80px));
   }
 }
 
-.constellation-badge {
-  animation: constellation-float var(--constellation-duration, 6s) ease-in-out infinite;
-  animation-delay: var(--constellation-delay, 0s);
+@keyframes hero-orbit-counter-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(calc(-1 * var(--start-angle, 0deg)));
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(calc(-1 * var(--start-angle, 0deg) - 360deg));
+  }
+}
+
+.hero-orbit-anchor {
+  animation: hero-orbit-spin var(--orbit-duration, 32s) linear infinite;
+}
+
+.hero-orbit-badge {
+  animation: hero-orbit-counter-spin var(--orbit-duration, 32s) linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .constellation-badge {
+  .hero-orbit-anchor,
+  .hero-orbit-badge {
     animation: none;
+  }
+
+  .hero-orbit-anchor {
+    transform: rotate(var(--start-angle, 0deg)) translateX(var(--orbit-radius, 80px));
+  }
+
+  .hero-orbit-badge {
+    transform: translate(-50%, -50%) rotate(calc(-1 * var(--start-angle, 0deg)));
   }
 }
 
