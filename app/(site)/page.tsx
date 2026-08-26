@@ -274,7 +274,11 @@ export default function HomePage() {
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {browseTech.map((tech) => (
               <li key={tech.slug}>
-                <Link href={`/technologies/${tech.slug}`} prefetch={false} className="group block h-full">
+                <Link
+                  href={`/technologies/${tech.slug}`}
+                  prefetch={false}
+                  className="group block h-full"
+                >
                   <Card interactive className="flex h-full items-center gap-3 p-4 text-left">
                     <TechLogo slug={tech.slug} size={40} />
                     <div className="min-w-0">
