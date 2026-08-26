@@ -201,6 +201,7 @@ export default function HomePage() {
                       href={`/technologies/${tech.slug}`}
                       aria-label={tech.name}
                       title={tech.name}
+                      prefetch={false}
                       className="flex flex-col items-center gap-1 rounded-lg border border-(--color-border) bg-(--color-canvas) px-1 py-2 text-center transition-colors duration-[var(--motion-fast)] hover:border-(--color-brand) hover:bg-(--color-surface-sunken)"
                     >
                       <TechLogo slug={tech.slug} size={28} />
@@ -273,7 +274,7 @@ export default function HomePage() {
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
             {browseTech.map((tech) => (
               <li key={tech.slug}>
-                <Link href={`/technologies/${tech.slug}`} className="group block h-full">
+                <Link href={`/technologies/${tech.slug}`} prefetch={false} className="group block h-full">
                   <Card interactive className="flex h-full items-center gap-3 p-4 text-left">
                     <TechLogo slug={tech.slug} size={40} />
                     <div className="min-w-0">
@@ -448,8 +449,8 @@ export default function HomePage() {
  * collide, for any duration, forever.
  */
 const HERO_ORBIT_DURATION = "32s";
-const HERO_ORBIT_CONTAINER_SIZE = { width: 317, height: 415 } as const;
-const HERO_ORBIT_CONTAINER_OFFSET = { left: -31.56, top: -18.86 } as const;
+const HERO_ORBIT_CONTAINER_SIZE = { width: 317, height: 410 } as const;
+const HERO_ORBIT_CONTAINER_OFFSET = { left: -31.56, top: -16.36 } as const;
 
 const HERO_ORBIT = [
   { startFraction: 0 },
