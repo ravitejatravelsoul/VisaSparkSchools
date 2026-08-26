@@ -181,21 +181,25 @@ describe("Homepage learner image panel", () => {
     expect(sizes.size).toBeGreaterThan(1);
   });
 
-  it("badges sit at six distinct 60-degree-apart starting angles, with at least two different orbit radii", () => {
+  it("badges sit at six distinct, evenly-spaced phase offsets along a single shared path", () => {
     render(<HomePage />);
-    // Angle lives on the outer .hero-orbit-anchor (it drives the actual
-    // rotate+translate sweep); radius lives there too. All six share one
-    // --orbit-duration by design -- equal angular speed keeps their
-    // 60-degree spacing constant forever, which is what actually
-    // guarantees badges can never collide (varying speed instead would
-    // risk two badges eventually passing through the same point).
-    const anchors = Array.from(document.querySelectorAll(".hero-orbit-anchor")) as HTMLElement[];
-    expect(anchors).toHaveLength(6);
-    const angles = anchors.map((a) => a.style.getPropertyValue("--start-angle"));
-    expect(new Set(angles).size).toBe(6);
-    const radii = anchors.map((a) => a.style.getPropertyValue("--orbit-radius"));
-    expect(new Set(radii).size).toBeGreaterThan(1);
-    const durations = anchors.map((a) => a.style.getPropertyValue("--orbit-duration"));
+    // Badges travel on one shared `offset-path` (see globals.css), each
+    // started at its own --start-fraction via a negative animation-delay,
+    // all sharing one --orbit-duration. Equal speed + distinct, evenly
+    // spaced starting points keeps their arc-length spacing constant
+    // forever -- this is what actually guarantees badges can never
+    // collide, regardless of duration (varying per-badge speed instead
+    // would risk two badges eventually passing through the same point).
+    const badges = Array.from(document.querySelectorAll(".hero-orbit-badge")) as HTMLElement[];
+    expect(badges).toHaveLength(6);
+    const fractions = badges
+      .map((b) => Number(b.style.getPropertyValue("--start-fraction")))
+      .sort((a, b) => a - b);
+    expect(new Set(fractions).size).toBe(6);
+    for (let i = 0; i < fractions.length; i++) {
+      expect(fractions[i]).toBeCloseTo(i / 6, 5);
+    }
+    const durations = badges.map((b) => b.style.getPropertyValue("--orbit-duration"));
     expect(new Set(durations).size).toBe(1);
   });
 
